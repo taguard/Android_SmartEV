@@ -11,7 +11,6 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         MokoSupport.getInstance().init(getApplicationContext());
-        Toasty.Config.getInstance()
-                .apply();
+        Toasty.Config.getInstance().apply();
     }
 }
