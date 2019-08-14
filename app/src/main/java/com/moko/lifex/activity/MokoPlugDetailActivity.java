@@ -143,7 +143,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
                 }
             }
             if (AppConstants.ACTION_MODIFY_NAME.equals(action)) {
-                MokoDevice device = DBTools.getInstance(MokoPlugDetailActivity.this).selectDevice(String.valueOf(mokoDevice.id));
+                MokoDevice device = DBTools.getInstance(MokoPlugDetailActivity.this).selectDevice(mokoDevice.deviceId);
                 mokoDevice.nickName = device.nickName;
             }
         }

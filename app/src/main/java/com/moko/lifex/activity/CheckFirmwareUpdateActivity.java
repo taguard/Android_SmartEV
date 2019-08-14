@@ -69,6 +69,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
         mUpdateType = getResources().getStringArray(R.array.update_type);
+        tvUpdateType.setText(mUpdateType[0]);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);

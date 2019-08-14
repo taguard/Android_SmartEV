@@ -102,7 +102,7 @@ public class MoreActivity extends BaseActivity {
                         DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
                         String company_name = deviceInfo.company_name;
                         String production_date = deviceInfo.production_date;
-                        String product_model = deviceInfo.device_name;
+                        String product_model = deviceInfo.product_model;
                         String firmware_version = deviceInfo.firmware_version;
                         String firmwar_mac = deviceInfo.device_mac;
                         mokoDevice.company_name = company_name;

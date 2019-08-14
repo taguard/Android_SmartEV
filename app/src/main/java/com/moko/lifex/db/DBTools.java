@@ -79,8 +79,8 @@ public class DBTools {
         return mokoDevices;
     }
 
-    public MokoDevice selectDevice(String id) {
-        Cursor cursor = db.query(DBConstants.TABLE_NAME_DEVICE, null, DBConstants.DEVICE_FIELD_DEVICE_ID + " = ?", new String[]{id}, null, null, null);
+    public MokoDevice selectDevice(String deviceId) {
+        Cursor cursor = db.query(DBConstants.TABLE_NAME_DEVICE, null, DBConstants.DEVICE_FIELD_DEVICE_ID + " = ?", new String[]{deviceId}, null, null, null);
         MokoDevice mokoDevice = null;
         while (cursor.moveToFirst()) {
             mokoDevice = new MokoDevice();
