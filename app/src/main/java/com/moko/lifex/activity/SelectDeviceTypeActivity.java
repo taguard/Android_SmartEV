@@ -31,10 +31,16 @@ public class SelectDeviceTypeActivity extends BaseActivity {
     }
 
     public void addMokoPlug(View view) {
-        startActivity(new Intent(this, AddMokoPlugActivity.class));
+        Intent intent = new Intent(this, SetDeviceMqttActivity.class);
+        intent.putExtra("function", "iot_plug");
+        startActivity(intent);
+//        startActivity(new Intent(this, AddMokoPlugActivity.class));
     }
 
     public void addMokoWallSwitch(View view) {
-        startActivity(new Intent(this, AddWallSwitchActivity.class));
+//        Intent intent = new Intent(this, SetDeviceMqttActivity.class);
+//        intent.putExtra("function", "iot_wall_switch");
+//        startActivity(intent);
+//        startActivity(new Intent(this, AddWallSwitchActivity.class));
     }
 }

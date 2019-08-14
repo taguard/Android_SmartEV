@@ -8,13 +8,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.entity.MokoDevice;
+import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.PowerInfo;
 import com.moko.support.MokoConstants;
 
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 
 import butterknife.Bind;
@@ -36,11 +41,15 @@ public class ElectricityActivity extends BaseActivity {
     @Bind(R.id.tv_power)
     TextView tvPower;
 
+    private MokoDevice mokoDevice;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_electricity_manager);
         ButterKnife.bind(this);
+        mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
@@ -58,15 +67,22 @@ public class ElectricityActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.contains(MokoDevice.DEVICE_TOPIC_ELECTRICITY_INFORMATION)) {
+                if (topic.equals(mokoDevice.topicPublish)) {
                     String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    JsonObject object = new JsonParser().parse(message).getAsJsonObject();
-                    int voltage = object.get("voltage").getAsInt();
-                    int current = object.get("current").getAsInt();
-                    int power = object.get("power").getAsInt();
-                    tvCurrent.setText(current + "");
-                    tvVoltage.setText(new DecimalFormat().format(voltage * 0.1));
-                    tvPower.setText(power + "");
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_INFO) {
+                        Type infoType = new TypeToken<PowerInfo>() {
+                        }.getType();
+                        PowerInfo powerInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        int voltage = powerInfo.voltage;
+                        int current = powerInfo.current;
+                        int power = powerInfo.power;
+                        tvCurrent.setText(current + "");
+                        tvVoltage.setText(new DecimalFormat().format(voltage * 0.1));
+                        tvPower.setText(power + "");
+                    }
                 }
             }
         }

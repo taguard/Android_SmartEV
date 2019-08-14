@@ -43,7 +43,7 @@ public class DeviceInfoActivity extends BaseActivity {
             tvDeviceDate.setText(mokoDevice.production_date);
             tvDeviceName.setText(mokoDevice.product_model);
             tvDeviceVersion.setText(mokoDevice.firmware_version);
-            tvDeviceMac.setText(mokoDevice.mac);
+            tvDeviceMac.setText(mokoDevice.deviceId);
         }
 
     }

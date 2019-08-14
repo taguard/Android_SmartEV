@@ -13,7 +13,7 @@ public class AppConstants {
     public static final String ACTION_DEVICE_STATE = "com.moko.lifex.action.ACTION_DEVICE_STATE";
     // sp
     public static final String SP_NAME = "sp_name_life";
-    public static final String SP_KEY_MQTT_CONFIG = "SP_KEY_MQTT_CONFIG";
+//    public static final String SP_KEY_MQTT_CONFIG = "SP_KEY_MQTT_CONFIG";
     public static final String SP_KEY_MQTT_CONFIG_APP = "SP_KEY_MQTT_CONFIG_APP";
 
 
@@ -39,6 +39,10 @@ public class AppConstants {
     public static final int REQUEST_CODE_PERMISSION = 120;
     public static final int REQUEST_CODE_PERMISSION_2 = 121;
     public static final int REQUEST_CODE_LOCATION_SETTINGS = 122;
+    public static final int REQUEST_CODE_CA_FILE = 123;
+    public static final int REQUEST_CODE_CLIENT_KEY_FILE = 124;
+    public static final int REQUEST_CODE_CLIENT_CEAR_FILE = 125;
+    public static final int REQUEST_CODE_SET_DEVICE_MQTT = 126;
 
     public static final int PERMISSION_REQUEST_CODE = 1;
     // result_code

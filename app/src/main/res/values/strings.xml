@@ -46,22 +46,30 @@
     <string name="mqtt_clean_session">Clean Session</string>
     <string name="mqtt_connct_mode">Connect Mode</string>
     <string name="mqtt_connct_mode_tcp">TCP</string>
-    <string name="mqtt_connct_mode_ssl">SSL</string>
+    <string name="mqtt_connct_mode_ssl_one_way">One-way SSL</string>
+    <string name="mqtt_connct_mode_ssl_two_way">Two-way SSL</string>
     <string name="mqtt_qos">Qos</string>
     <string name="mqtt_keep_alive">Keep Alive</string>
     <string name="mqtt_client_id">Client Id</string>
+    <string name="mqtt_topic_subscribe">Subscribed Topic</string>
+    <string name="mqtt_topic_publish">Published Topic</string>
     <string name="mqtt_username">Username</string>
     <string name="mqtt_Password">Password</string>
     <string name="mqtt_verify_client_id_empty">ClientId error</string>
     <string name="mqtt_verify_host">Host error</string>
     <string name="mqtt_verify_port">Port range : 0~65535</string>
     <string name="mqtt_verify_port_empty">Port error</string>
-    <string name="mqtt_verify_keep_alive">Keep alive range : 60~120</string>
+    <string name="mqtt_verify_keep_alive">Keep alive range : 10~120</string>
     <string name="mqtt_verify_username">Username error</string>
     <string name="mqtt_verify_password">Password error</string>
     <string name="mqtt_verify_client_id">ClientId error</string>
     <string name="mqtt_verify_length">Length range is 0~32</string>
     <string name="mqtt_verify_catalogue">Catalogue error</string>
+    <string name="mqtt_verify_ca">CA error</string>
+    <string name="mqtt_verify_topic_subscribe">Subscribed Topic error</string>
+    <string name="mqtt_verify_topic_publish">Published Topic error</string>
+    <string name="mqtt_verify_client_key">Client Key error</string>
+    <string name="mqtt_verify_client_cert">Client Cert error</string>
     <string name="success">Success</string>
     <string name="update_success">Update Success</string>
     <string name="failed">Failed</string>
@@ -137,6 +145,13 @@
     <string name="permission_location_close_content">Please find it in cellphone setting- permission, and allow MokoLifeX use the Location and Storage permission</string>
     <string name="permission_location_need_title">Turn on Location permission</string>
     <string name="permission_location_need_content">After that, MokoLifeX could search the wifi</string>
+
+    <string-array name="update_type">
+        <item>Firmware</item>
+        <item>CA certification</item>
+        <item>Client certification</item>
+        <item>Client key</item>
+    </string-array>
 
 
 </resources>

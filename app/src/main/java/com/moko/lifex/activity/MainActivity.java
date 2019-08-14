@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.adapter.DeviceAdapter;
@@ -22,6 +22,8 @@ import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
+import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -33,6 +35,7 @@ import com.moko.support.log.LogModule;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -112,14 +115,13 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                         String mqttConfigAppStr = SPUtiles.getStringValue(MainActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
                         MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
                         // 订阅
-                        for (String topic : device.getDeviceTopics()) {
-                            try {
-                                MokoSupport.getInstance().subscribe(topic, appMqttConfig.qos);
-                            } catch (MqttException e) {
-                                e.printStackTrace();
-                            }
-
+//                        for (String topic : device.getDeviceTopics()) {
+                        try {
+                            MokoSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+                        } catch (MqttException e) {
+                            e.printStackTrace();
                         }
+//                        }
                     }
                 }
             }
@@ -132,6 +134,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 final String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
+                String receive = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
 //                if (topic.equals("lwz_123")) {
 //                    String receive = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
 //                    ToastUtils.showToast(MainActivity.this, receive);
@@ -139,66 +142,74 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                 if (devices.isEmpty()) {
                     return;
                 }
-                if (topic.contains(MokoDevice.DEVICE_TOPIC_SWITCH_STATE)) {
-                    String receive = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    JsonObject object = new JsonParser().parse(receive).getAsJsonObject();
-                    for (final MokoDevice device : devices) {
-                        if (device.getDeviceTopicSwitchState().equals(topic)) {
-                            device.isOnline = true;
-                            if (mHandler.hasMessages(device.id)) {
-                                mHandler.removeMessages(device.id);
+//                if (topic.contains(MokoDevice.DEVICE_TOPIC_SWITCH_STATE)) {
+//                    JsonObject object = new JsonParser().parse(receive).getAsJsonObject();
+                for (final MokoDevice device : devices) {
+                    if (device.topicPublish.equals(topic)) {
+                        device.isOnline = true;
+                        if (mHandler.hasMessages(device.id)) {
+                            mHandler.removeMessages(device.id);
+                        }
+                        Message message = Message.obtain(mHandler, new Runnable() {
+                            @Override
+                            public void run() {
+                                device.isOnline = false;
+                                device.on_off = false;
+                                LogModule.i(device.deviceId + "离线");
+                                adapter.notifyDataSetChanged();
+                                Intent i = new Intent(AppConstants.ACTION_DEVICE_STATE);
+                                i.putExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC, topic);
+                                MainActivity.this.sendBroadcast(i);
                             }
-                            Message message = Message.obtain(mHandler, new Runnable() {
-                                @Override
-                                public void run() {
-                                    device.isOnline = false;
-                                    device.on_off = false;
-                                    LogModule.i(device.mac + "离线");
-                                    adapter.notifyDataSetChanged();
-                                    Intent i = new Intent(AppConstants.ACTION_DEVICE_STATE);
-                                    i.putExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC, topic);
-                                    MainActivity.this.sendBroadcast(i);
-                                }
-                            });
-                            message.what = device.id;
-                            mHandler.sendMessageDelayed(message, 62 * 1000);
-                            if (topic.contains("iot_plug")) {
-                                String switch_state = object.get("switch_state").getAsString();
+                        });
+                        message.what = device.id;
+                        mHandler.sendMessageDelayed(message, 62 * 1000);
+                        if (device.function.equals("iot_plug")) {
+                            Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                            }.getType();
+                            MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
+                            if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
+                                Type infoType = new TypeToken<SwitchInfo>() {
+                                }.getType();
+                                SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
+                                String switch_state = switchInfo.switch_state;
                                 // 启动设备定时离线，62s收不到应答则认为离线
                                 if (!switch_state.equals(device.on_off ? "on" : "off")) {
                                     device.on_off = !device.on_off;
                                 }
-                            } else if (topic.contains("iot_wall_switch")) {
-                                int type = Integer.parseInt(device.type);
-                                String switch_state_1;
-                                String switch_state_2;
-                                String switch_state_3;
-                                switch (type) {
-                                    case 1:
-                                        switch_state_1 = object.get("switch_state_01").getAsString();
-                                        device.on_off_1 = "on".equals(switch_state_1);
-                                        break;
-                                    case 2:
-                                        switch_state_1 = object.get("switch_state_01").getAsString();
-                                        device.on_off_1 = "on".equals(switch_state_1);
-                                        switch_state_2 = object.get("switch_state_02").getAsString();
-                                        device.on_off_2 = "on".equals(switch_state_2);
-                                        break;
-                                    case 3:
-                                        switch_state_1 = object.get("switch_state_01").getAsString();
-                                        device.on_off_1 = "on".equals(switch_state_1);
-                                        switch_state_2 = object.get("switch_state_02").getAsString();
-                                        device.on_off_2 = "on".equals(switch_state_2);
-                                        switch_state_3 = object.get("switch_state_03").getAsString();
-                                        device.on_off_3 = "on".equals(switch_state_3);
-                                        break;
-                                }
                             }
-                            adapter.notifyDataSetChanged();
-                            break;
+
+                        } else if (topic.contains("iot_wall_switch")) {
+//                            int type = Integer.parseInt(device.type);
+//                            String switch_state_1;
+//                            String switch_state_2;
+//                            String switch_state_3;
+//                            switch (type) {
+//                                case 1:
+//                                    switch_state_1 = object.get("switch_state_01").getAsString();
+//                                    device.on_off_1 = "on".equals(switch_state_1);
+//                                    break;
+//                                case 2:
+//                                    switch_state_1 = object.get("switch_state_01").getAsString();
+//                                    device.on_off_1 = "on".equals(switch_state_1);
+//                                    switch_state_2 = object.get("switch_state_02").getAsString();
+//                                    device.on_off_2 = "on".equals(switch_state_2);
+//                                    break;
+//                                case 3:
+//                                    switch_state_1 = object.get("switch_state_01").getAsString();
+//                                    device.on_off_1 = "on".equals(switch_state_1);
+//                                    switch_state_2 = object.get("switch_state_02").getAsString();
+//                                    device.on_off_2 = "on".equals(switch_state_2);
+//                                    switch_state_3 = object.get("switch_state_03").getAsString();
+//                                    device.on_off_3 = "on".equals(switch_state_3);
+//                                    break;
+//                            }
                         }
+                        adapter.notifyDataSetChanged();
+                        break;
                     }
                 }
+//                }
             }
             if (AppConstants.ACTION_MODIFY_NAME.equals(action)) {
                 devices.clear();
@@ -239,8 +250,8 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         stopService(new Intent(this, MokoService.class));
     }
 
-    public void mainSettings(View view) {
-        startActivity(new Intent(this, SettingsActivity.class));
+    public void setAppMqttConfig(View view) {
+        startActivity(new Intent(this, SetAppMqttActivity.class));
     }
 
     public void mainAddDevices(View view) {
@@ -254,11 +265,11 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
 //        }
 
         String mqttAppConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-        String mqttDeviceConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG, "");
-        if (TextUtils.isEmpty(mqttDeviceConfigStr)) {
-            startActivity(new Intent(this, SetDeviceMqttActivity.class));
-            return;
-        }
+//        String mqttDeviceConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG, "");
+//        if (TextUtils.isEmpty(mqttDeviceConfigStr)) {
+//            startActivity(new Intent(this, SetDeviceMqttActivity.class));
+//            return;e
+//        }
         if (TextUtils.isEmpty(mqttAppConfigStr)) {
             startActivity(new Intent(this, SetAppMqttActivity.class));
             return;
@@ -297,15 +308,20 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         }
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("切换开关");
-        JsonObject json = new JsonObject();
-        json.addProperty("switch_state", device.on_off ? "off" : "on");
+        MsgCommon<SwitchInfo> msgCommon = new MsgCommon();
+        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SWITCH_STATE;
+        SwitchInfo switchInfo = new SwitchInfo();
+        switchInfo.switch_state = device.on_off ? "off" : "on";
+        msgCommon.data = switchInfo;
+//        JsonObject json = new JsonObject();
+//        json.addProperty("switch_state", device.on_off ? "off" : "on");
         String mqttConfigAppStr = SPUtiles.getStringValue(MainActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         MqttMessage message = new MqttMessage();
-        message.setPayload(json.toString().getBytes());
+        message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);
         try {
-            MokoSupport.getInstance().publish(device.getAppTopicSwitchState(), message);
+            MokoSupport.getInstance().publish(device.topicSubscribe, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }

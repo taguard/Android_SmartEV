@@ -4,7 +4,23 @@ public class MokoConstants {
     // header
     public static final int HEADER_GET_DEVICE_INFO = 4001;
     public static final int HEADER_SET_MQTT_INFO = 4002;
-    public static final int HEADER_SET_WIFI_INFO = 4003;
+    public static final int HEADER_SET_MQTT_SSL = 4003;
+    public static final int HEADER_SET_TOPIC = 4004;
+    public static final int HEADER_SET_SWITCH_STATUS = 4005;
+    public static final int HEADER_SET_WIFI_INFO = 4006;
+    // device_to_app
+    public static final int MSG_ID_D_2_A_SWITCH_STATE = 1001;
+    public static final int MSG_ID_D_2_A_DEVICE_INFO = 1002;
+    public static final int MSG_ID_D_2_A_TIMER_INFO = 1003;
+    public static final int MSG_ID_D_2_A_OTA_INFO = 1004;
+    public static final int MSG_ID_D_2_A_DELETE = 1005;
+    public static final int MSG_ID_D_2_A_POWER_INFO = 1006;
+    // app_to_device
+    public static final int MSG_ID_A_2_D_SWITCH_STATE = 2001;
+    public static final int MSG_ID_A_2_D_SET_TIMER = 2002;
+    public static final int MSG_ID_A_2_D_RESET = 2003;
+    public static final int MSG_ID_A_2_D_SET_OTA = 2004;
+    public static final int MSG_ID_A_2_D_DEVICE_INFO = 2005;
     // response
     public static final int RESPONSE_SUCCESS = 0;
     public static final int RESPONSE_FAILED_LENGTH = 1;

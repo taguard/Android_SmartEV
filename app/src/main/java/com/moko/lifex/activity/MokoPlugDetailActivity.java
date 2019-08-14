@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
@@ -23,6 +23,10 @@ import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.TimerDialog;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
+import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.SetTimer;
+import com.moko.lifex.entity.SwitchInfo;
+import com.moko.lifex.entity.TimerInfo;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
@@ -31,6 +35,8 @@ import com.moko.support.log.LogModule;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.lang.reflect.Type;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -88,31 +94,38 @@ public class MokoPlugDetailActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.getDeviceTopicSwitchState())) {
+                if (topic.equals(mokoDevice.topicPublish)) {
                     mokoDevice.isOnline = true;
                     String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    JsonObject object = new JsonParser().parse(message).getAsJsonObject();
-                    String switch_state = object.get("switch_state").getAsString();
-                    tvSwitchState.setText(mokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
-                    if (!switch_state.equals(mokoDevice.on_off ? "on" : "off")) {
-                        mokoDevice.on_off = !mokoDevice.on_off;
-                        changeSwitchState();
-                        tvTimerState.setVisibility(View.GONE);
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
+                        Type infoType = new TypeToken<SwitchInfo>() {
+                        }.getType();
+                        SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        String switch_state = switchInfo.switch_state;
+                        // 启动设备定时离线，62s收不到应答则认为离线
+                        if (!switch_state.equals(mokoDevice.on_off ? "on" : "off")) {
+                            mokoDevice.on_off = !mokoDevice.on_off;
+                            tvSwitchState.setText(mokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
+                        }
                     }
-                }
-                if (topic.equals(mokoDevice.getDeviceTopicDelayTime())) {
-                    String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    JsonObject object = new JsonParser().parse(message).getAsJsonObject();
-                    int delay_hour = object.get("delay_hour").getAsInt();
-                    int delay_minute = object.get("delay_minute").getAsInt();
-                    int delay_second = object.get("delay_second").getAsInt();
-                    String switch_state = object.get("switch_state").getAsString();
-                    if (delay_hour == 0 && delay_minute == 0 && delay_second == 0) {
-                        tvTimerState.setVisibility(View.GONE);
-                    } else {
-                        tvTimerState.setVisibility(View.VISIBLE);
-                        String timer = String.format("%s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
-                        tvTimerState.setText(timer);
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_TIMER_INFO) {
+                        Type infoType = new TypeToken<TimerInfo>() {
+                        }.getType();
+                        TimerInfo timerInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        int delay_hour = timerInfo.delay_hour;
+                        int delay_minute = timerInfo.delay_minute;
+                        int delay_second = timerInfo.delay_second;
+                        String switch_state = timerInfo.switch_state;
+                        if (delay_hour == 0 && delay_minute == 0 && delay_second == 0) {
+                            tvTimerState.setVisibility(View.GONE);
+                        } else {
+                            tvTimerState.setVisibility(View.VISIBLE);
+                            String timer = String.format("%s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
+                            tvTimerState.setText(timer);
+                        }
                     }
                 }
             }
@@ -122,7 +135,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
             }
             if (AppConstants.ACTION_DEVICE_STATE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.getDeviceTopicSwitchState())) {
+                if (topic.equals(mokoDevice.topicPublish)) {
                     mokoDevice.isOnline = false;
                     mokoDevice.on_off = false;
                     tvTimerState.setVisibility(View.GONE);
@@ -130,7 +143,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
                 }
             }
             if (AppConstants.ACTION_MODIFY_NAME.equals(action)) {
-                MokoDevice device = DBTools.getInstance(MokoPlugDetailActivity.this).selectDevice(mokoDevice.mac);
+                MokoDevice device = DBTools.getInstance(MokoPlugDetailActivity.this).selectDevice(String.valueOf(mokoDevice.id));
                 mokoDevice.nickName = device.nickName;
             }
         }
@@ -193,16 +206,22 @@ public class MokoPlugDetailActivity extends BaseActivity {
                     return;
                 }
                 showLoadingProgressDialog(getString(R.string.wait));
-                JsonObject json = new JsonObject();
-                json.addProperty("delay_hour", dialog.getWvHour());
-                json.addProperty("delay_minute", dialog.getWvMinute());
+                MsgCommon<SetTimer> msgCommon = new MsgCommon();
+                msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_TIMER;
+                SetTimer setTimer = new SetTimer();
+                setTimer.delay_hour = dialog.getWvHour();
+                setTimer.delay_minute = dialog.getWvMinute();
+                msgCommon.data = setTimer;
+//                JsonObject json = new JsonObject();
+//                json.addProperty("delay_hour", dialog.getWvHour());
+//                json.addProperty("delay_minute", dialog.getWvMinute());
                 String mqttConfigAppStr = SPUtiles.getStringValue(MokoPlugDetailActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
                 MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
                 MqttMessage message = new MqttMessage();
-                message.setPayload(json.toString().getBytes());
+                message.setPayload(new Gson().toJson(msgCommon).getBytes());
                 message.setQos(appMqttConfig.qos);
                 try {
-                    MokoSupport.getInstance().publish(mokoDevice.getAppTopicDelayTime(), message);
+                    MokoSupport.getInstance().publish(mokoDevice.topicSubscribe, message);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -237,7 +256,9 @@ public class MokoPlugDetailActivity extends BaseActivity {
             ToastUtils.showToast(this, getString(R.string.device_info_no_statistics));
             return;
         }
-        startActivity(new Intent(this, ElectricityActivity.class));
+        Intent intent = new Intent(this, ElectricityActivity.class);
+        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
+        startActivity(intent);
     }
 
     public void switchClick(View view) {
@@ -251,15 +272,20 @@ public class MokoPlugDetailActivity extends BaseActivity {
         }
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("切换开关");
-        JsonObject json = new JsonObject();
-        json.addProperty("switch_state", mokoDevice.on_off ? "off" : "on");
+        MsgCommon<SwitchInfo> msgCommon = new MsgCommon();
+        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SWITCH_STATE;
+        SwitchInfo switchInfo = new SwitchInfo();
+        switchInfo.switch_state = mokoDevice.on_off ? "off" : "on";
+        msgCommon.data = switchInfo;
+//        JsonObject json = new JsonObject();
+//        json.addProperty("switch_state", mokoDevice.on_off ? "off" : "on");
         String mqttConfigAppStr = SPUtiles.getStringValue(MokoPlugDetailActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         MqttMessage message = new MqttMessage();
-        message.setPayload(json.toString().getBytes());
+        message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);
         try {
-            MokoSupport.getInstance().publish(mokoDevice.getAppTopicSwitchState(), message);
+            MokoSupport.getInstance().publish(mokoDevice.topicSubscribe, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }

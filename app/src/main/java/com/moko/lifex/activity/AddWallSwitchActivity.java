@@ -73,13 +73,13 @@ public class AddWallSwitchActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_wall_switch);
         ButterKnife.bind(this);
-        notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
-        notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
-        String mqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG, "");
-        mDeviceMqttConfig = new Gson().fromJson(mqttConfigStr, MQTTConfig.class);
-        String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-        mAppMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
-        bindService(new Intent(this, SocketService.class), mServiceConnection, BIND_AUTO_CREATE);
+//        notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
+//        notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
+//        String mqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG, "");
+//        mDeviceMqttConfig = new Gson().fromJson(mqttConfigStr, MQTTConfig.class);
+//        String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+//        mAppMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+//        bindService(new Intent(this, SocketService.class), mServiceConnection, BIND_AUTO_CREATE);
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -124,117 +124,117 @@ public class AddWallSwitchActivity extends BaseActivity {
                 }
             }
             if (MokoConstants.ACTION_AP_SET_DATA_RESPONSE.equals(action)) {
-                DeviceResponse response = (DeviceResponse) intent.getSerializableExtra(MokoConstants.EXTRA_AP_SET_DATA_RESPONSE);
-                if (response.code == MokoConstants.RESPONSE_SUCCESS) {
-                    switch (response.result.header) {
-                        case MokoConstants.HEADER_GET_DEVICE_INFO:
-                            mDeviceResult = response.result;
-                            mTopicPre = mDeviceResult.device_function
-                                    + "/" + mDeviceResult.device_name
-                                    + "/" + mDeviceResult.device_specifications
-                                    + "/" + mDeviceResult.device_mac
-                                    + "/" + "device"
-                                    + "/";
-                            // 获取设备信息，设置MQTT信息
-                            final JsonObject jsonObject = new JsonObject();
-                            jsonObject.addProperty("header", MokoConstants.HEADER_SET_MQTT_INFO);
-                            jsonObject.addProperty("host", mDeviceMqttConfig.host);
-                            jsonObject.addProperty("port", Integer.parseInt(mDeviceMqttConfig.port));
-                            jsonObject.addProperty("clientId", mDeviceMqttConfig.clientId);
-                            jsonObject.addProperty("connect_mode", mDeviceMqttConfig.connectMode);
-                            jsonObject.addProperty("username", mDeviceMqttConfig.username);
-                            jsonObject.addProperty("password", mDeviceMqttConfig.password);
-                            jsonObject.addProperty("keepalive", mDeviceMqttConfig.keepAlive);
-                            jsonObject.addProperty("qos", mDeviceMqttConfig.qos);
-                            jsonObject.addProperty("clean_session", mDeviceMqttConfig.cleanSession ? 1 : 0);
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mService.sendMessage(jsonObject.toString());
-                                }
-                            }).start();
-                            break;
-                        case MokoConstants.HEADER_SET_MQTT_INFO:
-                            // 获取MQTT信息，设置WIFI信息
-                            final JsonObject wifiInfo = new JsonObject();
-                            wifiInfo.addProperty("header", MokoConstants.HEADER_SET_WIFI_INFO);
-                            wifiInfo.addProperty("wifi_ssid", mWifiSSID);
-                            wifiInfo.addProperty("wifi_pwd", mWifiPassword);
-                            wifiInfo.addProperty("wifi_security", 3);
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mService.sendMessage(wifiInfo.toString());
-                                }
-                            }).start();
-                            break;
-                        case MokoConstants.HEADER_SET_WIFI_INFO:
-                            // 设置成功，保存数据，网络可用后订阅mqtt主题
-                            isSettingSuccess = true;
-                            break;
-                    }
-                } else {
-                    ToastUtils.showToast(AddWallSwitchActivity.this, response.message);
-                }
+//                DeviceResponse response = (DeviceResponse) intent.getSerializableExtra(MokoConstants.EXTRA_AP_SET_DATA_RESPONSE);
+//                if (response.code == MokoConstants.RESPONSE_SUCCESS) {
+//                    switch (response.result.header) {
+//                        case MokoConstants.HEADER_GET_DEVICE_INFO:
+//                            mDeviceResult = response.result;
+//                            mTopicPre = mDeviceResult.device_function
+//                                    + "/" + mDeviceResult.device_name
+//                                    + "/" + mDeviceResult.device_specifications
+//                                    + "/" + mDeviceResult.device_mac
+//                                    + "/" + "device"
+//                                    + "/";
+//                            // 获取设备信息，设置MQTT信息
+//                            final JsonObject jsonObject = new JsonObject();
+//                            jsonObject.addProperty("header", MokoConstants.HEADER_SET_MQTT_INFO);
+//                            jsonObject.addProperty("host", mDeviceMqttConfig.host);
+//                            jsonObject.addProperty("port", Integer.parseInt(mDeviceMqttConfig.port));
+//                            jsonObject.addProperty("clientId", mDeviceMqttConfig.clientId);
+//                            jsonObject.addProperty("connect_mode", mDeviceMqttConfig.connectMode);
+//                            jsonObject.addProperty("username", mDeviceMqttConfig.username);
+//                            jsonObject.addProperty("password", mDeviceMqttConfig.password);
+//                            jsonObject.addProperty("keepalive", mDeviceMqttConfig.keepAlive);
+//                            jsonObject.addProperty("qos", mDeviceMqttConfig.qos);
+//                            jsonObject.addProperty("clean_session", mDeviceMqttConfig.cleanSession ? 1 : 0);
+//                            new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mService.sendMessage(jsonObject.toString());
+//                                }
+//                            }).start();
+//                            break;
+//                        case MokoConstants.HEADER_SET_MQTT_INFO:
+//                            // 获取MQTT信息，设置WIFI信息
+//                            final JsonObject wifiInfo = new JsonObject();
+//                            wifiInfo.addProperty("header", MokoConstants.HEADER_SET_WIFI_INFO);
+//                            wifiInfo.addProperty("wifi_ssid", mWifiSSID);
+//                            wifiInfo.addProperty("wifi_pwd", mWifiPassword);
+//                            wifiInfo.addProperty("wifi_security", 3);
+//                            new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mService.sendMessage(wifiInfo.toString());
+//                                }
+//                            }).start();
+//                            break;
+//                        case MokoConstants.HEADER_SET_WIFI_INFO:
+//                            // 设置成功，保存数据，网络可用后订阅mqtt主题
+//                            isSettingSuccess = true;
+//                            break;
+//                    }
+//                } else {
+//                    ToastUtils.showToast(AddWallSwitchActivity.this, response.message);
+//                }
             }
             if (action.equals(MokoConstants.ACTION_MQTT_CONNECTION)) {
-                int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_CONNECTION_STATE, 0);
-                if (state == MokoConstants.MQTT_CONN_STATUS_SUCCESS && isSettingSuccess) {
-                    LogModule.i("连接MQTT成功");
-                    // 订阅设备主题
-                    String topicSwitchState = mTopicPre + "switch_state";
-                    String topicDelayTime = mTopicPre + "delay_time";
-                    String topicDeleteDevice = mTopicPre + "delete_device";
-                    // 订阅
-                    try {
-                        MokoSupport.getInstance().subscribe(topicSwitchState, mAppMqttConfig.qos);
-                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
-                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_CONNECTION_STATE, 0);
+//                if (state == MokoConstants.MQTT_CONN_STATUS_SUCCESS && isSettingSuccess) {
+//                    LogModule.i("连接MQTT成功");
+//                    // 订阅设备主题
+//                    String topicSwitchState = mTopicPre + "switch_state";
+//                    String topicDelayTime = mTopicPre + "delay_time";
+//                    String topicDeleteDevice = mTopicPre + "delete_device";
+//                    // 订阅
+//                    try {
+//                        MokoSupport.getInstance().subscribe(topicSwitchState, mAppMqttConfig.qos);
+//                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
+//                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
+//                    } catch (MqttException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
             }
             if (action.equals(MokoConstants.ACTION_MQTT_RECEIVE)) {
-                String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (TextUtils.isEmpty(topic) || TextUtils.isEmpty(mTopicPre) || isDeviceConnectSuccess) {
-                    return;
-                }
-                if (topic.contains(mTopicPre) && !isDeviceConnectSuccess) {
-                    isDeviceConnectSuccess = true;
-                    donutProgress.setProgress(100);
-                    donutProgress.setText(100 + "%");
-                    // 关闭进度条弹框，保存数据，跳转修改设备名称页面
-                    notBlinkingTips.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            dismissConnMqttDialog();
-                            MokoDevice mokoDevice = DBTools.getInstance(AddWallSwitchActivity.this).selectDevice(mDeviceResult.device_mac);
-                            if (mokoDevice == null) {
-                                mokoDevice = new MokoDevice();
-                                mokoDevice.name = mDeviceResult.device_name;
-                                mokoDevice.nickName = mDeviceResult.device_name;
-                                mokoDevice.switchName1 = "Switch1";
-                                mokoDevice.switchName2 = "Switch2";
-                                mokoDevice.switchName3 = "Switch3";
-                                mokoDevice.specifications = mDeviceResult.device_specifications;
-                                mokoDevice.function = mDeviceResult.device_function;
-                                mokoDevice.mac = mDeviceResult.device_mac;
-                                mokoDevice.type = mDeviceResult.device_type;
-                                DBTools.getInstance(AddWallSwitchActivity.this).insertDevice(mokoDevice);
-                            } else {
-                                mokoDevice.name = mDeviceResult.device_name;
-                                mokoDevice.specifications = mDeviceResult.device_specifications;
-                                mokoDevice.function = mDeviceResult.device_function;
-                                mokoDevice.type = mDeviceResult.device_type;
-                                DBTools.getInstance(AddWallSwitchActivity.this).updateDevice(mokoDevice);
-                            }
-                            Intent modifyIntent = new Intent(AddWallSwitchActivity.this, ModifyNameActivity.class);
-                            modifyIntent.putExtra("mokodevice", mokoDevice);
-                            startActivity(modifyIntent);
-                        }
-                    }, 500);
-                }
+//                String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
+//                if (TextUtils.isEmpty(topic) || TextUtils.isEmpty(mTopicPre) || isDeviceConnectSuccess) {
+//                    return;
+//                }
+//                if (topic.contains(mTopicPre) && !isDeviceConnectSuccess) {
+//                    isDeviceConnectSuccess = true;
+//                    donutProgress.setProgress(100);
+//                    donutProgress.setText(100 + "%");
+//                    // 关闭进度条弹框，保存数据，跳转修改设备名称页面
+//                    notBlinkingTips.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            dismissConnMqttDialog();
+//                            MokoDevice mokoDevice = DBTools.getInstance(AddWallSwitchActivity.this).selectDevice(mDeviceResult.device_mac);
+//                            if (mokoDevice == null) {
+//                                mokoDevice = new MokoDevice();
+//                                mokoDevice.name = mDeviceResult.device_name;
+//                                mokoDevice.nickName = mDeviceResult.device_name;
+//                                mokoDevice.switchName1 = "Switch1";
+//                                mokoDevice.switchName2 = "Switch2";
+//                                mokoDevice.switchName3 = "Switch3";
+//                                mokoDevice.specifications = mDeviceResult.device_specifications;
+//                                mokoDevice.function = mDeviceResult.device_function;
+//                                mokoDevice.mac = mDeviceResult.device_mac;
+//                                mokoDevice.type = mDeviceResult.device_type;
+//                                DBTools.getInstance(AddWallSwitchActivity.this).insertDevice(mokoDevice);
+//                            } else {
+//                                mokoDevice.name = mDeviceResult.device_name;
+//                                mokoDevice.specifications = mDeviceResult.device_specifications;
+//                                mokoDevice.function = mDeviceResult.device_function;
+//                                mokoDevice.type = mDeviceResult.device_type;
+//                                DBTools.getInstance(AddWallSwitchActivity.this).updateDevice(mokoDevice);
+//                            }
+//                            Intent modifyIntent = new Intent(AddWallSwitchActivity.this, ModifyNameActivity.class);
+//                            modifyIntent.putExtra("mokodevice", mokoDevice);
+//                            startActivity(modifyIntent);
+//                        }
+//                    }, 500);
+//                }
             }
         }
     };

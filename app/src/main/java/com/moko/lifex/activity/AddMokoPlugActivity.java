@@ -43,6 +43,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import butterknife.Bind;
@@ -69,18 +70,18 @@ public class AddMokoPlugActivity extends BaseActivity {
     private MQTTConfig mDeviceMqttConfig;
     private MQTTConfig mAppMqttConfig;
     private boolean isSettingSuccess;
-    private String mTopicPre;
     private boolean isDeviceConnectSuccess;
+    private String function;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_moko_plug);
         ButterKnife.bind(this);
+        mDeviceMqttConfig = (MQTTConfig) getIntent().getSerializableExtra("mqttConfig");
+        function = getIntent().getStringExtra("function");
         notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
         notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
-        String mqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG, "");
-        mDeviceMqttConfig = new Gson().fromJson(mqttConfigStr, MQTTConfig.class);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         mAppMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         bindService(new Intent(this, SocketService.class), mServiceConnection, BIND_AUTO_CREATE);
@@ -115,23 +116,6 @@ public class AddMokoPlugActivity extends BaseActivity {
             if (MokoConstants.ACTION_AP_CONNECTION.equals(action)) {
                 int status = intent.getIntExtra(MokoConstants.EXTRA_AP_CONNECTION, -1);
                 if (status == MokoConstants.CONN_STATUS_SUCCESS) {
-                    try {
-                        File file = Utils.getFile(AddMokoPlugActivity.this, "aws-root-ca.pem");
-                        if (file.exists()) {
-                            long size = file.length();
-                            // 创建一个缓冲区
-                            byte[] buffer = new byte[400];
-                            // 判断输入流中的数据是否已经读完的标识
-                            int len = 0;
-                            InputStream inputStream = new FileInputStream(file);
-                            if ((len = inputStream.read(buffer)) > 0) {
-                                // TODO: 2019/8/6 发送buffer，收到应答后继续发送下一段
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -150,19 +134,19 @@ public class AddMokoPlugActivity extends BaseActivity {
                     switch (response.result.header) {
                         case MokoConstants.HEADER_GET_DEVICE_INFO:
                             mDeviceResult = response.result;
-                            mTopicPre = mDeviceResult.device_function
-                                    + "/" + mDeviceResult.device_name
-                                    + "/" + mDeviceResult.device_specifications
-                                    + "/" + mDeviceResult.device_mac
-                                    + "/" + "device"
-                                    + "/";
+                            if ("{device_name}/{device_id}/app_to_device".equals(mDeviceMqttConfig.topicSubscribe)) {
+                                mDeviceMqttConfig.topicSubscribe = String.format("%s/%s/app_to_device", mDeviceResult.device_name, mDeviceResult.device_id);
+                            }
+                            if ("{device_name}/{device_id}/device_to_app".equals(mDeviceMqttConfig.topicPublish)) {
+                                mDeviceMqttConfig.topicPublish = String.format("%s/%s/device_to_app", mDeviceResult.device_name, mDeviceResult.device_id);
+                            }
                             // 获取设备信息，设置MQTT信息
                             final JsonObject jsonObject = new JsonObject();
                             jsonObject.addProperty("header", MokoConstants.HEADER_SET_MQTT_INFO);
                             jsonObject.addProperty("host", mDeviceMqttConfig.host);
                             jsonObject.addProperty("port", Integer.parseInt(mDeviceMqttConfig.port));
-                            jsonObject.addProperty("clientId", mDeviceMqttConfig.clientId);
                             jsonObject.addProperty("connect_mode", mDeviceMqttConfig.connectMode);
+                            jsonObject.addProperty("clientid", mDeviceMqttConfig.clientId);
                             jsonObject.addProperty("username", mDeviceMqttConfig.username);
                             jsonObject.addProperty("password", mDeviceMqttConfig.password);
                             jsonObject.addProperty("keepalive", mDeviceMqttConfig.keepAlive);
@@ -176,18 +160,55 @@ public class AddMokoPlugActivity extends BaseActivity {
                             }).start();
                             break;
                         case MokoConstants.HEADER_SET_MQTT_INFO:
-                            // 获取MQTT信息，设置WIFI信息
-                            final JsonObject wifiInfo = new JsonObject();
-                            wifiInfo.addProperty("header", MokoConstants.HEADER_SET_WIFI_INFO);
-                            wifiInfo.addProperty("wifi_ssid", mWifiSSID);
-                            wifiInfo.addProperty("wifi_pwd", mWifiPassword);
-                            wifiInfo.addProperty("wifi_security", 3);
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mService.sendMessage(wifiInfo.toString());
+                            // 判断是哪种连接方式，是否需要发送证书文件
+                            if (mAppMqttConfig.connectMode == 0 || (mAppMqttConfig.connectMode == 1 && TextUtils.isEmpty(mAppMqttConfig.caPath))) {
+                                sendTopic();
+
+                            } else if (mAppMqttConfig.connectMode == 1) {
+                                // 只发送CA证书
+                                sendCA();
+                            } else {
+                                // 先发送CA证书
+                                sendCA();
+                            }
+                            break;
+                        case MokoConstants.HEADER_SET_MQTT_SSL:
+                            if (mAppMqttConfig.connectMode == 1) {
+                                if (mOffset == mSize || mLen == -1) {
+                                    sendTopic();
+                                    return;
                                 }
-                            }).start();
+                                try {
+                                    uploadFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                if (mOffset == mSize || mLen == -1) {
+                                    if (mFileType == 1) {
+                                        // 发送客户端证书
+                                        sendClientCert();
+                                        return;
+                                    }
+                                    if (mFileType == 2) {
+                                        // 发送客户端公钥
+                                        sendClientKey();
+                                        return;
+                                    }
+                                    if (mFileType == 3) {
+                                        sendTopic();
+                                        return;
+                                    }
+                                }
+                                try {
+                                    uploadFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            break;
+                        case MokoConstants.HEADER_SET_TOPIC:
+                            sendWIFI();
                             break;
                         case MokoConstants.HEADER_SET_WIFI_INFO:
                             // 设置成功，保存数据，网络可用后订阅mqtt主题
@@ -203,16 +224,16 @@ public class AddMokoPlugActivity extends BaseActivity {
                 if (state == MokoConstants.MQTT_CONN_STATUS_SUCCESS && isSettingSuccess) {
                     LogModule.i("连接MQTT成功");
                     // 订阅设备主题
-                    String topicSwitchState = mTopicPre + "switch_state";
-                    String topicDelayTime = mTopicPre + "delay_time";
-                    String topicDeleteDevice = mTopicPre + "delete_device";
-                    String topicElectricityInfo = mTopicPre + "electricity_information";
+//                    String topicSwitchState = mTopicPre + "switch_state";
+//                    String topicDelayTime = mTopicPre + "delay_time";
+//                    String topicDeleteDevice = mTopicPre + "delete_device";
+//                    String topicElectricityInfo = mTopicPre + "electricity_information";
                     // 订阅
                     try {
-                        MokoSupport.getInstance().subscribe(topicSwitchState, mAppMqttConfig.qos);
-                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
-                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
-                        MokoSupport.getInstance().subscribe(topicElectricityInfo, mAppMqttConfig.qos);
+                        MokoSupport.getInstance().subscribe(mDeviceMqttConfig.topicPublish, mAppMqttConfig.qos);
+//                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
+//                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
+//                        MokoSupport.getInstance().subscribe(topicElectricityInfo, mAppMqttConfig.qos);
                     } catch (MqttException e) {
                         e.printStackTrace();
                     }
@@ -220,10 +241,10 @@ public class AddMokoPlugActivity extends BaseActivity {
             }
             if (action.equals(MokoConstants.ACTION_MQTT_RECEIVE)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (TextUtils.isEmpty(topic) || TextUtils.isEmpty(mTopicPre) || isDeviceConnectSuccess) {
+                if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
                     return;
                 }
-                if (topic.contains(mTopicPre) && !isDeviceConnectSuccess) {
+                if (!isDeviceConnectSuccess) {
                     isDeviceConnectSuccess = true;
                     donutProgress.setProgress(100);
                     donutProgress.setText(100 + "%");
@@ -232,20 +253,24 @@ public class AddMokoPlugActivity extends BaseActivity {
                         @Override
                         public void run() {
                             dismissConnMqttDialog();
-                            MokoDevice mokoDevice = DBTools.getInstance(AddMokoPlugActivity.this).selectDevice(mDeviceResult.device_mac);
+                            MokoDevice mokoDevice = DBTools.getInstance(AddMokoPlugActivity.this).selectDevice(mDeviceResult.device_id);
                             if (mokoDevice == null) {
                                 mokoDevice = new MokoDevice();
                                 mokoDevice.name = mDeviceResult.device_name;
                                 mokoDevice.nickName = mDeviceResult.device_name;
                                 mokoDevice.specifications = mDeviceResult.device_specifications;
-                                mokoDevice.function = mDeviceResult.device_function;
-                                mokoDevice.mac = mDeviceResult.device_mac;
+                                // TODO: 2019/8/14 设备不再传给app，由app区分
+                                mokoDevice.function = function;
+                                mokoDevice.deviceId = mDeviceResult.device_id;
                                 mokoDevice.type = mDeviceResult.device_type;
+                                mokoDevice.topicSubscribe = mDeviceMqttConfig.topicSubscribe;
+                                mokoDevice.topicPublish = mDeviceMqttConfig.topicPublish;
                                 DBTools.getInstance(AddMokoPlugActivity.this).insertDevice(mokoDevice);
                             } else {
                                 mokoDevice.name = mDeviceResult.device_name;
                                 mokoDevice.specifications = mDeviceResult.device_specifications;
-                                mokoDevice.function = mDeviceResult.device_function;
+                                // TODO: 2019/8/14 设备不再传给app，由app区分
+                                mokoDevice.function = function;
                                 mokoDevice.type = mDeviceResult.device_type;
                                 DBTools.getInstance(AddMokoPlugActivity.this).updateDevice(mokoDevice);
                             }
@@ -258,6 +283,127 @@ public class AddMokoPlugActivity extends BaseActivity {
             }
         }
     };
+
+    private void sendWIFI() {
+        // 获取MQTT信息，设置WIFI信息
+        final JsonObject wifiInfo = new JsonObject();
+        wifiInfo.addProperty("header", MokoConstants.HEADER_SET_WIFI_INFO);
+        wifiInfo.addProperty("wifi_ssid", mWifiSSID);
+        wifiInfo.addProperty("wifi_pwd", mWifiPassword);
+        wifiInfo.addProperty("wifi_security", 3);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mService.sendMessage(wifiInfo.toString());
+            }
+        }).start();
+    }
+
+    private void sendTopic() {
+        // 设置主题
+        final JsonObject topicInfo = new JsonObject();
+        topicInfo.addProperty("header", MokoConstants.HEADER_SET_TOPIC);
+        topicInfo.addProperty("set_publish_topic", mDeviceMqttConfig.topicPublish);
+        topicInfo.addProperty("set_subscibe_topic", mDeviceMqttConfig.topicSubscribe);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mService.sendMessage(topicInfo.toString());
+            }
+        }).start();
+    }
+
+    private void sendClientKey() {
+        try {
+            mFile = new File(mDeviceMqttConfig.clientKeyPath);
+            if (mFile.exists()) {
+                mFileType = 3;
+                mSize = mFile.length();
+                // 判断输入流中的数据是否已经读完的标识
+                mLen = 0;
+                mOffset = 0;
+                mInputSteam = new FileInputStream(mFile);
+                mBufferSize = Math.min(mInputSteam.available(), 200);
+                // 创建一个缓冲区
+                mBuffer = new byte[mBufferSize];
+                uploadFile();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendClientCert() {
+        try {
+            mFile = new File(mDeviceMqttConfig.clientCertPath);
+            if (mFile.exists()) {
+                mFileType = 2;
+                mSize = mFile.length();
+                // 判断输入流中的数据是否已经读完的标识
+                mLen = 0;
+                mOffset = 0;
+                mInputSteam = new FileInputStream(mFile);
+                mBufferSize = Math.min(mInputSteam.available(), 200);
+                // 创建一个缓冲区
+                mBuffer = new byte[mBufferSize];
+                uploadFile();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendCA() {
+        try {
+            mFile = new File(mDeviceMqttConfig.caPath);
+            if (mFile.exists()) {
+                mFileType = 1;
+                mSize = mFile.length();
+                // 判断输入流中的数据是否已经读完的标识
+                mLen = 0;
+                mOffset = 0;
+                mInputSteam = new FileInputStream(mFile);
+                mBufferSize = Math.min(mInputSteam.available(), 200);
+                // 创建一个缓冲区
+                mBuffer = new byte[mBufferSize];
+                uploadFile();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private File mFile;
+    private long mSize;
+    private byte[] mBuffer;
+    private int mLen;
+    private int mOffset;
+    private InputStream mInputSteam;
+    private int mFileType;
+    private int mBufferSize;
+
+    private void uploadFile() throws IOException {
+        if ((mLen = mInputSteam.read(mBuffer)) > 0) {
+            // 发送buffer，收到应答后继续发送下一段
+            final JsonObject sslInfo = new JsonObject();
+            sslInfo.addProperty("header", MokoConstants.HEADER_SET_MQTT_SSL);
+            sslInfo.addProperty("file_type", mFileType);
+            sslInfo.addProperty("file_size", mSize);
+            sslInfo.addProperty("offset", mOffset);
+            sslInfo.addProperty("current_packet_len", mLen);
+            String data = new String(mBuffer);
+            sslInfo.addProperty("data", data);
+            mOffset += mLen;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mService.sendMessage(sslInfo.toString());
+                }
+            }).start();
+            mBufferSize = Math.min(mInputSteam.available(), 200);
+            mBuffer = new byte[mBufferSize];
+        }
+    }
 
     public void back(View view) {
         finish();

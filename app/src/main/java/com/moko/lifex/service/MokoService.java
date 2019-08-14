@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.io.BufferedInputStream;
-import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
@@ -82,33 +82,34 @@ public class MokoService extends Service {
                 connOpts.setAutomaticReconnect(true);
                 connOpts.setCleanSession(mqttConfig.cleanSession);
                 connOpts.setKeepAliveInterval(mqttConfig.keepAlive);
-                connOpts.setUserName(mqttConfig.username);
-                connOpts.setPassword(mqttConfig.password.toCharArray());
-                switch (mqttConfig.connectMode) {
-                    case 1:
-                        // 单向不验证
-                        try {
-                            connOpts.setSocketFactory(getAllTMSocketFactory());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case 2:
-                        // 单向验证
-                        try {
-                            connOpts.setSocketFactory(getSingleSocketFactory());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case 3:
-                        // 双向验证
-                        try {
-                            connOpts.setSocketFactory(getSocketFactory());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
+//                connOpts.setUserName(mqttConfig.username);
+//                connOpts.setPassword(mqttConfig.password.toCharArray());
+                if (TextUtils.isEmpty(mqttConfig.caPath)) {
+                    // 单向不验证
+                    try {
+                        connOpts.setSocketFactory(getAllTMSocketFactory());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    switch (mqttConfig.connectMode) {
+                        case 1:
+                            // 单向验证
+                            try {
+                                connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        case 3:
+                            // 双向验证
+                            try {
+                                connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                    }
                 }
                 try {
                     MokoSupport.getInstance().connectMqtt(connOpts);
@@ -204,17 +205,15 @@ public class MokoService extends Service {
      * @throws Exception
      */
 
-    private SSLSocketFactory getSingleSocketFactory() throws Exception {
+    private SSLSocketFactory getSingleSocketFactory(String caFile) throws Exception {
         // 中间证书地址
-        InputStream ca = getAssets().open("aws-root-ca.pem");
-
         Security.addProvider(new BouncyCastleProvider());
 
         X509Certificate caCert = null;
 
-//        FileInputStream fis = new FileInputStream(caCrtFile);
+        FileInputStream fis = new FileInputStream(caFile);
 
-        BufferedInputStream bis = new BufferedInputStream(ca);
+        BufferedInputStream bis = new BufferedInputStream(fis);
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -250,11 +249,11 @@ public class MokoService extends Service {
      * @return
      * @throws Exception
      */
-    private SSLSocketFactory getSocketFactory() throws Exception {
+    private SSLSocketFactory getSocketFactory(String caFile, String clientKeyFile, String clientCertFile) throws Exception {
 
-        InputStream ca = getAssets().open("aws-root-ca.pem");
-        InputStream clientCert = getAssets().open("certificate.pem.crt");
-        InputStream clientKey = getAssets().open("private.pem.key");
+        FileInputStream ca = new FileInputStream(caFile);
+        FileInputStream clientCert = new FileInputStream(clientCertFile);
+        FileInputStream clientKey = new FileInputStream(clientKeyFile);
         Security.addProvider(new BouncyCastleProvider());
         // load CA certificate
         X509Certificate caCert = null;

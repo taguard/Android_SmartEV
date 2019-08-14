@@ -1,6 +1,8 @@
 package com.moko.lifex.activity;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,22 +14,24 @@ import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.dialog.KeepAliveDialog;
 import com.moko.lifex.entity.MQTTConfig;
+import com.moko.lifex.fragment.OnewaySSLFragment;
+import com.moko.lifex.fragment.TwowaySSLFragment;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
-
-import java.util.UUID;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -47,22 +51,31 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
     EditText etMqttPort;
     @Bind(R.id.iv_clean_session)
     ImageView ivCleanSession;
-    @Bind(R.id.rg_conn_mode)
-    RadioGroup rgConnMode;
-    @Bind(R.id.tv_qos)
-    TextView tvQos;
-    @Bind(R.id.et_mqtt_client_id)
-    EditText etMqttClientId;
     @Bind(R.id.et_mqtt_username)
     EditText etMqttUsername;
     @Bind(R.id.et_mqtt_password)
     EditText etMqttPassword;
-    @Bind(R.id.et_keep_alive)
-    EditText etKeepAlive;
-    @Bind(R.id.title)
-    TextView title;
-    @Bind(R.id.rl_client_id)
-    RelativeLayout rlClientId;
+    @Bind(R.id.tv_qos)
+    TextView tvQos;
+    @Bind(R.id.tv_keep_alive)
+    TextView tvKeepAlive;
+    @Bind(R.id.et_mqtt_client_id)
+    EditText etMqttClientId;
+    @Bind(R.id.rb_conn_mode_tcp)
+    RadioButton rbConnModeTcp;
+    @Bind(R.id.rb_conn_mode_ssl_oneway)
+    RadioButton rbConnModeSslOneway;
+    @Bind(R.id.rb_conn_mode_ssl_twoway)
+    RadioButton rbConnModeSslTwoway;
+    @Bind(R.id.rg_conn_mode)
+    RadioGroup rgConnMode;
+    @Bind(R.id.frame_connect_mode)
+    FrameLayout frameConnectMode;
+
+    private FragmentManager fragmentManager;
+    private OnewaySSLFragment onewaySSLFragment;
+    private TwowaySSLFragment twowaySSLFragment;
+
 
     private String[] mQosArray = new String[]{"0", "1", "2"};
 
@@ -72,23 +85,31 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mqtt_device);
+        setContentView(R.layout.activity_mqtt_app);
         ButterKnife.bind(this);
         String mqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-        title.setText(R.string.settings_mqtt_app);
-        rlClientId.setVisibility(View.VISIBLE);
         if (TextUtils.isEmpty(mqttConfigStr)) {
             mqttConfig = new MQTTConfig();
-            mqttConfig.clientId = UUID.randomUUID().toString().replaceAll("-", "");
         } else {
             Gson gson = new Gson();
             mqttConfig = gson.fromJson(mqttConfigStr, MQTTConfig.class);
         }
+        fragmentManager = getFragmentManager();
+        createFragment();
         initData();
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
         registerReceiver(mReceiver, filter);
+    }
+
+    private void createFragment() {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        onewaySSLFragment = OnewaySSLFragment.newInstance();
+        fragmentTransaction.add(R.id.frame_connect_mode, onewaySSLFragment);
+        twowaySSLFragment = TwowaySSLFragment.newInstance();
+        fragmentTransaction.add(R.id.frame_connect_mode, twowaySSLFragment);
+        fragmentTransaction.hide(onewaySSLFragment).hide(twowaySSLFragment).commit();
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -99,10 +120,6 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
                 int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_CONNECTION_STATE, 0);
                 if (state == MokoConstants.MQTT_CONN_STATUS_SUCCESS) {
                     ToastUtils.showToast(SetAppMqttActivity.this, getString(R.string.success));
-                    String mqttConfigStr = SPUtiles.getStringValue(SetAppMqttActivity.this, AppConstants.SP_KEY_MQTT_CONFIG, "");
-                    if (TextUtils.isEmpty(mqttConfigStr)) {
-                        startActivity(new Intent(SetAppMqttActivity.this, SetDeviceMqttActivity.class));
-                    }
                     dismissLoadingProgressDialog();
                     SetAppMqttActivity.this.finish();
                 }
@@ -112,13 +129,22 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
 
     private void initData() {
         etMqttHost.setText(mqttConfig.host);
-        etMqttHost.setSelection(mqttConfig.host.length());
         etMqttPort.setText(mqttConfig.port);
         tvQos.setText(mQosArray[mqttConfig.qos]);
         ivCleanSession.setImageDrawable(ContextCompat.getDrawable(this, mqttConfig.cleanSession ? R.drawable.checkbox_open : R.drawable.checkbox_close));
-        rgConnMode.check(mqttConfig.connectMode == 0 ? R.id.rb_conn_mode_tcp : R.id.rb_conn_mode_ssl);
         rgConnMode.setOnCheckedChangeListener(this);
-        etKeepAlive.setText(mqttConfig.keepAlive + "");
+        switch (mqttConfig.connectMode) {
+            case 0:
+                rbConnModeTcp.setChecked(true);
+                break;
+            case 1:
+                rbConnModeSslOneway.setChecked(true);
+                break;
+            case 3:
+                rbConnModeSslTwoway.setChecked(true);
+                break;
+        }
+        tvKeepAlive.setText(mqttConfig.keepAlive + "");
         etMqttClientId.setText(mqttConfig.clientId);
         etMqttUsername.setText(mqttConfig.username);
         etMqttPassword.setText(mqttConfig.password);
@@ -164,11 +190,23 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
         dialog.show();
     }
 
+
+    public void checkKeepAlive(View view) {
+        KeepAliveDialog dialog = new KeepAliveDialog();
+        dialog.setSelected(mqttConfig.keepAlive);
+        dialog.setListener(new KeepAliveDialog.OnDataSelectedListener() {
+            @Override
+            public void onDataSelected(String data) {
+                mqttConfig.keepAlive = Integer.parseInt(data);
+                tvKeepAlive.setText(data);
+            }
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
     public void saveSettings(View view) {
         mqttConfig.host = etMqttHost.getText().toString().replaceAll(" ", "");
         mqttConfig.port = etMqttPort.getText().toString();
-        String keepAlive = etKeepAlive.getText().toString();
-        mqttConfig.keepAlive = Integer.parseInt(TextUtils.isEmpty(keepAlive) ? "0" : keepAlive);
         mqttConfig.clientId = etMqttClientId.getText().toString().replaceAll(" ", "");
         mqttConfig.username = etMqttUsername.getText().toString().replaceAll(" ", "");
         mqttConfig.password = etMqttPassword.getText().toString().replaceAll(" ", "");
@@ -180,11 +218,32 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
             ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_id_empty));
             return;
         }
+        if (rbConnModeSslOneway.isChecked()) {
+            mqttConfig.caPath = onewaySSLFragment.getCAFilePath();
+        }
+        if (rbConnModeSslTwoway.isChecked()) {
+            mqttConfig.caPath = twowaySSLFragment.getCAFilePath();
+            if (TextUtils.isEmpty(mqttConfig.caPath)) {
+                ToastUtils.showToast(this, getString(R.string.mqtt_verify_ca));
+                return;
+            }
+            mqttConfig.clientKeyPath = twowaySSLFragment.getClientKeyPath();
+            if (TextUtils.isEmpty(mqttConfig.clientKeyPath)) {
+                ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_key));
+                return;
+            }
+            mqttConfig.clientCertPath = twowaySSLFragment.getClientCertPath();
+            if (TextUtils.isEmpty(mqttConfig.clientCertPath)) {
+                ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_cert));
+                return;
+            }
+        }
+
         String mqttConfigStr = new Gson().toJson(mqttConfig, MQTTConfig.class);
         SPUtiles.setStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, mqttConfigStr);
         stopService(new Intent(this, MokoService.class));
         showLoadingProgressDialog(getString(R.string.mqtt_connecting));
-        etKeepAlive.postDelayed(new Runnable() {
+        tvKeepAlive.postDelayed(new Runnable() {
             @Override
             public void run() {
                 startService(new Intent(SetAppMqttActivity.this, MokoService.class));
@@ -206,17 +265,26 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
 
     @Override
     public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
         switch (checkedId) {
             case R.id.rb_conn_mode_tcp:
                 mqttConfig.connectMode = 0;
-                mqttConfig.port = "1883";
+                fragmentTransaction.hide(onewaySSLFragment).hide(twowaySSLFragment).commit();
                 break;
-            case R.id.rb_conn_mode_ssl:
+            case R.id.rb_conn_mode_ssl_oneway:
                 mqttConfig.connectMode = 1;
-                mqttConfig.port = "8883";
+                fragmentTransaction.show(onewaySSLFragment).hide(twowaySSLFragment).commit();
+                onewaySSLFragment.setCAFilePath(mqttConfig);
+                break;
+            case R.id.rb_conn_mode_ssl_twoway:
+                mqttConfig.connectMode = 3;
+                fragmentTransaction.hide(onewaySSLFragment).show(twowaySSLFragment).commit();
+                twowaySSLFragment.setCAFilePath(mqttConfig);
+                twowaySSLFragment.setClientKeyPath(mqttConfig);
+                twowaySSLFragment.setClientCertPath(mqttConfig);
                 break;
         }
-        etMqttPort.setText(mqttConfig.port);
-        etMqttPort.setSelection(mqttConfig.port.length());
     }
+
 }

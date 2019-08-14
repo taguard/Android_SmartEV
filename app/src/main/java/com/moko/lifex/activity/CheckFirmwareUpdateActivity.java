@@ -8,16 +8,20 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.RadioButton;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.dialog.UpdateTypeDialog;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
+import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.OTAInfo;
+import com.moko.lifex.entity.SetOTA;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
@@ -27,8 +31,7 @@ import com.moko.support.log.LogModule;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.reflect.Type;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -42,18 +45,20 @@ import butterknife.ButterKnife;
 public class CheckFirmwareUpdateActivity extends BaseActivity {
 
     public static String TAG = "CheckFirmwareUpdateActivity";
-    @Bind(R.id.rb_host_type_ip)
-    RadioButton rbHostTypeIp;
     @Bind(R.id.et_host_content)
     EditText etHostContent;
     @Bind(R.id.et_host_port)
     EditText etHostPort;
     @Bind(R.id.et_host_catalogue)
     EditText etHostCatalogue;
+    @Bind(R.id.tv_update_type)
+    TextView tvUpdateType;
 
 
     private MokoDevice mokoDevice;
     private MQTTConfig appMqttConfig;
+
+    private String[] mUpdateType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         if (getIntent().getExtras() != null) {
             mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
+        mUpdateType = getResources().getStringArray(R.array.update_type);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
@@ -73,7 +79,6 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         String mqttConfigAppStr = SPUtiles.getStringValue(CheckFirmwareUpdateActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
-        rbHostTypeIp.setChecked(true);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -85,60 +90,35 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.getDeviceTopicSwitchState())) {
+                if (topic.equals(mokoDevice.topicPublish)) {
                     mokoDevice.isOnline = true;
-                }
-                if (topic.equals(mokoDevice.getDeviceTopicUpgradeState())) {
                     String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    JsonObject object = new JsonParser().parse(message).getAsJsonObject();
-                    String ota_result = object.get("ota_result").getAsString();
-                    if ("R1".equals(ota_result)) {
-                        ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_success);
-                    } else {
-                        ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_failed);
-                    }
-                    try {
-                        MokoSupport.getInstance().unSubscribe(mokoDevice.getDeviceTopicUpgradeState());
-                    } catch (MqttException e) {
-                        e.printStackTrace();
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OTA_INFO) {
+                        dismissLoadingProgressDialog();
+                        Type infoType = new TypeToken<OTAInfo>() {
+                        }.getType();
+                        OTAInfo otaInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        String ota_result = otaInfo.ota_result;
+                        if ("R1".equals(ota_result)) {
+                            ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_success);
+                        } else {
+                            ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_failed);
+                        }
                     }
                 }
             }
             if (MokoConstants.ACTION_MQTT_SUBSCRIBE.equals(action)) {
                 int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-                if (state == MokoConstants.MQTT_STATE_SUCCESS) {
-                    String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                    if (TextUtils.isEmpty(topic)) {
-                        return;
-                    }
-                    if (topic.equals(mokoDevice.getDeviceTopicUpgradeState())) {
-//                        json.addProperty("type", 0);
-//                        json.addProperty("realm", "23.83.237.116");
-//                        json.addProperty("port", 80);
-//                        json.addProperty("catalogue", "smartplug/20180817/");
-                        JsonObject json = new JsonObject();
-                        json.addProperty("type", rbHostTypeIp.isChecked() ? 0 : 1);
-                        json.addProperty("realm", etHostContent.getText().toString());
-                        json.addProperty("port", Integer.parseInt(etHostPort.getText().toString()));
-                        json.addProperty("catalogue", etHostCatalogue.getText().toString());
-                        MqttMessage message = new MqttMessage();
-                        message.setPayload(json.toString().getBytes());
-                        message.setQos(appMqttConfig.qos);
-                        try {
-                            MokoSupport.getInstance().publish(mokoDevice.getAppTopicUpgrade(), message);
-                        } catch (MqttException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
             }
             if (MokoConstants.ACTION_MQTT_UNSUBSCRIBE.equals(action)) {
                 int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-                dismissLoadingProgressDialog();
             }
             if (AppConstants.ACTION_DEVICE_STATE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.getDeviceTopicSwitchState())) {
+                if (topic.equals(mokoDevice.topicPublish)) {
                     mokoDevice.isOnline = false;
                 }
             }
@@ -165,21 +145,6 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.mqtt_verify_host);
             return;
         }
-        if (rbHostTypeIp.isChecked()) {
-            Pattern pattern = Pattern.compile("((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)");
-            Matcher matcher = pattern.matcher(hostStr);
-            if (!matcher.matches()) {
-                ToastUtils.showToast(this, R.string.mqtt_verify_host);
-                return;
-            }
-        } else {
-            Pattern pattern = Pattern.compile("[a-zA-z]+://[^\\\\s]*");
-            Matcher matcher = pattern.matcher(hostStr);
-            if (!matcher.matches()) {
-                ToastUtils.showToast(this, R.string.mqtt_verify_host);
-                return;
-            }
-        }
         if (!TextUtils.isEmpty(portStr) && Integer.parseInt(portStr) > 65535) {
             ToastUtils.showToast(this, R.string.mqtt_verify_port_empty);
             return;
@@ -190,8 +155,19 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         }
         LogModule.i("升级固件");
         showLoadingProgressDialog(getString(R.string.wait));
+        MsgCommon<SetOTA> msgCommon = new MsgCommon();
+        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_OTA;
+        SetOTA setOTA = new SetOTA();
+        setOTA.file_type = mSelected;
+        setOTA.domain_name = hostStr;
+        setOTA.port = Integer.parseInt(portStr);
+        setOTA.file_way = catalogueStr;
+        msgCommon.data = setOTA;
+        MqttMessage message = new MqttMessage();
+        message.setPayload(new Gson().toJson(msgCommon).getBytes());
+        message.setQos(appMqttConfig.qos);
         try {
-            MokoSupport.getInstance().subscribe(mokoDevice.getDeviceTopicUpgradeState(), appMqttConfig.qos);
+            MokoSupport.getInstance().publish(mokoDevice.topicSubscribe, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -201,5 +177,20 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+    }
+
+    private int mSelected;
+
+    public void updateType(View view) {
+        UpdateTypeDialog dialog = new UpdateTypeDialog();
+        dialog.setSelected(mSelected);
+        dialog.setListener(new UpdateTypeDialog.OnDataSelectedListener() {
+            @Override
+            public void onDataSelected(int selected) {
+                mSelected = selected;
+                tvUpdateType.setText(mUpdateType[mSelected]);
+            }
+        });
+        dialog.show(getSupportFragmentManager());
     }
 }

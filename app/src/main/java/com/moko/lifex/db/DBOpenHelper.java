@@ -7,9 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.moko.support.log.LogModule;
 
 public class DBOpenHelper extends SQLiteOpenHelper {
-    private static final String DB_NAME = "moko_life";
+    private static final String DB_NAME = "moko_lifex";
     // 数据库版本号
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 1;
 
     private Context mContext;
 
@@ -31,20 +31,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         LogModule.i("数据库升级");
         LogModule.i("旧版本:" + oldVersion + ";新版本:" + newVersion);
-        if (oldVersion < 2) {
-            LogModule.i("新增设备类型字段");
-            String sql_upgrade = "ALTER TABLE " + DBConstants.TABLE_NAME_DEVICE + " ADD " + DBConstants.DEVICE_FIELD_TYPE + " TEXT";
-            db.execSQL(sql_upgrade);
-        }
-        if (oldVersion < 3) {
-            LogModule.i("新增开关名称字段");
-            String sql_upgrade1 = "ALTER TABLE " + DBConstants.TABLE_NAME_DEVICE + " ADD " + DBConstants.DEVICE_FIELD_SWITCH_1 + " TEXT";
-            String sql_upgrade2 = "ALTER TABLE " + DBConstants.TABLE_NAME_DEVICE + " ADD " + DBConstants.DEVICE_FIELD_SWITCH_2 + " TEXT";
-            String sql_upgrade3 = "ALTER TABLE " + DBConstants.TABLE_NAME_DEVICE + " ADD " + DBConstants.DEVICE_FIELD_SWITCH_3 + " TEXT";
-            db.execSQL(sql_upgrade1);
-            db.execSQL(sql_upgrade2);
-            db.execSQL(sql_upgrade3);
-        }
     }
 
     /**
@@ -79,7 +65,11 @@ public class DBOpenHelper extends SQLiteOpenHelper {
             + DBConstants.DEVICE_FIELD_SPECIFICATIONS + " TEXT,"
             // 类型
             + DBConstants.DEVICE_FIELD_TYPE + " TEXT,"
-            // MAC
-            + DBConstants.DEVICE_FIELD_MAC + " TEXT);";
+            // 发布主题
+            + DBConstants.DEVICE_FIELD_TOPIC_PUBLISH + " TEXT,"
+            // 订阅主题
+            + DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE + " TEXT,"
+            // 设备唯一标识
+            + DBConstants.DEVICE_FIELD_DEVICE_ID + " TEXT);";
 
 }

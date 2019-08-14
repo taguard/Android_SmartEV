@@ -14,21 +14,24 @@ public class MQTTConfig implements Serializable {
     public String port = "8883";
     public boolean cleanSession = true;
     public int connectMode;
-    public int qos = 2;
+    public int qos = 1;
     public int keepAlive = 60;
     public String clientId = "";
-    public String username = "admin";
-    public String password = "public";
+    public String username = "";
+    public String password = "";
+    public String caPath;
+    public String clientKeyPath;
+    public String clientCertPath;
+    public String topicSubscribe;
+    public String topicPublish;
 
     public boolean isError(Context context) {
         if (context == null) {
-            return isHostError()
+            return TextUtils.isEmpty(host)
                     || TextUtils.isEmpty(port)
-                    || keepAlive == 0
-                    || TextUtils.isEmpty(username)
-                    || TextUtils.isEmpty(password);
+                    || keepAlive == 0;
         } else {
-            if (isHostError()) {
+            if (TextUtils.isEmpty(host)) {
                 ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_host));
                 return true;
             }
@@ -40,47 +43,34 @@ public class MQTTConfig implements Serializable {
                 ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_port));
                 return true;
             }
-            if (keepAlive < 60 || keepAlive > 120) {
+            if (keepAlive < 10 || keepAlive > 120) {
                 ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_keep_alive));
                 return true;
             }
-            if (TextUtils.isEmpty(username)) {
-                ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_username));
-                return true;
-            }
-            if (TextUtils.isEmpty(password)) {
-                ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_password));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isHostError() {
-        if (TextUtils.isEmpty(host)) {
-            return true;
-        }
-//        else {
-//            Pattern pattern = Pattern.compile("((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)");
-//            Matcher matcher = pattern.matcher(host);
-//            Pattern pattern2 = Pattern.compile("[a-zA-z]+://[^\\\\s]*");
-//            Matcher matcher2 = pattern2.matcher(host);
-//            if (!matcher.matches() && !matcher2.matches()) {
+//            if (TextUtils.isEmpty(username)) {
+//                ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_username));
 //                return true;
 //            }
-//        }
+//            if (TextUtils.isEmpty(password)) {
+//                ToastUtils.showToast(context, context.getString(R.string.mqtt_verify_password));
+//                return true;
+//            }
+        }
         return false;
     }
 
     public void reset() {
         host = "";
-        port = "18083";
+        port = "8883";
         cleanSession = true;
         connectMode = 0;
-        qos = 2;
+        qos = 1;
         keepAlive = 60;
         clientId = "";
         username = "";
         password = "";
+        caPath = "";
+        clientKeyPath = "";
+        clientCertPath = "";
     }
 }
