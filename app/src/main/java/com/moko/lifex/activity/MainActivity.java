@@ -310,6 +310,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         LogModule.i("切换开关");
         MsgCommon<SwitchInfo> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SWITCH_STATE;
+        msgCommon.id = device.uniqueId;
         SwitchInfo switchInfo = new SwitchInfo();
         switchInfo.switch_state = device.on_off ? "off" : "on";
         msgCommon.data = switchInfo;

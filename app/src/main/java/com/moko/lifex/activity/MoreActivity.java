@@ -233,6 +233,7 @@ public class MoreActivity extends BaseActivity {
 //        }
         MsgCommon<Object> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_DEVICE_INFO;
+        msgCommon.id = mokoDevice.uniqueId;
         MqttMessage message = new MqttMessage();
         message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);
@@ -309,6 +310,7 @@ public class MoreActivity extends BaseActivity {
                 LogModule.i("重置设备");
                 MsgCommon<Object> msgCommon = new MsgCommon();
                 msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_RESET;
+                msgCommon.id = mokoDevice.uniqueId;
                 MqttMessage message = new MqttMessage();
                 message.setPayload(new Gson().toJson(msgCommon).getBytes());
                 message.setQos(appMqttConfig.qos);

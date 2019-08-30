@@ -158,6 +158,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         showLoadingProgressDialog(getString(R.string.wait));
         MsgCommon<SetOTA> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_OTA;
+        msgCommon.id = mokoDevice.uniqueId;
         SetOTA setOTA = new SetOTA();
         setOTA.file_type = mSelected;
         setOTA.domain_name = hostStr;

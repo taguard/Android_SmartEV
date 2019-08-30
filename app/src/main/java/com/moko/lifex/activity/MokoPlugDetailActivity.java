@@ -108,6 +108,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
                         // 启动设备定时离线，62s收不到应答则认为离线
                         if (!switch_state.equals(mokoDevice.on_off ? "on" : "off")) {
                             mokoDevice.on_off = !mokoDevice.on_off;
+                            changeSwitchState();
                             tvSwitchState.setText(mokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
                         }
                     }
@@ -208,6 +209,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
                 showLoadingProgressDialog(getString(R.string.wait));
                 MsgCommon<SetTimer> msgCommon = new MsgCommon();
                 msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_TIMER;
+                msgCommon.id = mokoDevice.uniqueId;
                 SetTimer setTimer = new SetTimer();
                 setTimer.delay_hour = dialog.getWvHour();
                 setTimer.delay_minute = dialog.getWvMinute();
@@ -274,6 +276,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
         LogModule.i("切换开关");
         MsgCommon<SwitchInfo> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SWITCH_STATE;
+        msgCommon.id = mokoDevice.uniqueId;
         SwitchInfo switchInfo = new SwitchInfo();
         switchInfo.switch_state = mokoDevice.on_off ? "off" : "on";
         msgCommon.data = switchInfo;
