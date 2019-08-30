@@ -161,10 +161,10 @@ public class AddMokoPlugActivity extends BaseActivity {
                             break;
                         case MokoConstants.HEADER_SET_MQTT_INFO:
                             // 判断是哪种连接方式，是否需要发送证书文件
-                            if (mAppMqttConfig.connectMode == 0 || (mAppMqttConfig.connectMode == 1 && TextUtils.isEmpty(mAppMqttConfig.caPath))) {
+                            if (mDeviceMqttConfig.connectMode == 0 || (mDeviceMqttConfig.connectMode == 1 && TextUtils.isEmpty(mDeviceMqttConfig.caPath))) {
                                 sendTopic();
 
-                            } else if (mAppMqttConfig.connectMode == 1) {
+                            } else if (mDeviceMqttConfig.connectMode == 1) {
                                 // 只发送CA证书
                                 sendCA();
                             } else {
@@ -173,7 +173,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                             }
                             break;
                         case MokoConstants.HEADER_SET_MQTT_SSL:
-                            if (mAppMqttConfig.connectMode == 1) {
+                            if (mDeviceMqttConfig.connectMode == 1) {
                                 if (mOffset == mSize || mLen == -1) {
                                     sendTopic();
                                     return;
@@ -242,6 +242,9 @@ public class AddMokoPlugActivity extends BaseActivity {
             if (action.equals(MokoConstants.ACTION_MQTT_RECEIVE)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
                 if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
+                    return;
+                }
+                if (!topic.equals(mDeviceMqttConfig.topicPublish)){
                     return;
                 }
                 if (!isDeviceConnectSuccess) {

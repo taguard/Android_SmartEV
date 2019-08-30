@@ -36,8 +36,10 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -82,33 +84,45 @@ public class MokoService extends Service {
                 connOpts.setAutomaticReconnect(true);
                 connOpts.setCleanSession(mqttConfig.cleanSession);
                 connOpts.setKeepAliveInterval(mqttConfig.keepAlive);
-//                connOpts.setUserName(mqttConfig.username);
-//                connOpts.setPassword(mqttConfig.password.toCharArray());
-                if (TextUtils.isEmpty(mqttConfig.caPath)) {
-                    // 单向不验证
-                    try {
-                        connOpts.setSocketFactory(getAllTMSocketFactory());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    switch (mqttConfig.connectMode) {
-                        case 1:
-                            // 单向验证
-                            try {
-                                connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case 3:
-                            // 双向验证
-                            try {
-                                connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
+                if (!TextUtils.isEmpty(mqttConfig.username)) {
+                    connOpts.setUserName(mqttConfig.username);
+                }
+                if (!TextUtils.isEmpty(mqttConfig.password)) {
+                    connOpts.setPassword(mqttConfig.password.toCharArray());
+                }
+                if (mqttConfig.connectMode > 0) {
+                    if (TextUtils.isEmpty(mqttConfig.caPath)) {
+                        // 单向不验证
+                        try {
+                            connOpts.setSocketFactory(getAllTMSocketFactory());
+                            connOpts.setSSLHostnameVerifier(new HostnameVerifier() {
+                                @Override
+                                public boolean verify(String hostname, SSLSession session) {
+                                    return true;
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        switch (mqttConfig.connectMode) {
+                            case 1:
+                                // 单向验证
+                                try {
+                                    connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            case 3:
+                                // 双向验证
+                                try {
+                                    connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                        }
                     }
                 }
                 try {
