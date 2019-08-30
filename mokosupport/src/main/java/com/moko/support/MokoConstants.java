@@ -8,6 +8,7 @@ public class MokoConstants {
     public static final int HEADER_SET_TOPIC = 4004;
     public static final int HEADER_SET_SWITCH_STATUS = 4005;
     public static final int HEADER_SET_WIFI_INFO = 4006;
+    public static final int HEADER_SET_DEVICE_ID = 4007;
     // device_to_app
     public static final int MSG_ID_D_2_A_SWITCH_STATE = 1001;
     public static final int MSG_ID_D_2_A_DEVICE_INFO = 1002;

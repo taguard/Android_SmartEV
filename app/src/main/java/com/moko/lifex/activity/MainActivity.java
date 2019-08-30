@@ -144,8 +144,11 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                 }
 //                if (topic.contains(MokoDevice.DEVICE_TOPIC_SWITCH_STATE)) {
 //                    JsonObject object = new JsonParser().parse(receive).getAsJsonObject();
+                Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                }.getType();
+                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
                 for (final MokoDevice device : devices) {
-                    if (device.topicPublish.equals(topic)) {
+                    if (device.uniqueId.equals(msgCommon.id)) {
                         device.isOnline = true;
                         if (mHandler.hasMessages(device.id)) {
                             mHandler.removeMessages(device.id);
@@ -165,9 +168,6 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                         message.what = device.id;
                         mHandler.sendMessageDelayed(message, 62 * 1000);
                         if (device.function.equals("iot_plug")) {
-                            Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                            }.getType();
-                            MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
                             if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
                                 Type infoType = new TypeToken<SwitchInfo>() {
                                 }.getType();

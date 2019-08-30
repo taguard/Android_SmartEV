@@ -90,11 +90,11 @@ public class MoreActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.topicPublish)) {
-                    String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                    }.getType();
-                    MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
+                Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                }.getType();
+                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                if (mokoDevice.uniqueId.equals(msgCommon.id)) {
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_DEVICE_INFO) {
                         dismissLoadingProgressDialog();
                         Type infoType = new TypeToken<DeviceInfo>() {

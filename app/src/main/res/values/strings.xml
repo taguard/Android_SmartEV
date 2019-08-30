@@ -51,11 +51,13 @@
     <string name="mqtt_qos">Qos</string>
     <string name="mqtt_keep_alive">Keep Alive</string>
     <string name="mqtt_client_id">Client Id</string>
+    <string name="mqtt_device_id">Device Id</string>
     <string name="mqtt_topic_subscribe">Subscribed Topic</string>
     <string name="mqtt_topic_publish">Published Topic</string>
     <string name="mqtt_username">Username</string>
     <string name="mqtt_Password">Password</string>
     <string name="mqtt_verify_client_id_empty">ClientId error</string>
+    <string name="mqtt_verify_device_id_empty">DeivceId error</string>
     <string name="mqtt_verify_host">Host error</string>
     <string name="mqtt_verify_port">Port range : 0~65535</string>
     <string name="mqtt_verify_port_empty">Port error</string>

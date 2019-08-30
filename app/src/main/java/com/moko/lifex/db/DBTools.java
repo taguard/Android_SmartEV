@@ -37,6 +37,7 @@ public class DBTools {
         cv.put(DBConstants.DEVICE_FIELD_SWITCH_3, mokoDevice.switchName3);
         cv.put(DBConstants.DEVICE_FIELD_SPECIFICATIONS, mokoDevice.specifications);
         cv.put(DBConstants.DEVICE_FIELD_DEVICE_ID, mokoDevice.deviceId);
+        cv.put(DBConstants.DEVICE_FIELD_UNIQUE_ID, mokoDevice.uniqueId);
         cv.put(DBConstants.DEVICE_FIELD_TYPE, mokoDevice.type);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_PUBLISH, mokoDevice.topicPublish);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE, mokoDevice.topicSubscribe);
@@ -68,6 +69,8 @@ public class DBTools {
                     .getColumnIndex(DBConstants.DEVICE_FIELD_SPECIFICATIONS));
             mokoDevice.deviceId = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_DEVICE_ID));
+            mokoDevice.uniqueId = cursor.getString(cursor
+                    .getColumnIndex(DBConstants.DEVICE_FIELD_UNIQUE_ID));
             mokoDevice.type = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_TYPE));
             mokoDevice.topicPublish = cursor.getString(cursor
@@ -102,6 +105,8 @@ public class DBTools {
                     .getColumnIndex(DBConstants.DEVICE_FIELD_SPECIFICATIONS));
             mokoDevice.deviceId = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_DEVICE_ID));
+            mokoDevice.uniqueId = cursor.getString(cursor
+                    .getColumnIndex(DBConstants.DEVICE_FIELD_UNIQUE_ID));
             mokoDevice.type = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_TYPE));
             mokoDevice.topicPublish = cursor.getString(cursor

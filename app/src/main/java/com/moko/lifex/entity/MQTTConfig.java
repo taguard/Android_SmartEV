@@ -17,6 +17,7 @@ public class MQTTConfig implements Serializable {
     public int qos = 1;
     public int keepAlive = 60;
     public String clientId = "";
+    public String uniqueId = "";
     public String username = "";
     public String password = "";
     public String caPath;

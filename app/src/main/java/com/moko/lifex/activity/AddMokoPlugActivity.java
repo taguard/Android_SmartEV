@@ -208,6 +208,9 @@ public class AddMokoPlugActivity extends BaseActivity {
                             }
                             break;
                         case MokoConstants.HEADER_SET_TOPIC:
+                            sendDeviceId();
+                            break;
+                        case MokoConstants.HEADER_SET_DEVICE_ID:
                             sendWIFI();
                             break;
                         case MokoConstants.HEADER_SET_WIFI_INFO:
@@ -244,7 +247,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                 if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
                     return;
                 }
-                if (!topic.equals(mDeviceMqttConfig.topicPublish)){
+                if (!topic.equals(mDeviceMqttConfig.topicPublish)) {
                     return;
                 }
                 if (!isDeviceConnectSuccess) {
@@ -268,6 +271,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                                 mokoDevice.type = mDeviceResult.device_type;
                                 mokoDevice.topicSubscribe = mDeviceMqttConfig.topicSubscribe;
                                 mokoDevice.topicPublish = mDeviceMqttConfig.topicPublish;
+                                mokoDevice.uniqueId = mDeviceMqttConfig.uniqueId;
                                 DBTools.getInstance(AddMokoPlugActivity.this).insertDevice(mokoDevice);
                             } else {
                                 mokoDevice.name = mDeviceResult.device_name;
@@ -286,6 +290,19 @@ public class AddMokoPlugActivity extends BaseActivity {
             }
         }
     };
+
+    private void sendDeviceId() {
+        // 获取MQTT信息，设置DeviceId
+        final JsonObject deviceId = new JsonObject();
+        deviceId.addProperty("header", MokoConstants.HEADER_SET_DEVICE_ID);
+        deviceId.addProperty("id", mDeviceMqttConfig.uniqueId);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mService.sendMessage(deviceId.toString());
+            }
+        }).start();
+    }
 
     private void sendWIFI() {
         // 获取MQTT信息，设置WIFI信息

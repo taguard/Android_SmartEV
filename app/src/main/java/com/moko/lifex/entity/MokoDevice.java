@@ -29,6 +29,7 @@ public class MokoDevice implements Serializable {
     public String function;
     public String specifications;
     public String deviceId;
+    public String uniqueId;
     public String type;
     public boolean on_off;
     public String company_name;

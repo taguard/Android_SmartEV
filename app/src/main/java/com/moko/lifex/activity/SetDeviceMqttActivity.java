@@ -24,7 +24,6 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.dialog.KeepAliveDialog;
 import com.moko.lifex.entity.MQTTConfig;
-import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.fragment.OnewaySSLFragment;
 import com.moko.lifex.fragment.TwowaySSLFragment;
 import com.moko.lifex.utils.SPUtiles;
@@ -58,6 +57,8 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
     TextView tvKeepAlive;
     @Bind(R.id.et_mqtt_client_id)
     EditText etMqttClientId;
+    @Bind(R.id.et_mqtt_device_id)
+    EditText etMqttDeviceId;
     @Bind(R.id.rb_conn_mode_tcp)
     RadioButton rbConnModeTcp;
     @Bind(R.id.rb_conn_mode_ssl_oneway)
@@ -164,6 +165,7 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
         }
         tvKeepAlive.setText(mqttConfig.keepAlive + "");
         etMqttClientId.setText(mqttConfig.clientId);
+        etMqttDeviceId.setText(mqttConfig.uniqueId);
         etMqttUsername.setText(mqttConfig.username);
         etMqttPassword.setText(mqttConfig.password);
     }
@@ -226,6 +228,7 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
         mqttConfig.host = etMqttHost.getText().toString().replaceAll(" ", "");
         mqttConfig.port = etMqttPort.getText().toString();
         mqttConfig.clientId = etMqttClientId.getText().toString().replaceAll(" ", "");
+        mqttConfig.uniqueId = etMqttDeviceId.getText().toString().replaceAll(" ", "");
         mqttConfig.username = etMqttUsername.getText().toString().replaceAll(" ", "");
         mqttConfig.password = etMqttPassword.getText().toString().replaceAll(" ", "");
         if (mqttConfig.isError(this)) {
@@ -234,6 +237,11 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
         String clientId = etMqttClientId.getText().toString();
         if (TextUtils.isEmpty(clientId)) {
             ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_id_empty));
+            return;
+        }
+        String deviceId = etMqttDeviceId.getText().toString();
+        if (TextUtils.isEmpty(deviceId)) {
+            ToastUtils.showToast(this, getString(R.string.mqtt_verify_device_id_empty));
             return;
         }
         if (rbConnModeSslOneway.isChecked()) {

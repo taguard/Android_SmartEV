@@ -94,12 +94,12 @@ public class MokoPlugDetailActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.topicPublish)) {
+                String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
+                Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                }.getType();
+                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                if (mokoDevice.uniqueId.equals(msgCommon.id)) {
                     mokoDevice.isOnline = true;
-                    String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                    }.getType();
-                    MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
                         Type infoType = new TypeToken<SwitchInfo>() {
                         }.getType();

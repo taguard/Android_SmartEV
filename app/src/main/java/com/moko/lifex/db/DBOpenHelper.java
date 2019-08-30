@@ -69,6 +69,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
             + DBConstants.DEVICE_FIELD_TOPIC_PUBLISH + " TEXT,"
             // 订阅主题
             + DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE + " TEXT,"
+            // 唯一标识
+            + DBConstants.DEVICE_FIELD_UNIQUE_ID + " TEXT,"
             // 设备唯一标识
             + DBConstants.DEVICE_FIELD_DEVICE_ID + " TEXT);";
 
