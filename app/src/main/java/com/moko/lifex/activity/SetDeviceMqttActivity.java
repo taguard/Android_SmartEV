@@ -112,6 +112,8 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
             mqttConfig.caPath = "";
             mqttConfig.clientKeyPath = "";
             mqttConfig.clientCertPath = "";
+            mqttConfig.topicPublish = "";
+            mqttConfig.topicSubscribe = "";
         }
         fragmentManager = getFragmentManager();
         createFragment();
@@ -231,6 +233,8 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
         mqttConfig.uniqueId = etMqttDeviceId.getText().toString().replaceAll(" ", "");
         mqttConfig.username = etMqttUsername.getText().toString().replaceAll(" ", "");
         mqttConfig.password = etMqttPassword.getText().toString().replaceAll(" ", "");
+        mqttConfig.topicSubscribe = etTopicSubscribe.getText().toString().replaceAll(" ", "");
+        mqttConfig.topicPublish = etTopicPublish.getText().toString().replaceAll(" ", "");
         if (mqttConfig.isError(this)) {
             return;
         }
@@ -249,10 +253,10 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
         }
         if (rbConnModeSslTwoway.isChecked()) {
             mqttConfig.caPath = twowaySSLFragment.getCAFilePath();
-            if (TextUtils.isEmpty(mqttConfig.caPath)) {
-                ToastUtils.showToast(this, getString(R.string.mqtt_verify_ca));
-                return;
-            }
+//            if (TextUtils.isEmpty(mqttConfig.caPath)) {
+//                ToastUtils.showToast(this, getString(R.string.mqtt_verify_ca));
+//                return;
+//            }
             mqttConfig.clientKeyPath = twowaySSLFragment.getClientKeyPath();
             if (TextUtils.isEmpty(mqttConfig.clientKeyPath)) {
                 ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_key));

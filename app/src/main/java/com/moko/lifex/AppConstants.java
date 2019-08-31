@@ -10,6 +10,7 @@ public class AppConstants {
     // action
     public static final String ACTION_FINISH_ACTIVITY = "com.moko.lifex.action.finishActivity";
     public static final String ACTION_MODIFY_NAME = "com.moko.lifex.action.ACTION_MODIFY_NAME";
+    public static final String ACTION_DELETE_DEVICE = "com.moko.lifex.action.ACTION_DELETE_DEVICE";
     public static final String ACTION_DEVICE_STATE = "com.moko.lifex.action.ACTION_DEVICE_STATE";
     // sp
     public static final String SP_NAME = "sp_name_life";
@@ -28,6 +29,7 @@ public class AppConstants {
     public static final String EXTRA_KEY_TEMP_MINUTE = "EXTRA_KEY_TEMP_MINUTE";
     public static final String EXTRA_KEY_FROM_ACTIVITY = "EXTRA_KEY_FROM_ACTIVITY";
     public static final String EXTRA_KEY_DEVICE= "EXTRA_KEY_DEVICE";
+    public static final String EXTRA_DELETE_DEVICE_ID = "EXTRA_DELETE_DEVICE_ID";
     // request_code
     public static final int REQUEST_CODE_TEMP_TARGET = 100;
     public static final int REQUEST_CODE_TIMER = 101;

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
@@ -29,6 +30,7 @@ import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.CustomDialog;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
+import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.lifex.utils.Utils;
@@ -45,6 +47,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -161,7 +164,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                             break;
                         case MokoConstants.HEADER_SET_MQTT_INFO:
                             // 判断是哪种连接方式，是否需要发送证书文件
-                            if (mDeviceMqttConfig.connectMode == 0 || (mDeviceMqttConfig.connectMode == 1 && TextUtils.isEmpty(mDeviceMqttConfig.caPath))) {
+                            if (mDeviceMqttConfig.connectMode == 0 || (mDeviceMqttConfig.connectMode > 0 && TextUtils.isEmpty(mDeviceMqttConfig.caPath))) {
                                 sendTopic();
 
                             } else if (mDeviceMqttConfig.connectMode == 1) {
@@ -233,7 +236,9 @@ public class AddMokoPlugActivity extends BaseActivity {
 //                    String topicElectricityInfo = mTopicPre + "electricity_information";
                     // 订阅
                     try {
-                        MokoSupport.getInstance().subscribe(mDeviceMqttConfig.topicPublish, mAppMqttConfig.qos);
+                        if (TextUtils.isEmpty(mAppMqttConfig.topicSubscribe)) {
+                            MokoSupport.getInstance().subscribe(mDeviceMqttConfig.topicPublish, mAppMqttConfig.qos);
+                        }
 //                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
 //                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
 //                        MokoSupport.getInstance().subscribe(topicElectricityInfo, mAppMqttConfig.qos);
@@ -244,10 +249,14 @@ public class AddMokoPlugActivity extends BaseActivity {
             }
             if (action.equals(MokoConstants.ACTION_MQTT_RECEIVE)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
+                String receive = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
                 if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
                     return;
                 }
-                if (!topic.equals(mDeviceMqttConfig.topicPublish)) {
+                Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                }.getType();
+                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
+                if (!mDeviceMqttConfig.uniqueId.equals(msgCommon.id)) {
                     return;
                 }
                 if (!isDeviceConnectSuccess) {

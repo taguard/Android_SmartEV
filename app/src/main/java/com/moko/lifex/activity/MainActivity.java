@@ -83,6 +83,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
         filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
         filter.addAction(AppConstants.ACTION_MODIFY_NAME);
+        filter.addAction(AppConstants.ACTION_DELETE_DEVICE);
         registerReceiver(mReceiver, filter);
         startService(new Intent(this, MokoService.class));
     }
@@ -108,16 +109,26 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
 //                    } catch (MqttException e) {
 //                        e.printStackTrace();
 //                    }
+                    String mqttConfigAppStr = SPUtiles.getStringValue(MainActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+                    MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+                    // 订阅
+                    try {
+                        if (!TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
+                            MokoSupport.getInstance().subscribe(appMqttConfig.topicSubscribe, appMqttConfig.qos);
+                        }
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
                     if (devices.isEmpty()) {
                         return;
                     }
                     for (MokoDevice device : devices) {
-                        String mqttConfigAppStr = SPUtiles.getStringValue(MainActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-                        MQTTConfig appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
                         // 订阅
 //                        for (String topic : device.getDeviceTopics()) {
                         try {
-                            MokoSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+                            if (TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
+                                MokoSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+                            }
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }
@@ -215,6 +226,12 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                 devices.clear();
                 devices.addAll(DBTools.getInstance(MainActivity.this).selectAllDevice());
                 adapter.notifyDataSetChanged();
+            }
+            if (AppConstants.ACTION_DELETE_DEVICE.equals(action)) {
+                int id = intent.getIntExtra(AppConstants.EXTRA_DELETE_DEVICE_ID,-1);
+                if (id > 0 && mHandler.hasMessages(id)) {
+                    mHandler.removeMessages(id);
+                }
             }
         }
     };
@@ -321,8 +338,14 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         MqttMessage message = new MqttMessage();
         message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = device.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
         try {
-            MokoSupport.getInstance().publish(device.topicSubscribe, message);
+            MokoSupport.getInstance().publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }

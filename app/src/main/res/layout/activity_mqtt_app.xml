@@ -57,8 +57,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="40dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="40dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -373,6 +373,85 @@
                     android:layout_below="@id/rg_conn_mode">
 
                 </FrameLayout>
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="21dp"
+                android:paddingTop="5dp"
+                android:paddingRight="21dp"
+                android:paddingBottom="5dp"
+                android:text="@string/mqtt_topic_tips"
+                android:textColor="@color/black_333333"
+                android:textSize="14sp" />
+
+
+            <RelativeLayout
+                android:id="@+id/rl_topic_subscribe"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingLeft="21dp"
+                android:paddingTop="5dp"
+                android:paddingRight="21dp"
+                android:paddingBottom="5dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/mqtt_topic_subscribe"
+                    android:textColor="@color/black_333333"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/et_topic_subscribe"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="150dp"
+                    android:background="@drawable/shape_corner_btn_bg_white"
+                    android:maxLength="64"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textColor="@color/black_333333"
+                    android:textSize="18sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_topic_publish"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingLeft="21dp"
+                android:paddingTop="5dp"
+                android:paddingRight="21dp"
+                android:paddingBottom="5dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="@string/mqtt_topic_publish"
+                    android:textColor="@color/black_333333"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/et_topic_publish"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="150dp"
+                    android:background="@drawable/shape_corner_btn_bg_white"
+                    android:maxLength="64"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textColor="@color/black_333333"
+                    android:textSize="18sp" />
             </RelativeLayout>
 
             <TextView

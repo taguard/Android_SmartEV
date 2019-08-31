@@ -45,6 +45,7 @@
     <string name="mqtt_port">Port</string>
     <string name="mqtt_clean_session">Clean Session</string>
     <string name="mqtt_connct_mode">Connect Mode</string>
+    <string name="mqtt_topic_tips">Note：Input your  topic to communicate with the device or set the topic to empty.</string>
     <string name="mqtt_connct_mode_tcp">TCP</string>
     <string name="mqtt_connct_mode_ssl_one_way">One-way SSL</string>
     <string name="mqtt_connct_mode_ssl_two_way">Two-way SSL</string>
@@ -147,6 +148,8 @@
     <string name="permission_location_close_content">Please find it in cellphone setting- permission, and allow MokoLifeX use the Location and Storage permission</string>
     <string name="permission_location_need_title">Turn on Location permission</string>
     <string name="permission_location_need_content">After that, MokoLifeX could search the wifi</string>
+    <string name="mqtt_app_username"><![CDATA[iot_plug_https_test_app&a1iOTRs8KwG]]></string>
+    <string name="mqtt_device_username"><![CDATA[iot_plug_https_test_device1&a1iOTRs8KwG]]></string>
 
     <string-array name="update_type">
         <item>Firmware</item>

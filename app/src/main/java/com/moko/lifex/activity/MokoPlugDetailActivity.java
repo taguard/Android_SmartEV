@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -222,8 +223,14 @@ public class MokoPlugDetailActivity extends BaseActivity {
                 MqttMessage message = new MqttMessage();
                 message.setPayload(new Gson().toJson(msgCommon).getBytes());
                 message.setQos(appMqttConfig.qos);
+                String appTopic;
+                if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+                    appTopic = mokoDevice.topicSubscribe;
+                } else {
+                    appTopic = appMqttConfig.topicPublish;
+                }
                 try {
-                    MokoSupport.getInstance().publish(mokoDevice.topicSubscribe, message);
+                    MokoSupport.getInstance().publish(appTopic, message);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -287,8 +294,14 @@ public class MokoPlugDetailActivity extends BaseActivity {
         MqttMessage message = new MqttMessage();
         message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = mokoDevice.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
         try {
-            MokoSupport.getInstance().publish(mokoDevice.topicSubscribe, message);
+            MokoSupport.getInstance().publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }

@@ -10,8 +10,8 @@ import com.moko.lifex.utils.ToastUtils;
 import java.io.Serializable;
 
 public class MQTTConfig implements Serializable {
-    public String host = "a1fhygr0xxahcm-ats.iot.us-west-2.amazonaws.com";
-    public String port = "8883";
+    public String host = "";
+    public String port = "1883";
     public boolean cleanSession = true;
     public int connectMode;
     public int qos = 1;
@@ -62,7 +62,7 @@ public class MQTTConfig implements Serializable {
 
     public void reset() {
         host = "";
-        port = "8883";
+        port = "1883";
         cleanSession = true;
         connectMode = 0;
         qos = 1;
@@ -73,5 +73,7 @@ public class MQTTConfig implements Serializable {
         caPath = "";
         clientKeyPath = "";
         clientCertPath = "";
+        topicSubscribe = "";
+        topicPublish = "";
     }
 }

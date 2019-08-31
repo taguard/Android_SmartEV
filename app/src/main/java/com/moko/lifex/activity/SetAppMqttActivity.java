@@ -71,6 +71,10 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
     RadioGroup rgConnMode;
     @Bind(R.id.frame_connect_mode)
     FrameLayout frameConnectMode;
+    @Bind(R.id.et_topic_subscribe)
+    EditText etTopicSubscribe;
+    @Bind(R.id.et_topic_publish)
+    EditText etTopicPublish;
 
     private FragmentManager fragmentManager;
     private OnewaySSLFragment onewaySSLFragment;
@@ -148,6 +152,8 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
         etMqttClientId.setText(mqttConfig.clientId);
         etMqttUsername.setText(mqttConfig.username);
         etMqttPassword.setText(mqttConfig.password);
+        etTopicSubscribe.setText(mqttConfig.topicSubscribe);
+        etTopicPublish.setText(mqttConfig.topicPublish);
     }
 
     public void back(View view) {
@@ -210,6 +216,8 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
         mqttConfig.clientId = etMqttClientId.getText().toString().replaceAll(" ", "");
         mqttConfig.username = etMqttUsername.getText().toString().replaceAll(" ", "");
         mqttConfig.password = etMqttPassword.getText().toString().replaceAll(" ", "");
+        mqttConfig.topicSubscribe = etTopicSubscribe.getText().toString().replaceAll(" ", "");
+        mqttConfig.topicPublish = etTopicPublish.getText().toString().replaceAll(" ", "");
         if (mqttConfig.isError(this)) {
             return;
         }
@@ -223,10 +231,10 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
         }
         if (rbConnModeSslTwoway.isChecked()) {
             mqttConfig.caPath = twowaySSLFragment.getCAFilePath();
-            if (TextUtils.isEmpty(mqttConfig.caPath)) {
-                ToastUtils.showToast(this, getString(R.string.mqtt_verify_ca));
-                return;
-            }
+//            if (TextUtils.isEmpty(mqttConfig.caPath)) {
+//                ToastUtils.showToast(this, getString(R.string.mqtt_verify_ca));
+//                return;
+//            }
             mqttConfig.clientKeyPath = twowaySSLFragment.getClientKeyPath();
             if (TextUtils.isEmpty(mqttConfig.clientKeyPath)) {
                 ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_key));
