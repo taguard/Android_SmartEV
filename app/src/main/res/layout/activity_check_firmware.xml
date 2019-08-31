@@ -90,7 +90,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:singleLine="true"
-            android:text="23.83.237.116"
+            android:text=""
             android:textColor="@color/black_333333"
             android:textSize="15sp" />
     </RelativeLayout>
@@ -121,7 +121,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:singleLine="true"
-            android:text="80"
+            android:text=""
             android:textColor="@color/black_333333"
             android:textSize="15sp" />
     </RelativeLayout>
@@ -150,7 +150,7 @@
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:singleLine="true"
-            android:text="smartplug/20180623/"
+            android:text=""
             android:textColor="@color/black_333333"
             android:textSize="15sp" />
     </RelativeLayout>
