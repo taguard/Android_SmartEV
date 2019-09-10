@@ -86,7 +86,6 @@ public class PowerStatusActivity extends BaseActivity {
                         return;
                     }
                     showLoadingProgressDialog(getString(R.string.wait));
-                    LogModule.i("设置上电状态");
                     switch (checkedId) {
                         case R.id.rb_switch_off:
                             setPowerStatus(0);
@@ -123,6 +122,7 @@ public class PowerStatusActivity extends BaseActivity {
         msgCommon.id = mokoDevice.uniqueId;
         PowerStatus powerStatus = new PowerStatus();
         powerStatus.switch_state = status;
+        msgCommon.data = powerStatus;
         MqttMessage message = new MqttMessage();
         message.setPayload(new Gson().toJson(msgCommon).getBytes());
         message.setQos(appMqttConfig.qos);

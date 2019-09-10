@@ -91,6 +91,7 @@
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.PowerStatusActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
