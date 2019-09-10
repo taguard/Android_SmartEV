@@ -16,12 +16,15 @@ public class MokoConstants {
     public static final int MSG_ID_D_2_A_OTA_INFO = 1004;
     public static final int MSG_ID_D_2_A_DELETE = 1005;
     public static final int MSG_ID_D_2_A_POWER_INFO = 1006;
+    public static final int MSG_ID_D_2_A_POWER_STATUS = 1008;
     // app_to_device
     public static final int MSG_ID_A_2_D_SWITCH_STATE = 2001;
     public static final int MSG_ID_A_2_D_SET_TIMER = 2002;
     public static final int MSG_ID_A_2_D_RESET = 2003;
     public static final int MSG_ID_A_2_D_SET_OTA = 2004;
     public static final int MSG_ID_A_2_D_DEVICE_INFO = 2005;
+    public static final int MSG_ID_A_2_D_SET_POWER_STATUS = 2006;
+    public static final int MSG_ID_A_2_D_GET_POWER_STATUS = 2007;
     // response
     public static final int RESPONSE_SUCCESS = 0;
     public static final int RESPONSE_FAILED_LENGTH = 1;

@@ -288,6 +288,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                                 // TODO: 2019/8/14 设备不再传给app，由app区分
                                 mokoDevice.function = function;
                                 mokoDevice.type = mDeviceResult.device_type;
+                                mokoDevice.uniqueId = mDeviceMqttConfig.uniqueId;
                                 DBTools.getInstance(AddMokoPlugActivity.this).updateDevice(mokoDevice);
                             }
                             Intent modifyIntent = new Intent(AddMokoPlugActivity.this, ModifyNameActivity.class);

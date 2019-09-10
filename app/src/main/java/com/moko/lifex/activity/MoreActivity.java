@@ -29,6 +29,7 @@ import com.moko.lifex.entity.DeviceInfo;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.PowerStatus;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
@@ -117,6 +118,16 @@ public class MoreActivity extends BaseActivity {
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
                         mokoDevice.isOnline = true;
 
+                    }
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_STATUS) {
+                        dismissLoadingProgressDialog();
+                        Type statusType = new TypeToken<PowerStatus>() {
+                        }.getType();
+                        PowerStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
+                        Intent i = new Intent(MoreActivity.this, PowerStatusActivity.class);
+                        i.putExtra(AppConstants.EXTRA_KEY_POWER_STATUS, powerStatus.switch_state);
+                        i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
+                        startActivity(i);
                     }
                 }
             }
@@ -372,6 +383,42 @@ public class MoreActivity extends BaseActivity {
             //调用系统输入法
             InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             inputManager.showSoftInput(editText, 0);
+        }
+    }
+
+    public void modifyPowerStatus(View view) {
+        if (!MokoSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        if (!mokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        showLoadingProgressDialog(getString(R.string.wait));
+        LogModule.i("读取上电状态");
+//        try {
+//            MokoSupport.getInstance().subscribe(mokoDevice.getDeviceTopicFirmwareInfo(), appMqttConfig.qos);
+//        } catch (MqttException e) {
+//            e.printStackTrace();
+//        }
+        MsgCommon<Object> msgCommon = new MsgCommon();
+        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_GET_POWER_STATUS;
+        msgCommon.id = mokoDevice.uniqueId;
+        MqttMessage message = new MqttMessage();
+        message.setPayload(new Gson().toJson(msgCommon).getBytes());
+        message.setQos(appMqttConfig.qos);
+        publishTopic = 3;
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = mokoDevice.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
+        try {
+            MokoSupport.getInstance().publish(appTopic, message);
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
     }
 }

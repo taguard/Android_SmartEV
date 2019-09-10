@@ -30,6 +30,7 @@ public class AppConstants {
     public static final String EXTRA_KEY_FROM_ACTIVITY = "EXTRA_KEY_FROM_ACTIVITY";
     public static final String EXTRA_KEY_DEVICE= "EXTRA_KEY_DEVICE";
     public static final String EXTRA_DELETE_DEVICE_ID = "EXTRA_DELETE_DEVICE_ID";
+    public static final String EXTRA_KEY_POWER_STATUS = "EXTRA_KEY_POWER_STATUS";
     // request_code
     public static final int REQUEST_CODE_TEMP_TARGET = 100;
     public static final int REQUEST_CODE_TIMER = 101;
