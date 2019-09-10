@@ -175,7 +175,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text="@string/mqtt_device_username"
+                    android:text=""
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -207,7 +207,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text="66078C40207A5ABFA1EC1E529945DCA6F3A77943"
+                    android:text=""
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -304,7 +304,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text="00002|securemode=3,signmethod=hmacsha1|"
+                    android:text=""
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -435,7 +435,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text="/a1iOTRs8KwG/iot_plug_https_test_device1/user/communication"
+                    android:text="{device_name}/{device_id}/app_to_device"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -468,7 +468,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text="/a1iOTRs8KwG/iot_plug_https_test_device1/user/communication"
+                    android:text="{device_name}/{device_id}/device_to_app"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
