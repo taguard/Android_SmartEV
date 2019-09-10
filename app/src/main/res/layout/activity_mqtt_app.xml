@@ -87,7 +87,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="a1iOTRs8KwG.iot-as-mqtt.cn-shanghai.aliyuncs.com"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -125,7 +125,7 @@
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="1883"
                         android:textColor="@color/black_333333"
                         android:textSize="18sp" />
                 </RelativeLayout>
@@ -175,7 +175,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="@string/mqtt_app_username"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -207,7 +207,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="E23048C56CB9F86A58A750BA6FFC802B06774F15"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -304,7 +304,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="00001|securemode=3,signmethod=hmacsha1|"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -416,7 +416,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="/a1iOTRs8KwG/iot_plug_https_test_app/user/communication"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
@@ -449,7 +449,7 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
-                    android:text=""
+                    android:text="/a1iOTRs8KwG/iot_plug_https_test_app/user/communication"
                     android:textColor="@color/black_333333"
                     android:textSize="18sp" />
             </RelativeLayout>
