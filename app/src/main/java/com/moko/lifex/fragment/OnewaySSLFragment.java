@@ -5,10 +5,13 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelUuid;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.moko.lifex.AppConstants;
@@ -30,6 +33,8 @@ public class OnewaySSLFragment extends Fragment {
     private static final String TAG = OnewaySSLFragment.class.getSimpleName();
     @Bind(R.id.tv_ca_file)
     TextView tvCaFile;
+    @Bind(R.id.iv_delete)
+    ImageView ivDelete;
 
 
     private BaseActivity activity;
@@ -57,6 +62,9 @@ public class OnewaySSLFragment extends Fragment {
         ButterKnife.bind(this, view);
         activity = (BaseActivity) getActivity();
         tvCaFile.setText(caFile);
+        if (!TextUtils.isEmpty(caFile)) {
+            ivDelete.setVisibility(View.VISIBLE);
+        }
         return view;
     }
 
@@ -85,7 +93,7 @@ public class OnewaySSLFragment extends Fragment {
         super.onDestroy();
     }
 
-    @OnClick({R.id.iv_select_ca_file})
+    @OnClick({R.id.iv_select_ca_file,R.id.iv_delete})
     public void onViewClicked(View v) {
         switch (v.getId()) {
             case R.id.iv_select_ca_file:
@@ -98,6 +106,10 @@ public class OnewaySSLFragment extends Fragment {
                 } catch (ActivityNotFoundException ex) {
                     ToastUtils.showToast(activity, "install file manager app");
                 }
+                break;
+            case R.id.iv_delete:
+                tvCaFile.setText("");
+                ivDelete.setVisibility(View.GONE);
                 break;
         }
     }
@@ -115,6 +127,7 @@ public class OnewaySSLFragment extends Fragment {
                     final File firmwareFile = new File(firmwareFilePath);
                     if (firmwareFile.exists()) {
                         tvCaFile.setText(firmwareFilePath);
+                        ivDelete.setVisibility(View.VISIBLE);
                     } else {
                         ToastUtils.showToast(activity, "file is not exists!");
                     }

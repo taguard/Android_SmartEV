@@ -5,10 +5,12 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.moko.lifex.AppConstants;
@@ -33,6 +35,8 @@ public class TwowaySSLFragment extends Fragment {
     TextView tvClientKeyFile;
     @Bind(R.id.tv_client_cert_file)
     TextView tvClientCertFile;
+    @Bind(R.id.iv_delete)
+    ImageView ivDelete;
 
 
     private BaseActivity activity;
@@ -60,6 +64,9 @@ public class TwowaySSLFragment extends Fragment {
         ButterKnife.bind(this, view);
         activity = (BaseActivity) getActivity();
         tvCaFile.setText(caFile);
+        if (!TextUtils.isEmpty(caFile)) {
+            ivDelete.setVisibility(View.VISIBLE);
+        }
         tvClientKeyFile.setText(clientKeyFile);
         tvClientCertFile.setText(clientCertFile);
         return view;
@@ -90,7 +97,7 @@ public class TwowaySSLFragment extends Fragment {
         super.onDestroy();
     }
 
-    @OnClick({R.id.iv_select_ca_file, R.id.iv_select_client_key_file, R.id.iv_select_client_cert_file})
+    @OnClick({R.id.iv_select_ca_file, R.id.iv_select_client_key_file, R.id.iv_select_client_cert_file, R.id.iv_delete})
     public void onViewClicked(View v) {
         switch (v.getId()) {
             case R.id.iv_select_ca_file:
@@ -126,6 +133,10 @@ public class TwowaySSLFragment extends Fragment {
                     ToastUtils.showToast(activity, "install file manager app");
                 }
                 break;
+            case R.id.iv_delete:
+                tvCaFile.setText("");
+                ivDelete.setVisibility(View.GONE);
+                break;
         }
     }
 
@@ -142,6 +153,7 @@ public class TwowaySSLFragment extends Fragment {
                     final File firmwareFile = new File(firmwareFilePath);
                     if (firmwareFile.exists()) {
                         tvCaFile.setText(firmwareFilePath);
+                        ivDelete.setVisibility(View.VISIBLE);
                     } else {
                         ToastUtils.showToast(activity, "file is not exists!");
                     }

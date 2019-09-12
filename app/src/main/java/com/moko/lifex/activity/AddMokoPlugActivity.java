@@ -259,6 +259,8 @@ public class AddMokoPlugActivity extends BaseActivity {
                 if (!mDeviceMqttConfig.uniqueId.equals(msgCommon.id)) {
                     return;
                 }
+                if (donutProgress == null)
+                    return;
                 if (!isDeviceConnectSuccess) {
                     isDeviceConnectSuccess = true;
                     donutProgress.setProgress(100);
