@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Message;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -34,6 +35,7 @@ import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
 import com.moko.support.MokoSupport;
+import com.moko.support.handler.BaseMessageHandler;
 import com.moko.support.log.LogModule;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -59,6 +61,7 @@ public class MoreActivity extends BaseActivity {
     private MokoDevice mokoDevice;
     private int publishTopic;
     private MQTTConfig appMqttConfig;
+    private MoreHandler moreHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +81,7 @@ public class MoreActivity extends BaseActivity {
         filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
         filter.addAction(AppConstants.ACTION_DEVICE_STATE);
         registerReceiver(mReceiver, filter);
+        moreHandler = new MoreHandler(this);
         String mqttConfigAppStr = SPUtiles.getStringValue(MoreActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
     }
@@ -97,6 +101,7 @@ public class MoreActivity extends BaseActivity {
                 MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
                 if (mokoDevice.uniqueId.equals(msgCommon.id)) {
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_DEVICE_INFO && !mIsDeviceInfoFinished) {
+                        moreHandler.removeMessages(0);
                         mIsDeviceInfoFinished = true;
                         dismissLoadingProgressDialog();
                         Type infoType = new TypeToken<DeviceInfo>() {
@@ -121,6 +126,7 @@ public class MoreActivity extends BaseActivity {
 
                     }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_STATUS && !mIsPowerStatusFinished) {
+                        moreHandler.removeMessages(0);
                         mIsPowerStatusFinished = true;
                         dismissLoadingProgressDialog();
                         Type statusType = new TypeToken<PowerStatus>() {
@@ -252,7 +258,7 @@ public class MoreActivity extends BaseActivity {
 //            e.printStackTrace();
 //        }
         mIsDeviceInfoFinished = false;
-        tvDeviceName.postDelayed(new Runnable() {
+        moreHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (!mIsDeviceInfoFinished) {
@@ -420,7 +426,7 @@ public class MoreActivity extends BaseActivity {
 //            e.printStackTrace();
 //        }
         mIsPowerStatusFinished = false;
-        tvDeviceName.postDelayed(new Runnable() {
+        moreHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (!mIsPowerStatusFinished) {
@@ -447,6 +453,18 @@ public class MoreActivity extends BaseActivity {
             MokoSupport.getInstance().publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
+        }
+    }
+
+    public class MoreHandler extends BaseMessageHandler<MoreActivity> {
+
+        public MoreHandler(MoreActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected void handleMessage(MoreActivity activity, Message msg) {
+
         }
     }
 }
