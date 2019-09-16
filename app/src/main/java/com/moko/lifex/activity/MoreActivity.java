@@ -96,7 +96,8 @@ public class MoreActivity extends BaseActivity {
                 }.getType();
                 MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
                 if (mokoDevice.uniqueId.equals(msgCommon.id)) {
-                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_DEVICE_INFO) {
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_DEVICE_INFO && !mIsDeviceInfoFinished) {
+                        mIsDeviceInfoFinished = true;
                         dismissLoadingProgressDialog();
                         Type infoType = new TypeToken<DeviceInfo>() {
                         }.getType();
@@ -119,7 +120,8 @@ public class MoreActivity extends BaseActivity {
                         mokoDevice.isOnline = true;
 
                     }
-                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_STATUS) {
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_STATUS && !mIsPowerStatusFinished) {
+                        mIsPowerStatusFinished = true;
                         dismissLoadingProgressDialog();
                         Type statusType = new TypeToken<PowerStatus>() {
                         }.getType();
@@ -231,6 +233,8 @@ public class MoreActivity extends BaseActivity {
         }, 300);
     }
 
+    private boolean mIsDeviceInfoFinished;
+
     public void deviceInfo(View view) {
         if (!MokoSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
@@ -247,6 +251,17 @@ public class MoreActivity extends BaseActivity {
 //        } catch (MqttException e) {
 //            e.printStackTrace();
 //        }
+        mIsDeviceInfoFinished = false;
+        tvDeviceName.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!mIsDeviceInfoFinished) {
+                    ToastUtils.showToast(MoreActivity.this, "Get data failed!");
+                    mIsDeviceInfoFinished = true;
+                    dismissLoadingProgressDialog();
+                }
+            }
+        }, 10000);
         MsgCommon<Object> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_DEVICE_INFO;
         msgCommon.id = mokoDevice.uniqueId;
@@ -386,6 +401,8 @@ public class MoreActivity extends BaseActivity {
         }
     }
 
+    private boolean mIsPowerStatusFinished;
+
     public void modifyPowerStatus(View view) {
         if (!MokoSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
@@ -402,6 +419,17 @@ public class MoreActivity extends BaseActivity {
 //        } catch (MqttException e) {
 //            e.printStackTrace();
 //        }
+        mIsPowerStatusFinished = false;
+        tvDeviceName.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!mIsPowerStatusFinished) {
+                    ToastUtils.showToast(MoreActivity.this, "Get data failed!");
+                    mIsPowerStatusFinished = true;
+                    dismissLoadingProgressDialog();
+                }
+            }
+        }, 10000);
         MsgCommon<Object> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_GET_POWER_STATUS;
         msgCommon.id = mokoDevice.uniqueId;
