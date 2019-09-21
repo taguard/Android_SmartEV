@@ -27,6 +27,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -102,7 +105,13 @@ public class MokoService extends Service {
                                 }
                             });
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            // 读取stacktrace信息
+                            final Writer result = new StringWriter();
+                            final PrintWriter printWriter = new PrintWriter(result);
+                            e.printStackTrace(printWriter);
+                            StringBuffer errorReport = new StringBuffer();
+                            errorReport.append(result.toString());
+                            LogModule.e(errorReport.toString());
                         }
                     } else {
                         switch (mqttConfig.connectMode) {
@@ -111,7 +120,13 @@ public class MokoService extends Service {
                                 try {
                                     connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    // 读取stacktrace信息
+                                    final Writer result = new StringWriter();
+                                    final PrintWriter printWriter = new PrintWriter(result);
+                                    e.printStackTrace(printWriter);
+                                    StringBuffer errorReport = new StringBuffer();
+                                    errorReport.append(result.toString());
+                                    LogModule.e(errorReport.toString());
                                 }
                                 break;
                             case 3:
@@ -119,7 +134,13 @@ public class MokoService extends Service {
                                 try {
                                     connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    // 读取stacktrace信息
+                                    final Writer result = new StringWriter();
+                                    final PrintWriter printWriter = new PrintWriter(result);
+                                    e.printStackTrace(printWriter);
+                                    StringBuffer errorReport = new StringBuffer();
+                                    errorReport.append(result.toString());
+                                    LogModule.e(errorReport.toString());
                                 }
                                 break;
                         }
@@ -128,7 +149,13 @@ public class MokoService extends Service {
                 try {
                     MokoSupport.getInstance().connectMqtt(connOpts);
                 } catch (MqttException e) {
-                    e.printStackTrace();
+                    // 读取stacktrace信息
+                    final Writer result = new StringWriter();
+                    final PrintWriter printWriter = new PrintWriter(result);
+                    e.printStackTrace(printWriter);
+                    StringBuffer errorReport = new StringBuffer();
+                    errorReport.append(result.toString());
+                    LogModule.e(errorReport.toString());
                 }
                 return;
             }

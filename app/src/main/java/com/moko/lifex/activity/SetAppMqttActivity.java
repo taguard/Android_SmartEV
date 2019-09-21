@@ -126,6 +126,9 @@ public class SetAppMqttActivity extends BaseActivity implements RadioGroup.OnChe
                     ToastUtils.showToast(SetAppMqttActivity.this, getString(R.string.success));
                     dismissLoadingProgressDialog();
                     SetAppMqttActivity.this.finish();
+                } else if (state == MokoConstants.MQTT_CONN_STATUS_FAILED) {
+                    ToastUtils.showToast(SetAppMqttActivity.this, getString(R.string.mqtt_connect_failed));
+                    dismissLoadingProgressDialog();
                 }
             }
         }
