@@ -19,6 +19,7 @@
 	        super.onCreate();
 	        // initialization
 	        MokoSupport.getInstance().init(getApplicationContext());
+	        Toasty.Config.getInstance().apply();
 	    }
 	}
 
@@ -28,6 +29,7 @@
 - The methods provided in SDK include: Socket communication with WIFI device, MQTT connection service, disconnection, subscription topic, unsubscribe topic, post topic, log record, etc.
 - Socket communication is called by `SocketService`;
 - MQTT communication can be called by `MokoSupport.getInstance()`;
+- Three SSL connections are supported by `MokoService`;
 
 ### 2.1 SocketService
 
@@ -74,15 +76,13 @@ eg:
 	 
 response：
 
-	 { 
+	{ 
 	     "code" : 0, 
 	     "message" : "success", 
 	     "result" : { 
 	          "header" : 4001, 
-	          "device_function" : "iot_plug", 
-	          "device_name" : "plug_one", 
-	          "device_specifications" : "us", 
-	          "device_mac" : "11:22:33:44:55:66",
+	          "device_name" : "MK112", 
+	          "device_id" : "112233445566",
 	          "device_type" : "1"
 	     } 
 	 }
@@ -90,31 +90,118 @@ response：
 2、	Send MQTT server information
 
 	{ 
-	          "header" : 4002, 
-	          "host" : "45.32.33.42", 
-	          "port" : 1883, 
-	          "connect_mode" : 0, 
-	          "username" : "DVES_USER", 
-	          "password" : "DVES_PASS", 
-	          "keepalive" : 120, 
-	          "qos" : 2, 
-	          "clean_session" :1
-	 }
+          "header" : 4002, 
+          "host" : "45.32.33.42", 
+          "port" : 1883, 
+          "connect_mode" : 0, 
+          "clientid":"xxxxxxx",
+          "username" : "DVES_USER", 
+          "password" : "DVES_PASS", 
+          "keepalive" : 120, 
+          "qos" : 2, 
+          "clean_session" :1
+ 	}
 	 
 response：
 
 	{ 
-	     "code" : 0, 
-	     "message" : "success", 
-	     "result" : { 
-	         "header" : 4002
-	     } 
-	 }
-	 
-3、Send a WIFI network with a specific SSID
+     "code" : 0, 
+     "message" : "success", 
+     "result" : { 
+         "header" : 4002
+     } 
+ 	}
+ 	
+3、Send SSL certificates
+
+file_type	number	1:rootCA 2：clientCertificate 3：clientPrivateKey
 
 	{ 
 	          "header" : 4003, 
+	          "file_type": 1,
+	          "file_size": xxxx,
+	          "offset":xx,
+	          "current_packet_len":x,
+	          "data":"xxxx"
+	 }
+
+response：
+
+	{ 
+     "code" : 0, 
+     "message" : "success", 
+     "result" : { 
+       "header" : 4003
+     } 
+ 	}
+ 	
+ Note: if the data is larger than 200 bytes, it shall be transmitted by means of subcontracting, and the subcontracting unit is 200 bytes
+For example, existing 300 bytes of data to send, we will split into two packets
+ 	
+ The first pack:
+ 
+	 { 
+	          "header" : 4003, 
+	          "file_type": 1,
+	          "file_size": 300,
+	          "offset":0,
+	          "current_packet_len":200,
+	          "data":"xxxx"
+	 }
+ 
+ The second package
+ 
+	 { 
+	          "header" : 4003, 
+	          "file_type": 1,
+	          "file_size": 300,
+	          "offset":200,
+	          "current_packet_len":100,
+	          "data":"xxxx"
+	 }
+	 
+5、Send publish and subscribe topics
+
+	{ 
+          "header" : 4004, 
+          "set_publish_topic": "xxxx",
+          "set_subscibe_topic":"xxxxxxxxx"
+ 	}
+	 
+response:
+
+	{ 
+     "code" : 0, 
+     "message" : "success", 
+     "result" : { 
+       "header" : 4004
+     } 
+ 	}
+ 	
+6、Send device id value (optional)
+
+Function description:
+If the app side wants to determine by MQTT message body which device the data is sent from, it needs to send this instruction. Otherwise, it does not need to send this instruction.
+
+	 { 
+    "header" : 4007, 
+    "id" : "XXXXXX"
+ 	}
+	 
+response:
+
+	 { 
+     "code" : 0, 
+     "message" : "success", 
+     "result" : { 
+       "header" : 4007
+     } 
+ 	}
+	 
+7、Send a WIFI network with a specific SSID
+
+	{ 
+	          "header" : 4006, 
 	          "wifi_ssid" : "Fitpolo", 
 	          "wifi_pwd" : "fitpolo1234.", 
 	          "wifi_security" : 3 
@@ -126,7 +213,7 @@ response:
 	     "code" : 0, 
 	     "message" : "success", 
 	     "result" : { 
-	       "header" : 4003
+	       "header" : 4006
 	     } 
 	 }
 
@@ -180,12 +267,12 @@ Return data：
 The return data is in JSON format,eg：
 
 	{ 
-	          "company_name" : "moko", 
-	          "production_date" : "201801", 
-	          "product_model" : "plug_one", 
-	          "firmware_version" : "000001" 
-	          "device_mac" : "11:22:33:44:55:66"
-	 }
+          "company_name" : "MOKO TECHNOLOGY LTD.", 
+          "production_date" : "2019.1", 
+          "device_name" : "MK112", 
+          "firmware_version" : "V2.0.1", 
+          "device_mac" : "112233445566"
+     } 
 
 #### 2.2.2 Action monitor
 
@@ -258,6 +345,36 @@ Broadcast ACTION：`MokoConstants.ACTION_MQTT_UNSUBSCRIBE`
 
 	MokoSupport.getInstance().disconnectMqtt()
 	
+	
+### 2.3	MokoService
+
+#### 2.3.1 TCP
+
+	mqttConfig.connectMode = 0;
+	...
+	MokoSupport.getInstance().connectMqtt(connOpts);
+	
+#### 2.3.2 SSL(One-way authentication)
+	
+	mqttConfig.connectMode = 1;
+	...
+	connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
+	...
+	MokoSupport.getInstance().connectMqtt(connOpts);
+	
+#### 2.3.3 SSL(Two-way authentication)
+	
+	mqttConfig.connectMode = 3;
+	...
+	connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
+	...
+	MokoSupport.getInstance().connectMqtt(connOpts);
+	
+#### 2.3.4 SSL(All Trust)
+
+	mqttConfig.connectMode > 0 && mqttConfig.caPath = null;
+	...
+	connOpts.setSocketFactory(getAllTMSocketFactory());
 
 ## 3.Save Log to SD Card
 
@@ -266,8 +383,8 @@ Broadcast ACTION：`MokoConstants.ACTION_MQTT_UNSUBSCRIBE`
 - The folder name and file name saved on the SD card can be modified.
 
 		public class LogModule {
-			private static final String TAG = "mokoLife";// file name 
-		    private static final String LOG_FOLDER = "mokoLife";// folder name
+			private static final String TAG = "mokoLifeX";// file name 
+		    private static final String LOG_FOLDER = "mokoLifeX";// folder name
 			...
 		}
 
