@@ -155,9 +155,14 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                 }
 //                if (topic.contains(MokoDevice.DEVICE_TOPIC_SWITCH_STATE)) {
 //                    JsonObject object = new JsonParser().parse(receive).getAsJsonObject();
-                Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                }.getType();
-                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
+                MsgCommon<JsonObject> msgCommon;
+                try {
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    msgCommon = new Gson().fromJson(receive, type);
+                } catch (Exception e) {
+                    return;
+                }
                 for (final MokoDevice device : devices) {
                     if (device.uniqueId.equals(msgCommon.id)) {
                         device.isOnline = true;
@@ -228,7 +233,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                 adapter.notifyDataSetChanged();
             }
             if (AppConstants.ACTION_DELETE_DEVICE.equals(action)) {
-                int id = intent.getIntExtra(AppConstants.EXTRA_DELETE_DEVICE_ID,-1);
+                int id = intent.getIntExtra(AppConstants.EXTRA_DELETE_DEVICE_ID, -1);
                 if (id > 0 && mHandler.hasMessages(id)) {
                     mHandler.removeMessages(id);
                 }

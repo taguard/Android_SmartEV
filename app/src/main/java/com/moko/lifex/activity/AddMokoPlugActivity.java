@@ -253,9 +253,14 @@ public class AddMokoPlugActivity extends BaseActivity {
                 if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
                     return;
                 }
-                Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                }.getType();
-                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(receive, type);
+                MsgCommon<JsonObject> msgCommon;
+                try {
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    msgCommon = new Gson().fromJson(receive, type);
+                } catch (Exception e) {
+                    return;
+                }
                 if (!mDeviceMqttConfig.uniqueId.equals(msgCommon.id)) {
                     return;
                 }

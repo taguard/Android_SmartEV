@@ -68,9 +68,14 @@ public class ElectricityActivity extends BaseActivity {
             if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
                 String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                }.getType();
-                MsgCommon<JsonObject> msgCommon = new Gson().fromJson(message, type);
+                MsgCommon<JsonObject> msgCommon;
+                try {
+                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
+                    }.getType();
+                    msgCommon = new Gson().fromJson(message, type);
+                } catch (Exception e) {
+                    return;
+                }
                 if (mokoDevice.uniqueId.equals(msgCommon.id)) {
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_INFO) {
                         Type infoType = new TypeToken<PowerInfo>() {
