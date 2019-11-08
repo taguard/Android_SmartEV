@@ -296,6 +296,8 @@ public class AddMokoPlugActivity extends BaseActivity {
                                 mokoDevice.function = function;
                                 mokoDevice.type = mDeviceResult.device_type;
                                 mokoDevice.uniqueId = mDeviceMqttConfig.uniqueId;
+                                mokoDevice.topicSubscribe = mDeviceMqttConfig.topicSubscribe;
+                                mokoDevice.topicPublish = mDeviceMqttConfig.topicPublish;
                                 DBTools.getInstance(AddMokoPlugActivity.this).updateDevice(mokoDevice);
                             }
                             Intent modifyIntent = new Intent(AddMokoPlugActivity.this, ModifyNameActivity.class);

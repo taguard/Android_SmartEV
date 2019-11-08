@@ -128,6 +128,8 @@ public class DBTools {
         cv.put(DBConstants.DEVICE_FIELD_SWITCH_2, mokoDevice.switchName2);
         cv.put(DBConstants.DEVICE_FIELD_SWITCH_3, mokoDevice.switchName3);
         cv.put(DBConstants.DEVICE_FIELD_UNIQUE_ID, mokoDevice.uniqueId);
+        cv.put(DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE, mokoDevice.topicSubscribe);
+        cv.put(DBConstants.DEVICE_FIELD_TOPIC_PUBLISH, mokoDevice.topicPublish);
         db.update(DBConstants.TABLE_NAME_DEVICE, cv, where, whereValue);
     }
 
