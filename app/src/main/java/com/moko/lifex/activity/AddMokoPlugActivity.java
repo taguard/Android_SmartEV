@@ -293,12 +293,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                             if (mokoDevice == null) {
                                 mokoDevice = new MokoDevice();
                                 mokoDevice.name = mDeviceResult.device_name;
-                                String suffix = mDeviceResult.device_id;
-                                int length = suffix.length();
-                                if (length > 4) {
-                                    suffix = mDeviceResult.device_id.substring(length - 4);
-                                }
-                                mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, suffix);
+                                mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, mDeviceResult.device_id);
                                 mokoDevice.specifications = mDeviceResult.device_specifications;
                                 // TODO: 2019/8/14 设备不再传给app，由app区分
                                 mokoDevice.function = function;
