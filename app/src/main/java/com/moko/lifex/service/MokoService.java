@@ -16,7 +16,8 @@ import com.moko.lifex.BuildConfig;
 import com.moko.lifex.R;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.utils.SPUtiles;
-import com.moko.support.MokoSupport;
+import com.moko.support.callback.ActionListener;
+import com.moko.support.handler.MqttCallbackHandler;
 import com.moko.support.log.LogModule;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -29,6 +30,7 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -39,6 +41,7 @@ import java.io.Writer;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -67,6 +70,8 @@ public class MokoService extends Service {
 
     private IBinder mBinder = new LocalBinder();
 
+    private MqttAndroidClient mqttAndroidClient;
+
     public class LocalBinder extends Binder {
         public MokoService getService() {
             return MokoService.this;
@@ -87,12 +92,23 @@ public class MokoService extends Service {
     public void onCreate() {
         super.onCreate();
         LogModule.i("启动后台服务");
-        String mqttAppConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         onCreate = true;
+        connectMqtt();
+    }
+
+    public void connectMqtt() {
+        String mqttAppConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         if (!TextUtils.isEmpty(mqttAppConfigStr)) {
             MQTTConfig mqttConfig = new Gson().fromJson(mqttAppConfigStr, MQTTConfig.class);
             if (!mqttConfig.isError(null)) {
-                MqttAndroidClient client = MokoSupport.getInstance().creatClient(mqttConfig.host, mqttConfig.port, mqttConfig.clientId, mqttConfig.connectMode > 0);
+                String uri;
+                if (mqttConfig.connectMode > 0) {
+                    uri = "ssl://" + mqttConfig.host + ":" + mqttConfig.port;
+                } else {
+                    uri = "tcp://" + mqttConfig.host + ":" + mqttConfig.port;
+                }
+                mqttAndroidClient = new MqttAndroidClient(this, uri, mqttConfig.clientId);
+                mqttAndroidClient.setCallback(new MqttCallbackHandler(this));
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setAutomaticReconnect(true);
                 connOpts.setCleanSession(mqttConfig.cleanSession);
@@ -157,7 +173,7 @@ public class MokoService extends Service {
                     }
                 }
                 try {
-                    MokoSupport.getInstance().connectMqtt(connOpts);
+                    connectMqtt(connOpts);
                 } catch (MqttException e) {
                     // 读取stacktrace信息
                     final Writer result = new StringWriter();
@@ -176,11 +192,7 @@ public class MokoService extends Service {
     public void onDestroy() {
         LogModule.i("关闭后台服务");
         super.onDestroy();
-        try {
-            MokoSupport.getInstance().disconnectMqtt();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        disconnectMqtt();
     }
 
     @Override
@@ -252,8 +264,10 @@ public class MokoService extends Service {
         trustAllCerts[0] = tm;
         SSLContext sc = null;
         try {
-            // 全信任
+            sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, null);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         } catch (KeyManagementException e) {
             e.printStackTrace();
         }
@@ -382,5 +396,48 @@ public class MokoService extends Service {
         context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
         return context.getSocketFactory();
+    }
+
+    private void connectMqtt(MqttConnectOptions options) throws MqttException {
+        if (mqttAndroidClient != null && !mqttAndroidClient.isConnected()) {
+            mqttAndroidClient.connect(options, null, new ActionListener(this, ActionListener.Action.CONNECT));
+        }
+    }
+
+
+    public void disconnectMqtt() {
+        if (mqttAndroidClient != null && mqttAndroidClient.isConnected()) {
+            try {
+                mqttAndroidClient.disconnect();
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            mqttAndroidClient = null;
+        }
+    }
+
+    public void subscribe(String topic, int qos) throws MqttException {
+        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+            mqttAndroidClient.subscribe(topic, qos, null, new ActionListener(this, ActionListener.Action.SUBSCRIBE));
+        }
+    }
+
+    public void unSubscribe(String topic) throws MqttException {
+        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+            mqttAndroidClient.unsubscribe(topic, null, new ActionListener(this, ActionListener.Action.UNSUBSCRIBE));
+        }
+    }
+
+    public void publish(String topic, MqttMessage message) throws MqttException {
+        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+            mqttAndroidClient.publish(topic, message, null, new ActionListener(this, ActionListener.Action.PUBLISH));
+        }
+    }
+
+    public boolean isConnected() {
+        if (mqttAndroidClient != null) {
+            return mqttAndroidClient.isConnected();
+        }
+        return false;
     }
 }

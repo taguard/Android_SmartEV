@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputFilter;
@@ -20,26 +19,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.lzyzsd.circleprogress.DonutProgress;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
-import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.CustomDialog;
 import com.moko.lifex.entity.MQTTConfig;
-import com.moko.lifex.entity.MokoDevice;
-import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.lifex.utils.Utils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
-import com.moko.support.entity.DeviceResponse;
 import com.moko.support.entity.DeviceResult;
 import com.moko.support.log.LogModule;
 import com.moko.support.service.SocketService;
-
-import org.eclipse.paho.client.mqttv3.MqttException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

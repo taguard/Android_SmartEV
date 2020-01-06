@@ -1,46 +1,6 @@
 package com.moko.lifex.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.text.InputFilter;
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.moko.lifex.AppConstants;
-import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
-import com.moko.lifex.db.DBTools;
-import com.moko.lifex.dialog.CustomDialog;
-import com.moko.lifex.dialog.TimerDialog;
-import com.moko.lifex.entity.MQTTConfig;
-import com.moko.lifex.entity.MokoDevice;
-import com.moko.lifex.utils.SPUtiles;
-import com.moko.lifex.utils.ToastUtils;
-import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
-import com.moko.support.log.LogModule;
-
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * @Date 2018/6/7

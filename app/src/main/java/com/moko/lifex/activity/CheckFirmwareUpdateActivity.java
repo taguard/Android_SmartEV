@@ -1,10 +1,13 @@
 package com.moko.lifex.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -22,10 +25,10 @@ import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OTAInfo;
 import com.moko.lifex.entity.SetOTA;
+import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
 import com.moko.support.log.LogModule;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -59,6 +62,8 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     private MQTTConfig appMqttConfig;
 
     private String[] mUpdateType;
+    
+    private MokoService mokoService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +75,30 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         }
         mUpdateType = getResources().getStringArray(R.array.update_type);
         tvUpdateType.setText(mUpdateType[0]);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
-        filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
-        filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
-        filter.addAction(MokoConstants.ACTION_MQTT_UNSUBSCRIBE);
-        filter.addAction(AppConstants.ACTION_DEVICE_STATE);
-        registerReceiver(mReceiver, filter);
         String mqttConfigAppStr = SPUtiles.getStringValue(CheckFirmwareUpdateActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+        bindService(new Intent(this, MokoService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mokoService = ((MokoService.LocalBinder) service).getService();
+            // 注册广播接收器
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
+            filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
+            filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
+            filter.addAction(MokoConstants.ACTION_MQTT_UNSUBSCRIBE);
+            filter.addAction(AppConstants.ACTION_DEVICE_STATE);
+            registerReceiver(mReceiver, filter);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -136,7 +154,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     }
 
     public void startUpdate(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -180,7 +198,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         try {
-            MokoSupport.getInstance().publish(appTopic, message);
+            mokoService.publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -190,6 +208,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+        unbindService(serviceConnection);
     }
 
     private int mSelected;

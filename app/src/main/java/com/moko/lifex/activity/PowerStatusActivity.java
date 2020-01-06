@@ -1,10 +1,13 @@
 package com.moko.lifex.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RadioButton;
@@ -20,10 +23,10 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.PowerStatus;
+import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
 import com.moko.support.log.LogModule;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -54,6 +57,7 @@ public class PowerStatusActivity extends BaseActivity {
 
     private MQTTConfig appMqttConfig;
     private MokoDevice mokoDevice;
+    private MokoService mokoService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +81,7 @@ public class PowerStatusActivity extends BaseActivity {
             rgPowerStatus.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    if (!MokoSupport.getInstance().isConnected()) {
+                    if (!mokoService.isConnected()) {
                         ToastUtils.showToast(PowerStatusActivity.this, R.string.network_error);
                         return;
                     }
@@ -99,6 +103,22 @@ public class PowerStatusActivity extends BaseActivity {
                     }
                 }
             });
+            
+            String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+            appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+
+            bindService(new Intent(this, MokoService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            finish();
+            return;
+        }
+
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mokoService = ((MokoService.LocalBinder) service).getService();
             // 注册广播接收器
             IntentFilter filter = new IntentFilter();
             filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
@@ -106,14 +126,13 @@ public class PowerStatusActivity extends BaseActivity {
             filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
             filter.addAction(AppConstants.ACTION_DEVICE_STATE);
             registerReceiver(mReceiver, filter);
-            String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-            appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
-        } else {
-            finish();
-            return;
         }
 
-    }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private void setPowerStatus(int status) {
         LogModule.i("设置上电状态");
@@ -133,7 +152,7 @@ public class PowerStatusActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         try {
-            MokoSupport.getInstance().publish(appTopic, message);
+            mokoService.publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -194,5 +213,6 @@ public class PowerStatusActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+        unbindService(serviceConnection);
     }
 }

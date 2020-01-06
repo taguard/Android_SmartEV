@@ -1,11 +1,14 @@
 package com.moko.lifex.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
@@ -28,10 +31,10 @@ import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.SetTimer;
 import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.entity.TimerInfo;
+import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
 import com.moko.support.log.LogModule;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -66,6 +69,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
     @Bind(R.id.tv_timer_state)
     TextView tvTimerState;
     private MokoDevice mokoDevice;
+    private MokoService mokoService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +80,28 @@ public class MokoPlugDetailActivity extends BaseActivity {
             mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
             changeSwitchState();
         }
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
-        filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
-        filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
-        filter.addAction(AppConstants.ACTION_MODIFY_NAME);
-        filter.addAction(AppConstants.ACTION_DEVICE_STATE);
-        registerReceiver(mReceiver, filter);
+        bindService(new Intent(this, MokoService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mokoService = ((MokoService.LocalBinder) service).getService();
+            // 注册广播接收器
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
+            filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
+            filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
+            filter.addAction(AppConstants.ACTION_MODIFY_NAME);
+            filter.addAction(AppConstants.ACTION_DEVICE_STATE);
+            registerReceiver(mReceiver, filter);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -191,7 +208,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
         if (isWindowLocked()) {
             return;
         }
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(MokoPlugDetailActivity.this, R.string.network_error);
             return;
         }
@@ -204,7 +221,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
         dialog.setListener(new TimerDialog.TimerListener() {
             @Override
             public void onConfirmClick(TimerDialog dialog) {
-                if (!MokoSupport.getInstance().isConnected()) {
+                if (!mokoService.isConnected()) {
                     ToastUtils.showToast(MokoPlugDetailActivity.this, R.string.network_error);
                     return;
                 }
@@ -235,7 +252,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
                     appTopic = appMqttConfig.topicPublish;
                 }
                 try {
-                    MokoSupport.getInstance().publish(appTopic, message);
+                    mokoService.publish(appTopic, message);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -246,7 +263,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
     }
 
     public void scheduleClick(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(MokoPlugDetailActivity.this, R.string.network_error);
             return;
         }
@@ -258,7 +275,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
     }
 
     public void statisticsClick(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -276,7 +293,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
     }
 
     public void switchClick(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -306,7 +323,7 @@ public class MokoPlugDetailActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         try {
-            MokoSupport.getInstance().publish(appTopic, message);
+            mokoService.publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -316,5 +333,6 @@ public class MokoPlugDetailActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+        unbindService(serviceConnection);
     }
 }

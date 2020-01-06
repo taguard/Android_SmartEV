@@ -31,11 +31,11 @@ import com.moko.lifex.dialog.CustomDialog;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.lifex.utils.Utils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
 import com.moko.support.entity.DeviceResponse;
 import com.moko.support.entity.DeviceResult;
 import com.moko.support.log.LogModule;
@@ -67,6 +67,7 @@ public class AddMokoPlugActivity extends BaseActivity {
     private CustomDialog mqttConnDialog;
     private DonutProgress donutProgress;
     private SocketService mService;
+    private MokoService mokoService;
     private String mWifiSSID;
     private String mWifiPassword;
     private DeviceResult mDeviceResult;
@@ -88,8 +89,21 @@ public class AddMokoPlugActivity extends BaseActivity {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         mAppMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         bindService(new Intent(this, SocketService.class), mServiceConnection, BIND_AUTO_CREATE);
+        bindService(new Intent(this, MokoService.class), serviceConnection, BIND_AUTO_CREATE);
     }
 
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mokoService = ((MokoService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
     private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -237,7 +251,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                     // 订阅
                     try {
                         if (TextUtils.isEmpty(mAppMqttConfig.topicSubscribe)) {
-                            MokoSupport.getInstance().subscribe(mDeviceMqttConfig.topicPublish, mAppMqttConfig.qos);
+                            mokoService.subscribe(mDeviceMqttConfig.topicPublish, mAppMqttConfig.qos);
                         }
 //                        MokoSupport.getInstance().subscribe(topicDelayTime, mAppMqttConfig.qos);
 //                        MokoSupport.getInstance().subscribe(topicDeleteDevice, mAppMqttConfig.qos);
@@ -622,6 +636,7 @@ public class AddMokoPlugActivity extends BaseActivity {
         super.onDestroy();
         unregisterReceiver(mReceiver);
         unbindService(mServiceConnection);
+        unbindService(serviceConnection);
     }
 
     public boolean isWifiCorrect() {

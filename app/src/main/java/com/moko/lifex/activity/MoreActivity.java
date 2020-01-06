@@ -1,11 +1,14 @@
 package com.moko.lifex.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Message;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -31,10 +34,10 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.PowerStatus;
+import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MokoConstants;
-import com.moko.support.MokoSupport;
 import com.moko.support.handler.BaseMessageHandler;
 import com.moko.support.log.LogModule;
 
@@ -62,6 +65,7 @@ public class MoreActivity extends BaseActivity {
     private int publishTopic;
     private MQTTConfig appMqttConfig;
     private MoreHandler moreHandler;
+    private MokoService mokoService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,19 +76,32 @@ public class MoreActivity extends BaseActivity {
             mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
             tvDeviceName.setText(mokoDevice.nickName);
         }
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
-        filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
-        filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
-        filter.addAction(MokoConstants.ACTION_MQTT_UNSUBSCRIBE);
-        filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
-        filter.addAction(AppConstants.ACTION_DEVICE_STATE);
-        registerReceiver(mReceiver, filter);
         moreHandler = new MoreHandler(this);
         String mqttConfigAppStr = SPUtiles.getStringValue(MoreActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+        bindService(new Intent(this, MokoService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mokoService = ((MokoService.LocalBinder) service).getService();
+            // 注册广播接收器
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
+            filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
+            filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
+            filter.addAction(MokoConstants.ACTION_MQTT_UNSUBSCRIBE);
+            filter.addAction(MokoConstants.ACTION_MQTT_PUBLISH);
+            filter.addAction(AppConstants.ACTION_DEVICE_STATE);
+            registerReceiver(mReceiver, filter);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -152,7 +169,7 @@ public class MoreActivity extends BaseActivity {
                         if (TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
                             // 取消订阅
                             try {
-                                MokoSupport.getInstance().unSubscribe(mokoDevice.topicPublish);
+                                mokoService.unSubscribe(mokoDevice.topicPublish);
                             } catch (MqttException e) {
                                 e.printStackTrace();
                             }
@@ -247,7 +264,7 @@ public class MoreActivity extends BaseActivity {
     private boolean mIsDeviceInfoFinished;
 
     public void deviceInfo(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -258,7 +275,7 @@ public class MoreActivity extends BaseActivity {
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("读取设备信息");
 //        try {
-//            MokoSupport.getInstance().subscribe(mokoDevice.getDeviceTopicFirmwareInfo(), appMqttConfig.qos);
+//            mokoService.subscribe(mokoDevice.getDeviceTopicFirmwareInfo(), appMqttConfig.qos);
 //        } catch (MqttException e) {
 //            e.printStackTrace();
 //        }
@@ -287,14 +304,14 @@ public class MoreActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         try {
-            MokoSupport.getInstance().publish(appTopic, message);
+            mokoService.publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     public void checkNewFirmware(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -312,7 +329,7 @@ public class MoreActivity extends BaseActivity {
         dialog.setListener(new RemoveDialog.RemoveListener() {
             @Override
             public void onConfirmClick(RemoveDialog dialog) {
-                if (!MokoSupport.getInstance().isConnected()) {
+                if (!mokoService.isConnected()) {
                     ToastUtils.showToast(MoreActivity.this, R.string.network_error);
                     return;
                 }
@@ -320,7 +337,7 @@ public class MoreActivity extends BaseActivity {
                 if (TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
                     // 取消订阅
                     try {
-                        MokoSupport.getInstance().unSubscribe(mokoDevice.topicPublish);
+                        mokoService.unSubscribe(mokoDevice.topicPublish);
                     } catch (MqttException e) {
                         e.printStackTrace();
                     }
@@ -352,7 +369,7 @@ public class MoreActivity extends BaseActivity {
         dialog.setListener(new ResetDialog.ResetListener() {
             @Override
             public void onConfirmClick(ResetDialog dialog) {
-                if (!MokoSupport.getInstance().isConnected()) {
+                if (!mokoService.isConnected()) {
                     ToastUtils.showToast(MoreActivity.this, R.string.network_error);
                     return;
                 }
@@ -376,7 +393,7 @@ public class MoreActivity extends BaseActivity {
                     appTopic = appMqttConfig.topicPublish;
                 }
                 try {
-                    MokoSupport.getInstance().publish(appTopic, message);
+                    mokoService.publish(appTopic, message);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -390,6 +407,7 @@ public class MoreActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+        unbindService(serviceConnection);
     }
 
     public void about(View view) {
@@ -415,7 +433,7 @@ public class MoreActivity extends BaseActivity {
     private boolean mIsPowerStatusFinished;
 
     public void modifyPowerStatus(View view) {
-        if (!MokoSupport.getInstance().isConnected()) {
+        if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -426,7 +444,7 @@ public class MoreActivity extends BaseActivity {
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("读取上电状态");
 //        try {
-//            MokoSupport.getInstance().subscribe(mokoDevice.getDeviceTopicFirmwareInfo(), appMqttConfig.qos);
+//            mokoService.subscribe(mokoDevice.getDeviceTopicFirmwareInfo(), appMqttConfig.qos);
 //        } catch (MqttException e) {
 //            e.printStackTrace();
 //        }
@@ -455,7 +473,7 @@ public class MoreActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         try {
-            MokoSupport.getInstance().publish(appTopic, message);
+            mokoService.publish(appTopic, message);
         } catch (MqttException e) {
             e.printStackTrace();
         }
