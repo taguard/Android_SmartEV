@@ -375,6 +375,11 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
     }
 
 
+    public void about(View view) {
+        // 关于
+        startActivity(new Intent(this, AboutActivity.class));
+    }
+
     public OfflineHandler mHandler;
 
     public class OfflineHandler extends BaseMessageHandler<MainActivity> {

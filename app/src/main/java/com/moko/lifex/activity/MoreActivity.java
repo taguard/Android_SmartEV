@@ -410,11 +410,6 @@ public class MoreActivity extends BaseActivity {
         unbindService(serviceConnection);
     }
 
-    public void about(View view) {
-        startActivity(new Intent(this, AboutActivity.class));
-    }
-
-
     //弹出软键盘
     public void showKeyboard(EditText editText) {
         //其中editText为dialog中的输入框的 EditText
