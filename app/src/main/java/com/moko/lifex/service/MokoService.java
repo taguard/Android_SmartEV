@@ -107,7 +107,7 @@ public class MokoService extends Service {
                 } else {
                     uri = "tcp://" + mqttConfig.host + ":" + mqttConfig.port;
                 }
-                mqttAndroidClient = new MqttAndroidClient(this, uri, mqttConfig.clientId);
+                mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), uri, mqttConfig.clientId);
                 mqttAndroidClient.setCallback(new MqttCallbackHandler(this));
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setAutomaticReconnect(true);

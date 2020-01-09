@@ -8,8 +8,8 @@ android {
         applicationId "com.moko.lifex"
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 7
-        versionName "1.1.3"
+        versionCode 8
+        versionName "1.1.4"
 
         javaCompileOptions {
             annotationProcessorOptions {
