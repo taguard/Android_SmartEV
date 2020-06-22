@@ -19,13 +19,11 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.lxj.xpopup.XPopup;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.adapter.EnergyListAdapter;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.db.DBTools;
-import com.moko.lifex.dialog.TimerDialog;
 import com.moko.lifex.entity.ElectricityConstant;
 import com.moko.lifex.entity.EnergyCurrentInfo;
 import com.moko.lifex.entity.EnergyHistoryMonth;
@@ -36,18 +34,12 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OverloadInfo;
-import com.moko.lifex.entity.SetTimer;
-import com.moko.lifex.entity.SwitchInfo;
-import com.moko.lifex.entity.SystemTimeInfo;
-import com.moko.lifex.entity.TimerInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.lifex.utils.Utils;
-import com.moko.lifex.view.CustomAttachPopup;
 import com.moko.support.MokoConstants;
 import com.moko.support.log.LogModule;
-import com.moko.support.utils.MokoUtils;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -55,7 +47,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -186,7 +177,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                         Calendar calendar = Calendar.getInstance();
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
-                        for (int i = 0, size = energyHistoryToday.result.size(); i < size; i++) {
+                        for (int size = energyHistoryToday.result.size(), i = size - 1; i >= 0; i--) {
                             EnergyValue energyValue = energyHistoryToday.result.get(i);
                             Calendar c = (Calendar) calendar.clone();
                             c.add(Calendar.HOUR_OF_DAY, energyValue.offset);
@@ -210,7 +201,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                             return;
                         energyInfosMonth.clear();
                         energyTotalMonth = 0;
-                        for (int i = 0, size = energyHistoryMonth.result.size(); i < size; i++) {
+                        for (int size = energyHistoryMonth.result.size(), i = size - 1; i >= 0; i--) {
                             EnergyValue energyValue = energyHistoryMonth.result.get(i);
                             Calendar c = (Calendar) calendar.clone();
                             c.add(Calendar.DAY_OF_MONTH, energyValue.offset);
@@ -275,7 +266,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                             adapter.replaceData(energyInfosToday);
                         } else {
                             float totalMonthly = energyTotalMonth * 1.0f / electricityConstant;
-                            String eneryTotalMonthly =Utils.getDecimalFormat("0.##").format(totalMonthly);
+                            String eneryTotalMonthly = Utils.getDecimalFormat("0.##").format(totalMonthly);
                             tvEnergyTotal.setText(eneryTotalMonthly);
                             adapter.replaceData(energyInfosMonth);
                         }

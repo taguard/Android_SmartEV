@@ -148,8 +148,8 @@ public class MokoPlugActivity extends BaseActivity {
                         // 启动设备定时离线，62s收不到应答则认为离线
                         if (!switch_state.equals(mokoDevice.on_off ? "on" : "off")) {
                             mokoDevice.on_off = !mokoDevice.on_off;
-                            changeSwitchState();
                         }
+                        changeSwitchState();
                     }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_TIMER_INFO) {
                         Type infoType = new TypeToken<TimerInfo>() {

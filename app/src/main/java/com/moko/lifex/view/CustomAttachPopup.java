@@ -54,6 +54,14 @@ public class CustomAttachPopup extends AttachPopupView {
                 }
             }
         });
+        findViewById(R.id.ll_bg).setBackgroundResource(mokoDevice.on_off ?
+                R.drawable.popup_bg : R.drawable.popup_bg_white);
+        ((TextView) findViewById(R.id.tv_more)).setTextColor(
+                ContextCompat.getColor(getContext(),
+                        mokoDevice.on_off ? R.color.white_fffefe : R.color.black_333333));
+        ((TextView) findViewById(R.id.tv_setting)).setTextColor(
+                ContextCompat.getColor(getContext(),
+                        mokoDevice.on_off ? R.color.white_fffefe : R.color.black_333333));
     }
 
     public void setData(MokoDevice mokoDevice) {
@@ -61,7 +69,7 @@ public class CustomAttachPopup extends AttachPopupView {
     }
 
     public void setBg(boolean on_off) {
-        findViewById(R.id.tv_setting).setBackgroundResource(on_off ?
+        findViewById(R.id.ll_bg).setBackgroundResource(on_off ?
                 R.drawable.popup_bg : R.drawable.popup_bg_white);
         ((TextView) findViewById(R.id.tv_more)).setTextColor(
                 ContextCompat.getColor(getContext(),
