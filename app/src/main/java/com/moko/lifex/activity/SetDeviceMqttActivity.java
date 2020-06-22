@@ -287,12 +287,13 @@ public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.On
             intent.putExtra("function", function);
             intent.putExtra("mqttConfig", mqttConfig);
             startActivity(intent);
-        } else if ("iot_wall_switch".equals(function)) {
-            Intent intent = new Intent(this, AddWallSwitchActivity.class);
-            intent.putExtra("function", function);
-            intent.putExtra("mqttConfig", mqttConfig);
-            startActivity(intent);
         }
+//        else if ("iot_wall_switch".equals(function)) {
+//            Intent intent = new Intent(this, AddWallSwitchActivity.class);
+//            intent.putExtra("function", function);
+//            intent.putExtra("mqttConfig", mqttConfig);
+//            startActivity(intent);
+//        }
 
 
 //        String mqttConfigStr = new Gson().toJson(mqttConfig, MQTTConfig.class);

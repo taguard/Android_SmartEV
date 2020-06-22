@@ -23,4 +23,8 @@
     <color name="blue_9fdfff">#9fdfff</color>
     <color name="blue_2fa7e4">#2fa7e4</color>
     <color name="blue_03466a">#03466a</color>
+    <color name="red_ff4444">#ff4444</color>
+
+    <color name="text_black_4d4d4d">#4d4d4d</color>
+
 </resources>

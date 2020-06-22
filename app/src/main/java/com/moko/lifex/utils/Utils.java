@@ -14,7 +14,13 @@ import android.os.Environment;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class Utils {
 
@@ -137,5 +143,31 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static Calendar strDate2Calendar(String strDate, String pattern) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
+        try {
+            Date date = sdf.parse(strDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            return calendar;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String calendar2StrDate(Calendar calendar, String pattren) {
+        String strDate = new SimpleDateFormat(pattren, Locale.US).format(calendar.getTime());
+        return strDate;
+    }
+
+    public static DecimalFormat getDecimalFormat(String pattern) {
+        DecimalFormat decimalFormat = new DecimalFormat(pattern);
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        decimalFormat.setDecimalFormatSymbols(dfs);
+        return decimalFormat;
     }
 }

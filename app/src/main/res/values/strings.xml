@@ -12,6 +12,7 @@
     <string name="mqtt_connect_failed">Connect Failed</string>
     <string name="network_error">Network error,please check.</string>
     <string name="device_offline">Device offline,please check.</string>
+    <string name="device_overload">Device is overload,please check.</string>
     <string name="guide_center">Moko LifeX</string>
     <string name="guide_company_info">MOKO TECHNOLOGY LTD.</string>
     <string name="main_welcome">Start your moko lifeX</string>
@@ -101,9 +102,12 @@
     <string name="device_detail_switch_off">Socket is off</string>
     <string name="device_detail_switch_offline">Socket is offline</string>
     <string name="device_detail_switch_on">Socket is on</string>
+    <string name="device_detail_overload">Socket is overload\nOverload value %dW</string>
     <string name="device_detail_schedule">Schedule</string>
+    <string name="device_detail_power">Power</string>
     <string name="device_detail_timer">Timer</string>
     <string name="device_detail_statistics">Statistics</string>
+    <string name="device_detail_energy">Energy</string>
     <string name="device_detail_schedule_tips">The timing function needs to be improved.</string>
 
     <string name="electricity_title">Electricity Management</string>
@@ -162,6 +166,17 @@
         <item>Client certification</item>
         <item>Client key</item>
     </string-array>
-
+    <string-array name="led_color">
+        <item>Color transition directly</item>
+        <item>Color transition smoothly</item>
+        <item>White</item>
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Orange</item>
+        <item>Cyan</item>
+        <item>Purple</item>
+        <item>LED disable</item>
+    </string-array>
 
 </resources>

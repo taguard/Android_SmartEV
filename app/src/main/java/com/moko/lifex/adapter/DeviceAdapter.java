@@ -37,11 +37,12 @@ public class DeviceAdapter extends BaseAdapter<MokoDevice> {
     }
 
     private void setView(DeviceViewHolder holder, final MokoDevice device) {
-        if ("iot_wall_switch".equals(device.function)) {
-            holder.ivDevice.setImageResource(R.drawable.device_wall_switch);
-            holder.ivSwitch.setVisibility(View.GONE);
-            holder.ivSwitch.setOnClickListener(null);
-        } else if ("iot_plug".equals(device.function)) {
+//        if ("iot_wall_switch".equals(device.function)) {
+//            holder.ivDevice.setImageResource(R.drawable.device_wall_switch);
+//            holder.ivSwitch.setVisibility(View.GONE);
+//            holder.ivSwitch.setOnClickListener(null);
+//        } else
+        if ("iot_plug".equals(device.function)) {
             holder.ivDevice.setImageResource(R.drawable.device_moko_plug);
             holder.ivSwitch.setVisibility(View.VISIBLE);
             holder.ivSwitch.setOnClickListener(new View.OnClickListener() {
@@ -57,10 +58,11 @@ public class DeviceAdapter extends BaseAdapter<MokoDevice> {
             holder.tvDeviceSwitch.setTextColor(ContextCompat.getColor(mContext, R.color.grey_cccccc));
         } else {
             holder.ivSwitch.setImageDrawable(ContextCompat.getDrawable(mContext, device.on_off ? R.drawable.checkbox_open : R.drawable.checkbox_close));
-            if ("iot_wall_switch".equals(device.function)) {
-                holder.tvDeviceSwitch.setText(mContext.getString(R.string.device_state_online));
-                holder.tvDeviceSwitch.setTextColor(ContextCompat.getColor(mContext, R.color.blue_0188cc));
-            } else if ("iot_plug".equals(device.function)) {
+//            if ("iot_wall_switch".equals(device.function)) {
+//                holder.tvDeviceSwitch.setText(mContext.getString(R.string.device_state_online));
+//                holder.tvDeviceSwitch.setTextColor(ContextCompat.getColor(mContext, R.color.blue_0188cc));
+//            } else
+            if ("iot_plug".equals(device.function)) {
                 holder.tvDeviceSwitch.setText(device.on_off ? mContext.getString(R.string.switch_on) : mContext.getString(R.string.switch_off));
                 holder.tvDeviceSwitch.setTextColor(ContextCompat.getColor(mContext, device.on_off ? R.color.blue_0188cc : R.color.grey_cccccc));
             }

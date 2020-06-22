@@ -26,6 +26,7 @@ import com.moko.lifex.db.DBTools;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.OverloadInfo;
 import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
@@ -211,8 +212,8 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                                     device.on_off = !device.on_off;
                                 }
                             }
-
-                        } else if (topic.contains("iot_wall_switch")) {
+                        }
+//                        else if (topic.contains("iot_wall_switch")) {
 //                            int type = Integer.parseInt(device.type);
 //                            String switch_state_1;
 //                            String switch_state_2;
@@ -237,7 +238,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
 //                                    device.on_off_3 = "on".equals(switch_state_3);
 //                                    break;
 //                            }
-                        }
+//                        }
                         adapter.notifyDataSetChanged();
                         break;
                     }
@@ -325,14 +326,21 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
     @Override
     public void deviceDetailClick(MokoDevice device) {
         LogModule.i("跳转详情");
-        if ("iot_wall_switch".equals(device.function)) {
-            Intent intent = new Intent(this, WallSwitchDetailActivity.class);
-            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
-            startActivity(intent);
-        } else if ("iot_plug".equals(device.function)) {
-            Intent intent = new Intent(this, MokoPlugDetailActivity.class);
-            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
-            startActivity(intent);
+//        if ("iot_wall_switch".equals(device.function)) {
+//            Intent intent = new Intent(this, WallSwitchDetailActivity.class);
+//            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
+//            startActivity(intent);
+//        } else
+        if ("iot_plug".equals(device.function)) {
+            if ("2".equals(device.type)) {
+                Intent intent = new Intent(this, MokoPlugActivity.class);
+                intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, MokoPlugDetailActivity.class);
+                intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
+                startActivity(intent);
+            }
         }
     }
 
@@ -344,6 +352,9 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
         }
         if (!device.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (device.isOverload) {
             return;
         }
         showLoadingProgressDialog(getString(R.string.wait));

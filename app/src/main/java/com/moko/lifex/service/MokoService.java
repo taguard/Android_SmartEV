@@ -417,19 +417,20 @@ public class MokoService extends Service {
     }
 
     public void subscribe(String topic, int qos) throws MqttException {
-        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+        if (mqttAndroidClient != null && mqttAndroidClient.isConnected()) {
             mqttAndroidClient.subscribe(topic, qos, null, new ActionListener(this, ActionListener.Action.SUBSCRIBE));
         }
     }
 
     public void unSubscribe(String topic) throws MqttException {
-        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+        if (mqttAndroidClient != null && mqttAndroidClient.isConnected()) {
             mqttAndroidClient.unsubscribe(topic, null, new ActionListener(this, ActionListener.Action.UNSUBSCRIBE));
         }
     }
 
     public void publish(String topic, MqttMessage message) throws MqttException {
-        if (mqttAndroidClient != null&& mqttAndroidClient.isConnected()) {
+        if (mqttAndroidClient != null && mqttAndroidClient.isConnected()) {
+            LogModule.i("public:" + topic + "-->" + message.toString());
             mqttAndroidClient.publish(topic, message, null, new ActionListener(this, ActionListener.Action.PUBLISH));
         }
     }

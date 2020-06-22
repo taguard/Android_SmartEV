@@ -7,6 +7,7 @@ public class AppConstants {
     public static final String PATTERN_MM_DD = "MM/dd";
     public static final String PATTERN_MM_DD_2 = "MM-dd";
     public static final String PATTERN_YYYY_MM_DD_HH_MM = "yyyy-MM-dd HH:mm";
+    public static final String PATTERN_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
     // action
     public static final String ACTION_FINISH_ACTIVITY = "com.moko.lifex.action.finishActivity";
     public static final String ACTION_MODIFY_NAME = "com.moko.lifex.action.ACTION_MODIFY_NAME";

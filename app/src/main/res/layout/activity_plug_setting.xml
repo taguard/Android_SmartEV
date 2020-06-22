@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white_ffffff"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/rl_title"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/blue_0188cc">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="back"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Setting"
+            android:textColor="@color/white_ffffff"
+            android:textSize="18sp" />
+
+        <View
+            style="@style/divider_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/grey_999999" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="ledColorSettingsClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LED color settings"
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_led_color_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="overloadClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Overload value"
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="powerReportPeriodClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Power report period"
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="energyReportPeriodClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Energy report period "
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="energyStorageParamsClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Energy storage parameters"
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
+        android:onClick="resetEnergyClick"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Energy consumption"
+            android:textColor="@color/black_333333"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_energy_consumption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:text=""
+            android:textColor="@color/grey_808080"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <View style="@style/divider_line" />
+
+</LinearLayout>

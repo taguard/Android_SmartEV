@@ -42,4 +42,6 @@ public class MokoDevice implements Serializable {
     public boolean on_off_2;
     public boolean on_off_3;
     public boolean isOnline;
+    public boolean isOverload;
+    public int overloadValue;
 }
