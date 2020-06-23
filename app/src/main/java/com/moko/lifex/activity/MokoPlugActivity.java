@@ -26,6 +26,7 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.TimerDialog;
+import com.moko.lifex.entity.LoadInsertion;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
@@ -165,6 +166,14 @@ public class MokoPlugActivity extends BaseActivity {
                             tvTimerState.setVisibility(View.VISIBLE);
                             String timer = String.format("%s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
                             tvTimerState.setText(timer);
+                        }
+                    }
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_LOAD_INSERTION) {
+                        Type infoType = new TypeToken<LoadInsertion>() {
+                        }.getType();
+                        LoadInsertion loadInsertion = new Gson().fromJson(msgCommon.data, infoType);
+                        if (loadInsertion.load == 1) {
+                            ToastUtils.showToast(MokoPlugActivity.this, "Load insertion");
                         }
                     }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OVERLOAD) {

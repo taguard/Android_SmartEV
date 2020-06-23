@@ -33,6 +33,7 @@ import com.moko.lifex.entity.DeviceInfo;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
+import com.moko.lifex.entity.OverloadInfo;
 import com.moko.lifex.entity.PowerStatus;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
@@ -146,6 +147,13 @@ public class MoreActivity extends BaseActivity {
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
                         mokoDevice.isOnline = true;
 
+                    }
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OVERLOAD) {
+                        Type infoType = new TypeToken<OverloadInfo>() {
+                        }.getType();
+                        OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        mokoDevice.isOverload = overLoadInfo.overload_state == 1;
+                        mokoDevice.overloadValue = overLoadInfo.overload_value;
                     }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_POWER_STATUS && !mIsPowerStatusFinished) {
                         moreHandler.removeMessages(0);
@@ -272,6 +280,10 @@ public class MoreActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
+            return;
+        }
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("读取设备信息");
 //        try {
@@ -317,6 +329,10 @@ public class MoreActivity extends BaseActivity {
         }
         if (!mokoDevice.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         Intent intent = new Intent(this, CheckFirmwareUpdateActivity.class);
@@ -377,6 +393,10 @@ public class MoreActivity extends BaseActivity {
                     ToastUtils.showToast(MoreActivity.this, R.string.device_offline);
                     return;
                 }
+                if (mokoDevice.isOverload) {
+                    ToastUtils.showToast(MoreActivity.this, R.string.device_overload);
+                    return;
+                }
                 showLoadingProgressDialog(getString(R.string.wait));
                 LogModule.i("重置设备");
                 MsgCommon<Object> msgCommon = new MsgCommon();
@@ -434,6 +454,10 @@ public class MoreActivity extends BaseActivity {
         }
         if (!mokoDevice.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         showLoadingProgressDialog(getString(R.string.wait));

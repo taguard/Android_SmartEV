@@ -167,10 +167,13 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                         Type infoType = new TypeToken<EnergyHistoryToday>() {
                         }.getType();
                         EnergyHistoryToday energyHistoryToday = new Gson().fromJson(msgCommon.data, infoType);
-                        energyTotalToday = energyHistoryToday.today_energy;
-                        float totalToday = energyTotalToday * 1.0f / electricityConstant;
-                        String eneryTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
-                        tvEnergyTotal.setText(eneryTotalToday);
+                        if (electricityConstant == 0) {
+                            energyTotalToday = energyHistoryToday.today_energy;
+                            float totalToday = energyTotalToday * 1.0f / electricityConstant;
+                            String eneryTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
+                            tvEnergyTotal.setText(eneryTotalToday);
+                            return;
+                        }
                         if (energyHistoryToday.result == null || energyHistoryToday.result.isEmpty())
                             return;
                         energyInfosToday.clear();
@@ -226,7 +229,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                         EnergyInfo energyInfoMonth = new EnergyInfo();
                         energyInfoMonth.recordDate = currentInfo.timestamp.substring(0, 13);
                         energyInfoMonth.date = energyInfoMonth.recordDate.substring(5, 10);
-                        energyInfoMonth.hour = energyInfoMonth.recordDate.substring(11);
+                        energyInfoMonth.hour = energyInfoMonth.recordDate.substring(11, 13);
                         energyInfoMonth.value = String.valueOf(currentInfo.current_hour_energy);
                         if (!energyInfosMonth.isEmpty()) {
                             EnergyInfo first = energyInfosMonth.get(0);
@@ -244,7 +247,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                         EnergyInfo energyInfoToday = new EnergyInfo();
                         energyInfoToday.recordDate = currentInfo.timestamp.substring(0, 13);
                         energyInfoToday.date = energyInfoToday.recordDate.substring(5, 10);
-                        energyInfoToday.hour = energyInfoToday.recordDate.substring(11);
+                        energyInfoToday.hour = energyInfoToday.recordDate.substring(11, 13);
                         energyInfoToday.value = String.valueOf(currentInfo.current_hour_energy);
                         if (!energyInfosToday.isEmpty()) {
                             EnergyInfo first = energyInfosToday.get(0);
@@ -258,7 +261,9 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                             energyInfoToday.type = 0;
                             energyInfosToday.add(energyInfoToday);
                         }
-
+                        if (electricityConstant == 0) {
+                            return;
+                        }
                         if (rbDaily.isChecked()) {
                             float totalToday = energyTotalToday * 1.0f / electricityConstant;
                             String eneryTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);

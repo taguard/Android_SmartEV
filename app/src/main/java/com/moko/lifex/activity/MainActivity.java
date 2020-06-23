@@ -27,6 +27,7 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OverloadInfo;
+import com.moko.lifex.entity.OverloadValue;
 import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
@@ -212,6 +213,13 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                                     device.on_off = !device.on_off;
                                 }
                             }
+                            if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
+                                Type infoType = new TypeToken<OverloadInfo>() {
+                                }.getType();
+                                OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
+                                device.isOverload = overLoadInfo.overload_state == 1;
+                                device.overloadValue = overLoadInfo.overload_value;
+                            }
                         }
 //                        else if (topic.contains("iot_wall_switch")) {
 //                            int type = Integer.parseInt(device.type);
@@ -355,6 +363,7 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
             return;
         }
         if (device.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         showLoadingProgressDialog(getString(R.string.wait));

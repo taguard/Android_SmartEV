@@ -24,6 +24,7 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OTAInfo;
+import com.moko.lifex.entity.OverloadInfo;
 import com.moko.lifex.entity.SetOTA;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
@@ -62,7 +63,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     private MQTTConfig appMqttConfig;
 
     private String[] mUpdateType;
-    
+
     private MokoService mokoService;
 
     @Override
@@ -132,6 +133,13 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
                             ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_failed);
                         }
                     }
+                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OVERLOAD) {
+                        Type infoType = new TypeToken<OverloadInfo>() {
+                        }.getType();
+                        OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
+                        mokoDevice.isOverload = overLoadInfo.overload_state == 1;
+                        mokoDevice.overloadValue = overLoadInfo.overload_value;
+                    }
                 }
             }
             if (MokoConstants.ACTION_MQTT_SUBSCRIBE.equals(action)) {
@@ -159,6 +167,10 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             return;
         }
         if (!mokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
