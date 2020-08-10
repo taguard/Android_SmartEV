@@ -146,10 +146,12 @@ public class MokoPlugActivity extends BaseActivity {
                         }.getType();
                         SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
                         String switch_state = switchInfo.switch_state;
+                        int overload_state = switchInfo.overload_state;
                         // 启动设备定时离线，62s收不到应答则认为离线
                         if (!switch_state.equals(mokoDevice.on_off ? "on" : "off")) {
                             mokoDevice.on_off = !mokoDevice.on_off;
                         }
+                        mokoDevice.isOverload = overload_state == 1;
                         changeSwitchState();
                     }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_TIMER_INFO) {
@@ -182,6 +184,7 @@ public class MokoPlugActivity extends BaseActivity {
                         OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
                         mokoDevice.isOverload = overLoadInfo.overload_state == 1;
                         mokoDevice.overloadValue = overLoadInfo.overload_value;
+                        changeSwitchState();
                     }
                 }
             }
@@ -212,19 +215,17 @@ public class MokoPlugActivity extends BaseActivity {
         rlTitle.setBackgroundColor(ContextCompat.getColor(this, mokoDevice.on_off ? R.color.blue_0188cc : R.color.black_303a4b));
         llBg.setBackgroundColor(ContextCompat.getColor(this, mokoDevice.on_off ? R.color.grey_f2f2f2 : R.color.black_303a4b));
         ivSwitchState.setImageDrawable(ContextCompat.getDrawable(this, mokoDevice.on_off ? R.drawable.plug_switch_on : R.drawable.plug_switch_off));
-        // Overload
-        if (mokoDevice.isOverload) {
-            tvSwitchState.setText(getString(R.string.device_detail_overload, mokoDevice.overloadValue));
+        String switchState = "";
+        if (!mokoDevice.isOnline) {
+            switchState = getString(R.string.device_detail_switch_offline);
+        } else if (mokoDevice.on_off) {
+            switchState = getString(R.string.device_detail_switch_on);
+        } else if (mokoDevice.isOverload) {
+            switchState = getString(R.string.device_detail_overload, mokoDevice.overloadValue);
         } else {
-            tvSwitchState.setText(mokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
+            switchState = getString(R.string.device_detail_switch_off);
         }
-        tvSwitchState.setText(mokoDevice.isOnline ?
-                (mokoDevice.on_off ?
-                        R.string.device_detail_switch_on :
-                        (mokoDevice.isOverload ?
-                                R.string.device_detail_overload :
-                                R.string.device_detail_switch_off)) :
-                R.string.device_detail_switch_offline);
+        tvSwitchState.setText(switchState);
         tvSwitchState.setTextColor(ContextCompat.getColor(this, mokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
 
         Drawable drawablePower = ContextCompat.getDrawable(this, mokoDevice.on_off ? R.drawable.power_on : R.drawable.power_off);
@@ -254,8 +255,9 @@ public class MokoPlugActivity extends BaseActivity {
     public void more(View view) {
         popup = new CustomAttachPopup(this);
         popup.setData(mokoDevice);
-        new XPopup.Builder(this)
-                .atView(view)
+        XPopup.Builder builder = new XPopup.Builder(this);
+        builder.atView(view)
+                .offsetX(Utils.dip2px(this, 10))
                 .asCustom(popup)
                 .show();
     }
@@ -335,10 +337,6 @@ public class MokoPlugActivity extends BaseActivity {
             ToastUtils.showToast(MokoPlugActivity.this, R.string.device_offline);
             return;
         }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.device_overload);
-            return;
-        }
         // Power
         Intent intent = new Intent(this, ElectricityActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
@@ -352,10 +350,6 @@ public class MokoPlugActivity extends BaseActivity {
         }
         if (!mokoDevice.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.device_overload);
             return;
         }
         // Energy
@@ -424,7 +418,7 @@ public class MokoPlugActivity extends BaseActivity {
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_SYSTEM_TIME;
         msgCommon.id = mokoDevice.uniqueId;
         SystemTimeInfo systemTimeInfo = new SystemTimeInfo();
-        systemTimeInfo.timestamp = Utils.calendar2StrDate(Calendar.getInstance(), AppConstants.PATTERN_YYYY_MM_DD_HH_MM_SS);
+        systemTimeInfo.timestamp = Utils.calendar2StrDate(Calendar.getInstance(), "yyyy-MM-dd&HH:mm:ss");
         msgCommon.data = systemTimeInfo;
 //        JsonObject json = new JsonObject();
 //        json.addProperty("switch_state", mokoDevice.on_off ? "off" : "on");

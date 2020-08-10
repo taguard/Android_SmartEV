@@ -158,10 +158,6 @@ public class EnergyReportPeriodActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("读取累计电能上报间隔");
         MsgCommon<Object> msgCommon = new MsgCommon();
@@ -191,6 +187,18 @@ public class EnergyReportPeriodActivity extends BaseActivity {
     }
 
     public void saveSettings(View view) {
+        if (!mokoService.isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        if (!mokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
+            return;
+        }
         String reportPeriodStr = etEnergyReportPeriod.getText().toString();
         if (TextUtils.isEmpty(reportPeriodStr)) {
             ToastUtils.showToast(this,"Param error");

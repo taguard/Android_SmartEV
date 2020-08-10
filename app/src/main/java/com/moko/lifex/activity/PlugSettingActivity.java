@@ -20,7 +20,6 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.AlertMessageDialog;
-import com.moko.lifex.entity.ElectricityConstant;
 import com.moko.lifex.entity.EnergyTotal;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
@@ -54,7 +53,6 @@ public class PlugSettingActivity extends BaseActivity {
     private MokoDevice mokoDevice;
     private MokoService mokoService;
     private MQTTConfig appMqttConfig;
-    private int electricityConstant;
     private int publishNum;
 
     @Override
@@ -84,7 +82,6 @@ public class PlugSettingActivity extends BaseActivity {
             registerReceiver(mReceiver, filter);
             if (!mokoDevice.isOnline)
                 return;
-            getEC();
             getTotalEnergy();
         }
 
@@ -115,17 +112,13 @@ public class PlugSettingActivity extends BaseActivity {
                 }
                 if (mokoDevice.uniqueId.equals(msgCommon.id)) {
                     mokoDevice.isOnline = true;
-                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_ELECTRICITY_CONSTANT) {
-                        Type infoType = new TypeToken<ElectricityConstant>() {
-                        }.getType();
-                        ElectricityConstant ec = new Gson().fromJson(msgCommon.data, infoType);
-                        electricityConstant = ec.EC;
-                    }
                     if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_ENERGY_TOTAL) {
                         Type infoType = new TypeToken<EnergyTotal>() {
                         }.getType();
                         EnergyTotal energyTotal = new Gson().fromJson(msgCommon.data, infoType);
-                        float consumption = energyTotal.all_energy * 1.0f / electricityConstant;
+                        if (energyTotal != null && energyTotal.EC == 0)
+                            return;
+                        float consumption = energyTotal.all_energy * 1.0f / energyTotal.EC;
                         String energyConsumption = Utils.getDecimalFormat("0.##").format(consumption);
                         tvEnergyConsumption.setText(energyConsumption + "KWh");
                     }
@@ -214,7 +207,7 @@ public class PlugSettingActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    private void getEC() {
+    private void getTotalEnergy() {
         if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
@@ -223,32 +216,6 @@ public class PlugSettingActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
-        showLoadingProgressDialog(getString(R.string.wait));
-        LogModule.i("读取脉冲常数");
-        MsgCommon<Object> msgCommon = new MsgCommon();
-        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_GET_ELECTRICITY_CONSTANT;
-        msgCommon.id = mokoDevice.uniqueId;
-        MqttMessage message = new MqttMessage();
-        message.setPayload(new Gson().toJson(msgCommon).getBytes());
-        message.setQos(appMqttConfig.qos);
-        String appTopic;
-        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
-            appTopic = mokoDevice.topicSubscribe;
-        } else {
-            appTopic = appMqttConfig.topicPublish;
-        }
-        try {
-            mokoService.publish(appTopic, message);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getTotalEnergy() {
         LogModule.i("读取累计电量");
         MsgCommon<Object> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_GET_ENERGY_TOTAL;

@@ -208,12 +208,14 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
                                 }.getType();
                                 SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
                                 String switch_state = switchInfo.switch_state;
+                                int overload_state = switchInfo.overload_state;
                                 // 启动设备定时离线，62s收不到应答则认为离线
                                 if (!switch_state.equals(device.on_off ? "on" : "off")) {
                                     device.on_off = !device.on_off;
                                 }
+                                device.isOverload = overload_state == 1;
                             }
-                            if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_SWITCH_STATE) {
+                            if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OVERLOAD) {
                                 Type infoType = new TypeToken<OverloadInfo>() {
                                 }.getType();
                                 OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);

@@ -160,16 +160,6 @@ public class OverloadValueActivity extends BaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_confirm:
-                String overloadValue = etOverloadValue.getText().toString();
-                if (TextUtils.isEmpty(overloadValue)) {
-                    ToastUtils.showToast(this, "Param error");
-                    return;
-                }
-                int value = Integer.parseInt(overloadValue);
-                if (value < 10 || value > 2530) {
-                    ToastUtils.showToast(this, "Param error");
-                    return;
-                }
                 if (!mokoService.isConnected()) {
                     ToastUtils.showToast(this, R.string.network_error);
                     return;
@@ -178,8 +168,14 @@ public class OverloadValueActivity extends BaseActivity {
                     ToastUtils.showToast(this, R.string.device_offline);
                     return;
                 }
-                if (mokoDevice.isOverload) {
-                    ToastUtils.showToast(this, R.string.device_overload);
+                String overloadValue = etOverloadValue.getText().toString();
+                if (TextUtils.isEmpty(overloadValue)) {
+                    ToastUtils.showToast(this, "Param error");
+                    return;
+                }
+                int value = Integer.parseInt(overloadValue);
+                if (value < 10 || value > 2530) {
+                    ToastUtils.showToast(this, "Param error");
                     return;
                 }
                 showLoadingProgressDialog(getString(R.string.wait));

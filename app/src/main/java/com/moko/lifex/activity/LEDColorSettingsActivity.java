@@ -134,7 +134,7 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
                         }.getType();
                         LEDColorInfo ledColorInfo = new Gson().fromJson(msgCommon.data, infoType);
                         npvColorSettings.setValue(ledColorInfo.led_state);
-                        if (ledColorInfo.led_state > 2) {
+                        if (ledColorInfo.led_state > 1) {
                             llColorSettings.setVisibility(View.GONE);
                         } else {
                             llColorSettings.setVisibility(View.VISIBLE);
@@ -182,25 +182,6 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         finish();
     }
 
-
-    public void timerClick(View view) {
-        if (isWindowLocked()) {
-            return;
-        }
-        if (!mokoService.isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
-    }
-
     private void getColorSettings() {
         if (!mokoService.isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
@@ -208,10 +189,6 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         }
         if (!mokoDevice.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         showLoadingProgressDialog(getString(R.string.wait));
@@ -252,6 +229,18 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
     }
 
     public void saveSettings(View view) {
+        if (!mokoService.isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        if (!mokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
+            return;
+        }
         String blue = etBlue.getText().toString();
         String green = etGreen.getText().toString();
         String yellow = etYellow.getText().toString();
@@ -315,18 +304,6 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         int purpleValue = Integer.parseInt(purple);
         if (purpleValue <= redValue || purpleValue >= 2530) {
             ToastUtils.showToast(this, "Param6 Error");
-            return;
-        }
-        if (!mokoService.isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         showLoadingProgressDialog(getString(R.string.wait));

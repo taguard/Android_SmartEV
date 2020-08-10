@@ -8,4 +8,5 @@ public class EnergyCurrentInfo implements Serializable {
     public int thirty_day_energy;
     public int today_energy;
     public int current_hour_energy;
+    public int EC;
 }

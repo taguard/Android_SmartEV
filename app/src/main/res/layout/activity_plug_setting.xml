@@ -128,7 +128,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
         android:onClick="energyReportPeriodClick"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
@@ -150,7 +151,9 @@
             android:textSize="14sp" />
     </RelativeLayout>
 
-    <View style="@style/divider_line" />
+    <View
+        style="@style/divider_line"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -162,7 +165,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Energy storage parameters"
+            android:text="Energy accumulated parameters"
             android:textColor="@color/black_333333"
             android:textSize="16sp" />
 
@@ -204,7 +207,7 @@
             android:drawableRight="@drawable/arrow_right"
             android:drawablePadding="5dp"
             android:gravity="center_vertical"
-            android:text=""
+            android:text="0kWh"
             android:textColor="@color/grey_808080"
             android:textSize="14sp" />
     </RelativeLayout>

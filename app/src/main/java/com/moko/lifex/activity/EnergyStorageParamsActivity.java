@@ -162,10 +162,6 @@ public class EnergyStorageParamsActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        if (mokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
         showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("读取累计电能储存参数");
         MsgCommon<Object> msgCommon = new MsgCommon();
@@ -195,6 +191,18 @@ public class EnergyStorageParamsActivity extends BaseActivity {
     }
 
     public void saveSettings(View view) {
+        if (!mokoService.isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        if (!mokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
+            return;
+        }
         String storagePeriodStr = etStoragePeriod.getText().toString();
         if (TextUtils.isEmpty(storagePeriodStr)) {
             ToastUtils.showToast(this, "Param error");

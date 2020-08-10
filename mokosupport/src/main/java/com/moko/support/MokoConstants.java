@@ -23,7 +23,6 @@ public class MokoConstants {
     public static final int MSG_ID_D_2_A_ENERGY_STORAGE_PARAMS = 1013;
     public static final int MSG_ID_D_2_A_ENERGY_HISTORY_MONTH = 1014;
     public static final int MSG_ID_D_2_A_ENERGY_HISTORY_TODAY = 1015;
-    public static final int MSG_ID_D_2_A_ELECTRICITY_CONSTANT = 1016;
     public static final int MSG_ID_D_2_A_ENERGY_TOTAL = 1017;
     public static final int MSG_ID_D_2_A_ENERGY_CURRENT = 1018;
     public static final int MSG_ID_D_2_A_ENERGY_REPORT_INTERVAL = 1019;
@@ -45,7 +44,6 @@ public class MokoConstants {
     public static final int MSG_ID_A_2_D_SET_ENERGY_STORAGE_PARAMS = 2017;
     public static final int MSG_ID_A_2_D_GET_ENERGY_HISTORY_MONTH = 2018;
     public static final int MSG_ID_A_2_D_GET_ENERGY_HISTORY_TODAY = 2019;
-    public static final int MSG_ID_A_2_D_GET_ELECTRICITY_CONSTANT = 2020;
     public static final int MSG_ID_A_2_D_GET_ENERGY_TOTAL = 2021;
     public static final int MSG_ID_A_2_D_SET_SYSTEM_TIME = 2022;
     public static final int MSG_ID_A_2_D_SET_ENERGY_CLEAR = 2023;
