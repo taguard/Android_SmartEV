@@ -175,7 +175,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                             c.add(Calendar.HOUR_OF_DAY, energyValue.offset);
                             c.set(Calendar.MINUTE, 0);
                             EnergyInfo energyInfo = new EnergyInfo();
-                            energyInfo.recordDate = Utils.calendar2StrDate(c, "yyyy-MM-dd HH");
+                            energyInfo.recordDate = Utils.calendar2StrDate(c, "yyyy-MM-dd&HH");
                             energyInfo.type = 0;
                             energyInfo.hour = energyInfo.recordDate.substring(11);
                             energyInfo.value = String.valueOf(energyValue.value);
@@ -198,7 +198,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                             Calendar c = (Calendar) calendar.clone();
                             c.add(Calendar.DAY_OF_MONTH, energyValue.offset);
                             EnergyInfo energyInfo = new EnergyInfo();
-                            energyInfo.recordDate = Utils.calendar2StrDate(c, "yyyy-MM-dd HH");
+                            energyInfo.recordDate = Utils.calendar2StrDate(c, "yyyy-MM-dd&HH");
                             energyInfo.type = 1;
                             energyInfo.date = energyInfo.recordDate.substring(5, 10);
                             energyInfo.value = String.valueOf(energyValue.value);
@@ -239,13 +239,18 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                         energyInfoToday.date = energyInfoToday.recordDate.substring(5, 10);
                         energyInfoToday.hour = energyInfoToday.recordDate.substring(11, 13);
                         energyInfoToday.value = String.valueOf(currentInfo.current_hour_energy);
+                        String time = currentInfo.timestamp.substring(14);
                         if (!energyInfosToday.isEmpty()) {
                             EnergyInfo first = energyInfosToday.get(0);
                             if (energyInfoToday.recordDate.equals(first.recordDate)) {
                                 first.value = String.valueOf(currentInfo.current_hour_energy);
                             } else {
-                                energyInfoToday.type = 0;
-                                energyInfosToday.add(0, energyInfoToday);
+                                if ("00:00".equals(time)){
+                                    first.value = String.valueOf(currentInfo.current_hour_energy);
+                                } else {
+                                    energyInfoToday.type = 0;
+                                    energyInfosToday.add(0, energyInfoToday);
+                                }
                             }
                         } else {
                             energyInfoToday.type = 0;
@@ -379,7 +384,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                 }
                 Calendar calendarMonthly = Calendar.getInstance();
                 String end = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
-                calendarMonthly.add(Calendar.DAY_OF_MONTH, -30);
+                calendarMonthly.add(Calendar.DAY_OF_MONTH, -29);
                 String start = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
                 tvDuration.setText(String.format("%s to %s", start, end));
                 tvUnit.setText("Date");

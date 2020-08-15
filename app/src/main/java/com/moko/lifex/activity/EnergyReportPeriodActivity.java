@@ -51,7 +51,6 @@ public class EnergyReportPeriodActivity extends BaseActivity {
     private MokoDevice mokoDevice;
     private MokoService mokoService;
     private MQTTConfig appMqttConfig;
-    private int publishNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,10 +124,7 @@ public class EnergyReportPeriodActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_PUBLISH.equals(action)) {
                 int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-                publishNum++;
-                if (publishNum >= 1) {
-                    dismissLoadingProgressDialog();
-                }
+                dismissLoadingProgressDialog();
             }
             if (AppConstants.ACTION_DEVICE_STATE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
@@ -201,14 +197,15 @@ public class EnergyReportPeriodActivity extends BaseActivity {
         }
         String reportPeriodStr = etEnergyReportPeriod.getText().toString();
         if (TextUtils.isEmpty(reportPeriodStr)) {
-            ToastUtils.showToast(this,"Param error");
+            ToastUtils.showToast(this, "Param error");
             return;
         }
         int reportPeriod = Integer.parseInt(reportPeriodStr);
         if (reportPeriod < 1 || reportPeriod > 60) {
             ToastUtils.showToast(this, "Param error");
             return;
-        }showLoadingProgressDialog(getString(R.string.wait));
+        }
+        showLoadingProgressDialog(getString(R.string.wait));
         LogModule.i("设置累计电能上报间隔");
         MsgCommon<ReportPeriod> msgCommon = new MsgCommon();
         msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_ENERGY_REPORT_INTERVAL;

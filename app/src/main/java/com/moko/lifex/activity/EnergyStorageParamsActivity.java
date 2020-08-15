@@ -54,7 +54,6 @@ public class EnergyStorageParamsActivity extends BaseActivity {
     private MokoDevice mokoDevice;
     private MokoService mokoService;
     private MQTTConfig appMqttConfig;
-    private int publishNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,10 +128,7 @@ public class EnergyStorageParamsActivity extends BaseActivity {
             }
             if (MokoConstants.ACTION_MQTT_PUBLISH.equals(action)) {
                 int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-                publishNum++;
-                if (publishNum >= 1) {
-                    dismissLoadingProgressDialog();
-                }
+                dismissLoadingProgressDialog();
             }
             if (AppConstants.ACTION_DEVICE_STATE.equals(action)) {
                 String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);

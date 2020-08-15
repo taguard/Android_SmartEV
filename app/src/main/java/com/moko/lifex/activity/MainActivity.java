@@ -343,6 +343,10 @@ public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterC
 //        } else
         if ("iot_plug".equals(device.function)) {
             if ("2".equals(device.type)) {
+                if (!device.isOnline) {
+                    ToastUtils.showToast(this, R.string.device_offline);
+                    return;
+                }
                 Intent intent = new Intent(this, MokoPlugActivity.class);
                 intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
                 startActivity(intent);
