@@ -182,7 +182,7 @@
                         android:drawableLeft="@drawable/ic_manual"
                         android:drawablePadding="10dp"
                         android:gravity="center_vertical"
-                        android:text="Manual"
+                        android:text="Website"
                         android:textSize="18sp" />
 
                     <TextView
@@ -194,7 +194,7 @@
                         android:layout_marginBottom="12dp"
                         android:gravity="center_vertical"
                         android:onClick="openURL"
-                        android:text="@string/about_moko_url"
+                        android:text="@string/company_website"
                         android:textColor="@color/blue_0188cc"
                         android:textSize="15sp" />
 
@@ -214,17 +214,6 @@
                 android:text="@string/about_moko_name"
                 android:textColor="@color/black_333333"
                 android:textSize="15sp" />
-
-
-            <TextView
-                android:id="@+id/tv_moko_url"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:onClick="companyUrl"
-                android:text="@string/company_website"
-                android:textColor="@color/blue_0188cc"
-                android:textSize="16sp" />
         </LinearLayout>
 
     </ScrollView>
