@@ -1,7 +1,6 @@
 package com.moko.lifex.adapter;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,8 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseAdapter;
 import com.moko.lifex.entity.MokoDevice;
 
-import butterknife.Bind;
+import androidx.core.content.ContextCompat;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -88,15 +88,15 @@ public class DeviceAdapter extends BaseAdapter<MokoDevice> {
     }
 
     static class DeviceViewHolder extends ViewHolder {
-        @Bind(R.id.iv_device)
+        @BindView(R.id.iv_device)
         ImageView ivDevice;
-        @Bind(R.id.rl_device_detail)
+        @BindView(R.id.rl_device_detail)
         RelativeLayout rlDeviceDetail;
-        @Bind(R.id.tv_device_name)
+        @BindView(R.id.tv_device_name)
         TextView tvDeviceName;
-        @Bind(R.id.tv_device_switch)
+        @BindView(R.id.tv_device_switch)
         TextView tvDeviceSwitch;
-        @Bind(R.id.iv_switch)
+        @BindView(R.id.iv_switch)
         ImageView ivSwitch;
 
         public DeviceViewHolder(View convertView) {

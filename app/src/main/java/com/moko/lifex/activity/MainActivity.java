@@ -27,7 +27,6 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OverloadInfo;
-import com.moko.lifex.entity.OverloadValue;
 import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
@@ -42,7 +41,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -53,11 +52,11 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends BaseActivity implements DeviceAdapter.AdapterClickListener {
 
-    @Bind(R.id.rl_empty)
+    @BindView(R.id.rl_empty)
     RelativeLayout rlEmpty;
-    @Bind(R.id.lv_device_list)
+    @BindView(R.id.lv_device_list)
     ListView lvDeviceList;
-    @Bind(R.id.tv_title)
+    @BindView(R.id.tv_title)
     TextView tvTitle;
     private ArrayList<MokoDevice> devices;
     private DeviceAdapter adapter;

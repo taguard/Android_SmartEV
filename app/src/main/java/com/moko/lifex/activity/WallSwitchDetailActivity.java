@@ -9,29 +9,29 @@ import com.moko.lifex.base.BaseActivity;
  * @ClassPath com.moko.lifex.activity.WallSwitchDetailActivity
  */
 public class WallSwitchDetailActivity extends BaseActivity {
-//    @Bind(R.id.iv_wall_switch_1)
+//    @BindView(R.id.iv_wall_switch_1)
 //    ImageView ivWallSwitch1;
-//    @Bind(R.id.tv_wall_switch_1_edit)
+//    @BindView(R.id.tv_wall_switch_1_edit)
 //    TextView tvWallSwitch1Edit;
-//    @Bind(R.id.tv_wall_switch_1_timer_state)
+//    @BindView(R.id.tv_wall_switch_1_timer_state)
 //    TextView tvWallSwitch1TimerState;
-//    @Bind(R.id.rl_wall_switch_1)
+//    @BindView(R.id.rl_wall_switch_1)
 //    RelativeLayout rlWallSwitch1;
-//    @Bind(R.id.iv_wall_switch_2)
+//    @BindView(R.id.iv_wall_switch_2)
 //    ImageView ivWallSwitch2;
-//    @Bind(R.id.tv_wall_switch_2_edit)
+//    @BindView(R.id.tv_wall_switch_2_edit)
 //    TextView tvWallSwitch2Edit;
-//    @Bind(R.id.tv_wall_switch_2_timer_state)
+//    @BindView(R.id.tv_wall_switch_2_timer_state)
 //    TextView tvWallSwitch2TimerState;
-//    @Bind(R.id.rl_wall_switch_2)
+//    @BindView(R.id.rl_wall_switch_2)
 //    RelativeLayout rlWallSwitch2;
-//    @Bind(R.id.iv_wall_switch_3)
+//    @BindView(R.id.iv_wall_switch_3)
 //    ImageView ivWallSwitch3;
-//    @Bind(R.id.tv_wall_switch_3_edit)
+//    @BindView(R.id.tv_wall_switch_3_edit)
 //    TextView tvWallSwitch3Edit;
-//    @Bind(R.id.tv_wall_switch_3_timer_state)
+//    @BindView(R.id.tv_wall_switch_3_timer_state)
 //    TextView tvWallSwitch3TimerState;
-//    @Bind(R.id.rl_wall_switch_3)
+//    @BindView(R.id.rl_wall_switch_3)
 //    RelativeLayout rlWallSwitch3;
 //
 //    private MokoDevice mokoDevice;

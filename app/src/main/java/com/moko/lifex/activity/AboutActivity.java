@@ -10,7 +10,7 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.utils.Utils;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -21,7 +21,7 @@ import butterknife.ButterKnife;
  */
 public class AboutActivity extends BaseActivity {
 
-    @Bind(R.id.tv_soft_version)
+    @BindView(R.id.tv_soft_version)
     TextView tvSoftVersion;
 
     @Override

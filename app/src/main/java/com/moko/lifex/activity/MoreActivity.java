@@ -47,7 +47,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -60,7 +60,7 @@ public class MoreActivity extends BaseActivity {
 
     public static String TAG = "MoreActivity";
 
-    @Bind(R.id.tv_device_name)
+    @BindView(R.id.tv_device_name)
     TextView tvDeviceName;
     private MokoDevice mokoDevice;
     private int publishTopic;
@@ -229,7 +229,7 @@ public class MoreActivity extends BaseActivity {
 
     public void modifyName(View view) {
         View content = LayoutInflater.from(this).inflate(R.layout.modify_name, null);
-        final EditText etDeviceName = ButterKnife.findById(content, R.id.et_device_name);
+        final EditText etDeviceName = content.findViewById(R.id.et_device_name);
         String deviceName = tvDeviceName.getText().toString();
         etDeviceName.setText(deviceName);
         etDeviceName.setSelection(deviceName.length());

@@ -35,7 +35,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -46,7 +46,7 @@ import butterknife.ButterKnife;
  */
 public class EnergyReportPeriodActivity extends BaseActivity {
 
-    @Bind(R.id.et_energy_report_period)
+    @BindView(R.id.et_energy_report_period)
     EditText etEnergyReportPeriod;
     private MokoDevice mokoDevice;
     private MokoService mokoService;

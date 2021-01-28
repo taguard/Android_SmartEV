@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RadioButton;
@@ -46,7 +44,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import butterknife.Bind;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -58,19 +58,19 @@ import butterknife.ButterKnife;
 public class EnergyActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
 
 
-    @Bind(R.id.rg_energy)
+    @BindView(R.id.rg_energy)
     RadioGroup rgEnergy;
-    @Bind(R.id.tv_energy_total)
+    @BindView(R.id.tv_energy_total)
     TextView tvEnergyTotal;
-    @Bind(R.id.tv_duration)
+    @BindView(R.id.tv_duration)
     TextView tvDuration;
-    @Bind(R.id.tv_unit)
+    @BindView(R.id.tv_unit)
     TextView tvUnit;
-    @Bind(R.id.rv_energy)
+    @BindView(R.id.rv_energy)
     RecyclerView rvEnergy;
-    @Bind(R.id.rb_daily)
+    @BindView(R.id.rb_daily)
     RadioButton rbDaily;
-    @Bind(R.id.rb_monthly)
+    @BindView(R.id.rb_monthly)
     RadioButton rbMonthly;
     private EnergyListAdapter adapter;
     private MokoDevice mokoDevice;

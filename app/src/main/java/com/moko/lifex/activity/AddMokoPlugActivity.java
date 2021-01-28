@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -61,7 +61,7 @@ import butterknife.ButterKnife;
 public class AddMokoPlugActivity extends BaseActivity {
 
 
-    @Bind(R.id.not_blinking_tips)
+    @BindView(R.id.not_blinking_tips)
     TextView notBlinkingTips;
     private CustomDialog wifiAlertDialog;
     private CustomDialog mqttConnDialog;
@@ -485,7 +485,7 @@ public class AddMokoPlugActivity extends BaseActivity {
     private void checkWifiInfo() {
         if (!isWifiCorrect()) {
             View wifiAlertView = LayoutInflater.from(this).inflate(R.layout.wifi_setting_content, null);
-            ImageView iv_wifi_alert = ButterKnife.findById(wifiAlertView, R.id.iv_wifi_alert);
+            ImageView iv_wifi_alert = wifiAlertView.findViewById(R.id.iv_wifi_alert);
             iv_wifi_alert.setImageResource(R.drawable.plug_wifi_alert);
             wifiAlertDialog = new CustomDialog.Builder(this)
                     .setContentView(wifiAlertView)
@@ -541,9 +541,9 @@ public class AddMokoPlugActivity extends BaseActivity {
 
     private void showWifiInputDialog() {
         View wifiInputView = LayoutInflater.from(this).inflate(R.layout.wifi_input_content, null);
-        final EditText etSSID = ButterKnife.findById(wifiInputView, R.id.et_ssid);
+        final EditText etSSID = wifiInputView.findViewById(R.id.et_ssid);
         etSSID.setFilters(new InputFilter[]{filter});
-        final EditText etPassword = ButterKnife.findById(wifiInputView, R.id.et_password);
+        final EditText etPassword = wifiInputView.findViewById(R.id.et_password);
         CustomDialog dialog = new CustomDialog.Builder(this)
                 .setContentView(wifiInputView)
                 .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -586,7 +586,7 @@ public class AddMokoPlugActivity extends BaseActivity {
 
     private void showConnMqttDialog() {
         View view = LayoutInflater.from(this).inflate(R.layout.mqtt_conn_content, null);
-        donutProgress = ButterKnife.findById(view, R.id.dp_progress);
+        donutProgress = view.findViewById(R.id.dp_progress);
         mqttConnDialog = new CustomDialog.Builder(this)
                 .setContentView(view)
                 .create();

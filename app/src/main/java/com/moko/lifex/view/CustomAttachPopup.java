@@ -2,8 +2,6 @@ package com.moko.lifex.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,6 +11,9 @@ import com.moko.lifex.R;
 import com.moko.lifex.activity.MoreActivity;
 import com.moko.lifex.activity.PlugSettingActivity;
 import com.moko.lifex.entity.MokoDevice;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 
 public class CustomAttachPopup extends AttachPopupView {

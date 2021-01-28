@@ -9,7 +9,7 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.entity.MokoDevice;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -20,15 +20,15 @@ import butterknife.ButterKnife;
  */
 public class DeviceInfoActivity extends BaseActivity {
 
-    @Bind(R.id.tv_company_name)
+    @BindView(R.id.tv_company_name)
     TextView tvCompanyName;
-    @Bind(R.id.tv_device_date)
+    @BindView(R.id.tv_device_date)
     TextView tvDeviceDate;
-    @Bind(R.id.tv_device_name)
+    @BindView(R.id.tv_device_name)
     TextView tvDeviceName;
-    @Bind(R.id.tv_device_version)
+    @BindView(R.id.tv_device_version)
     TextView tvDeviceVersion;
-    @Bind(R.id.tv_device_mac)
+    @BindView(R.id.tv_device_mac)
     TextView tvDeviceMac;
     private MokoDevice mokoDevice;
 

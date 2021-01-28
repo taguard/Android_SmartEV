@@ -25,7 +25,6 @@ import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OverloadInfo;
-import com.moko.lifex.entity.SwitchInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -37,7 +36,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.carbswang.android.numberpickerview.library.NumberPickerView;
 
@@ -49,21 +48,21 @@ import cn.carbswang.android.numberpickerview.library.NumberPickerView;
  */
 public class LEDColorSettingsActivity extends BaseActivity implements NumberPickerView.OnValueChangeListener {
 
-    @Bind(R.id.npv_color_settings)
+    @BindView(R.id.npv_color_settings)
     NumberPickerView npvColorSettings;
-    @Bind(R.id.et_blue)
+    @BindView(R.id.et_blue)
     EditText etBlue;
-    @Bind(R.id.et_green)
+    @BindView(R.id.et_green)
     EditText etGreen;
-    @Bind(R.id.et_yellow)
+    @BindView(R.id.et_yellow)
     EditText etYellow;
-    @Bind(R.id.et_orange)
+    @BindView(R.id.et_orange)
     EditText etOrange;
-    @Bind(R.id.et_red)
+    @BindView(R.id.et_red)
     EditText etRed;
-    @Bind(R.id.et_purple)
+    @BindView(R.id.et_purple)
     EditText etPurple;
-    @Bind(R.id.ll_color_settings)
+    @BindView(R.id.ll_color_settings)
     LinearLayout llColorSettings;
     private MokoDevice mokoDevice;
     private MokoService mokoService;

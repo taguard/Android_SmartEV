@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -42,7 +41,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import androidx.core.content.ContextCompat;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -52,21 +52,21 @@ import butterknife.ButterKnife;
  * @ClassPath com.moko.lifex.activity.MokoPlugDetailActivity
  */
 public class MokoPlugDetailActivity extends BaseActivity {
-    @Bind(R.id.rl_title)
+    @BindView(R.id.rl_title)
     RelativeLayout rlTitle;
-    @Bind(R.id.iv_switch_state)
+    @BindView(R.id.iv_switch_state)
     ImageView ivSwitchState;
-    @Bind(R.id.tv_device_schedule)
+    @BindView(R.id.tv_device_schedule)
     TextView tvDeviceSchedule;
-    @Bind(R.id.tv_device_timer)
+    @BindView(R.id.tv_device_timer)
     TextView tvDeviceTimer;
-    @Bind(R.id.tv_device_statistics)
+    @BindView(R.id.tv_device_statistics)
     TextView tvDeviceStatistics;
-    @Bind(R.id.ll_bg)
+    @BindView(R.id.ll_bg)
     LinearLayout llBg;
-    @Bind(R.id.tv_switch_state)
+    @BindView(R.id.tv_switch_state)
     TextView tvSwitchState;
-    @Bind(R.id.tv_timer_state)
+    @BindView(R.id.tv_timer_state)
     TextView tvTimerState;
     private MokoDevice mokoDevice;
     private MokoService mokoService;

@@ -22,7 +22,7 @@ import com.moko.support.MokoConstants;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -34,11 +34,11 @@ import butterknife.ButterKnife;
 public class ElectricityActivity extends BaseActivity {
 
 
-    @Bind(R.id.tv_current)
+    @BindView(R.id.tv_current)
     TextView tvCurrent;
-    @Bind(R.id.tv_voltage)
+    @BindView(R.id.tv_voltage)
     TextView tvVoltage;
-    @Bind(R.id.tv_power)
+    @BindView(R.id.tv_power)
     TextView tvPower;
 
     private MokoDevice mokoDevice;

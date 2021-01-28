@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.widget.ImageView;
 
 import com.moko.lifex.AppConstants;
@@ -20,7 +19,8 @@ import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.utils.Utils;
 
-import butterknife.Bind;
+import androidx.core.app.ActivityCompat;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -31,7 +31,7 @@ import butterknife.ButterKnife;
  */
 public class GuideActivity extends BaseActivity {
 
-    @Bind(R.id.iv_logo)
+    @BindView(R.id.iv_logo)
     ImageView ivLogo;
 
     @Override
@@ -65,7 +65,7 @@ public class GuideActivity extends BaseActivity {
                 return;
             } else {
                 AppOpsManager appOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-                int checkOp = appOpsManager.checkOp(AppOpsManager.OPSTR_COARSE_LOCATION, Process.myUid(), getPackageName());
+                int checkOp = appOpsManager.checkOp(AppOpsManager.OPSTR_FINE_LOCATION, Process.myUid(), getPackageName());
                 if (checkOp != AppOpsManager.MODE_ALLOWED) {
                     showOpenSettingsDialog2();
                     return;
@@ -115,13 +115,13 @@ public class GuideActivity extends BaseActivity {
                         // 判断用户是否 点击了不再提醒。(检测该权限是否还可以申请)
                         boolean shouldShowRequest = shouldShowRequestPermissionRationale(permissions[0]);
                         if (shouldShowRequest) {
-                            if (permissions[0].equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                            if (permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
                                 showRequestPermissionDialog2();
                             } else {
                                 showRequestPermissionDialog();
                             }
                         } else {
-                            if (permissions[0].equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                            if (permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
                                 showOpenSettingsDialog2();
                             } else {
                                 showOpenSettingsDialog();
@@ -235,7 +235,7 @@ public class GuideActivity extends BaseActivity {
                 .setPositiveButton(getString(R.string.ensure), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(GuideActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, AppConstants.PERMISSION_REQUEST_CODE);
+                        ActivityCompat.requestPermissions(GuideActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, AppConstants.PERMISSION_REQUEST_CODE);
                     }
                 })
                 .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {

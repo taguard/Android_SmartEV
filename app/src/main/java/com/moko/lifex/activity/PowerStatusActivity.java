@@ -35,7 +35,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -47,13 +47,13 @@ import butterknife.ButterKnife;
 public class PowerStatusActivity extends BaseActivity {
 
 
-    @Bind(R.id.rb_switch_off)
+    @BindView(R.id.rb_switch_off)
     RadioButton rbSwitchOff;
-    @Bind(R.id.rb_switch_on)
+    @BindView(R.id.rb_switch_on)
     RadioButton rbSwitchOn;
-    @Bind(R.id.rb_last_status)
+    @BindView(R.id.rb_last_status)
     RadioButton rbLastStatus;
-    @Bind(R.id.rg_power_status)
+    @BindView(R.id.rg_power_status)
     RadioGroup rgPowerStatus;
 
     private MQTTConfig appMqttConfig;

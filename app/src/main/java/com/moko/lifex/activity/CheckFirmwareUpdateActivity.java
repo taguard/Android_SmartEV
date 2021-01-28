@@ -37,7 +37,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -49,13 +49,13 @@ import butterknife.ButterKnife;
 public class CheckFirmwareUpdateActivity extends BaseActivity {
 
     public static String TAG = "CheckFirmwareUpdateActivity";
-    @Bind(R.id.et_host_content)
+    @BindView(R.id.et_host_content)
     EditText etHostContent;
-    @Bind(R.id.et_host_port)
+    @BindView(R.id.et_host_port)
     EditText etHostPort;
-    @Bind(R.id.et_host_catalogue)
+    @BindView(R.id.et_host_catalogue)
     EditText etHostCatalogue;
-    @Bind(R.id.tv_update_type)
+    @BindView(R.id.tv_update_type)
     TextView tvUpdateType;
 
 

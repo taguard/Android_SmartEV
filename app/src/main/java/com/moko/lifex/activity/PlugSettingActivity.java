@@ -37,7 +37,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -48,7 +48,7 @@ import butterknife.ButterKnife;
  */
 public class PlugSettingActivity extends BaseActivity {
 
-    @Bind(R.id.tv_energy_consumption)
+    @BindView(R.id.tv_energy_consumption)
     TextView tvEnergyConsumption;
     private MokoDevice mokoDevice;
     private MokoService mokoService;

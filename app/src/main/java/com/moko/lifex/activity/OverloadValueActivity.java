@@ -24,14 +24,9 @@ import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.OverloadInfo;
 import com.moko.lifex.entity.OverloadValue;
-import com.moko.lifex.entity.SwitchInfo;
-import com.moko.lifex.entity.SystemTimeInfo;
-import com.moko.lifex.entity.TimerInfo;
 import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
-import com.moko.lifex.utils.Utils;
-import com.moko.lifex.view.CustomAttachPopup;
 import com.moko.support.MokoConstants;
 import com.moko.support.log.LogModule;
 
@@ -39,9 +34,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.lang.reflect.Type;
-import java.util.Calendar;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -53,7 +47,7 @@ import butterknife.OnClick;
  */
 public class OverloadValueActivity extends BaseActivity {
 
-    @Bind(R.id.et_overload_value)
+    @BindView(R.id.et_overload_value)
     EditText etOverloadValue;
     private MokoDevice mokoDevice;
     private MokoService mokoService;

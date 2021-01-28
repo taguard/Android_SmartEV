@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelUuid;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
-import com.moko.lifex.activity.SetAppMqttActivity;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.entity.MQTTConfig;
 import com.moko.lifex.utils.FileUtils;
@@ -24,16 +22,16 @@ import com.moko.lifex.utils.ToastUtils;
 
 import java.io.File;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class OnewaySSLFragment extends Fragment {
 
     private static final String TAG = OnewaySSLFragment.class.getSimpleName();
-    @Bind(R.id.tv_ca_file)
+    @BindView(R.id.tv_ca_file)
     TextView tvCaFile;
-    @Bind(R.id.iv_delete)
+    @BindView(R.id.iv_delete)
     ImageView ivDelete;
 
 
@@ -84,7 +82,6 @@ public class OnewaySSLFragment extends Fragment {
     public void onDestroyView() {
         Log.i(TAG, "onDestroyView: ");
         super.onDestroyView();
-        ButterKnife.unbind(this);
     }
 
     @Override

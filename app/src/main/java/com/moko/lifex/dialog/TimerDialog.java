@@ -10,7 +10,7 @@ import com.moko.lifex.view.WheelView;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.OnClick;
 
 /**
@@ -20,11 +20,11 @@ import butterknife.OnClick;
  * @ClassPath com.moko.lifex.dialog.TimerDialog
  */
 public class TimerDialog extends BaseDialog<Boolean> {
-    @Bind(R.id.tv_switch_state)
+    @BindView(R.id.tv_switch_state)
     TextView tvSwitchState;
-    @Bind(R.id.wv_hour)
+    @BindView(R.id.wv_hour)
     WheelView wvHour;
-    @Bind(R.id.wv_minute)
+    @BindView(R.id.wv_minute)
     WheelView wvMinute;
 
     public TimerDialog(Context context) {

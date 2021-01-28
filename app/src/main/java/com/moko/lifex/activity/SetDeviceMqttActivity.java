@@ -6,8 +6,6 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -29,7 +27,9 @@ import com.moko.lifex.fragment.TwowaySSLFragment;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 
-import butterknife.Bind;
+import androidx.annotation.IdRes;
+import androidx.core.content.ContextCompat;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -41,41 +41,41 @@ import butterknife.ButterKnife;
 public class SetDeviceMqttActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
 
 
-    @Bind(R.id.et_mqtt_host)
+    @BindView(R.id.et_mqtt_host)
     EditText etMqttHost;
-    @Bind(R.id.et_mqtt_port)
+    @BindView(R.id.et_mqtt_port)
     EditText etMqttPort;
-    @Bind(R.id.iv_clean_session)
+    @BindView(R.id.iv_clean_session)
     ImageView ivCleanSession;
-    @Bind(R.id.et_mqtt_username)
+    @BindView(R.id.et_mqtt_username)
     EditText etMqttUsername;
-    @Bind(R.id.et_mqtt_password)
+    @BindView(R.id.et_mqtt_password)
     EditText etMqttPassword;
-    @Bind(R.id.tv_qos)
+    @BindView(R.id.tv_qos)
     TextView tvQos;
-    @Bind(R.id.tv_keep_alive)
+    @BindView(R.id.tv_keep_alive)
     TextView tvKeepAlive;
-    @Bind(R.id.et_mqtt_client_id)
+    @BindView(R.id.et_mqtt_client_id)
     EditText etMqttClientId;
-    @Bind(R.id.et_mqtt_device_id)
+    @BindView(R.id.et_mqtt_device_id)
     EditText etMqttDeviceId;
-    @Bind(R.id.rb_conn_mode_tcp)
+    @BindView(R.id.rb_conn_mode_tcp)
     RadioButton rbConnModeTcp;
-    @Bind(R.id.rb_conn_mode_ssl_oneway)
+    @BindView(R.id.rb_conn_mode_ssl_oneway)
     RadioButton rbConnModeSslOneway;
-    @Bind(R.id.rb_conn_mode_ssl_twoway)
+    @BindView(R.id.rb_conn_mode_ssl_twoway)
     RadioButton rbConnModeSslTwoway;
-    @Bind(R.id.rg_conn_mode)
+    @BindView(R.id.rg_conn_mode)
     RadioGroup rgConnMode;
-    @Bind(R.id.frame_connect_mode)
+    @BindView(R.id.frame_connect_mode)
     FrameLayout frameConnectMode;
-    @Bind(R.id.rl_client_id)
+    @BindView(R.id.rl_client_id)
     RelativeLayout rlClientId;
-    @Bind(R.id.tv_connect_mode)
+    @BindView(R.id.tv_connect_mode)
     TextView tvConnectMode;
-    @Bind(R.id.et_topic_subscribe)
+    @BindView(R.id.et_topic_subscribe)
     EditText etTopicSubscribe;
-    @Bind(R.id.et_topic_publish)
+    @BindView(R.id.et_topic_publish)
     EditText etTopicPublish;
 
     private FragmentManager fragmentManager;
