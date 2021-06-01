@@ -164,7 +164,7 @@ public class OverloadValueActivity extends BaseActivity {
                     return;
                 }
                 int value = Integer.parseInt(overloadValue);
-                if (value < 10 || value > 2530) {
+                if (value < 10 || value > 3795) {
                     ToastUtils.showToast(this, "Param error");
                     return;
                 }

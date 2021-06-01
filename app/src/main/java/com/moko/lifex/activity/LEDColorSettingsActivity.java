@@ -267,37 +267,37 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
             return;
         }
         int blueValue = Integer.parseInt(blue);
-        if (blueValue <= 0 || blueValue >= 2525) {
+        if (blueValue <= 0 || blueValue >= 3790) {
             ToastUtils.showToast(this, "Param1 Error");
             return;
         }
 
         int greenValue = Integer.parseInt(green);
-        if (greenValue <= blueValue || greenValue >= 2526) {
+        if (greenValue <= blueValue || greenValue >= 3791) {
             ToastUtils.showToast(this, "Param2 Error");
             return;
         }
 
         int yellowValue = Integer.parseInt(yellow);
-        if (yellowValue <= greenValue || yellowValue >= 2527) {
+        if (yellowValue <= greenValue || yellowValue >= 3792) {
             ToastUtils.showToast(this, "Param3 Error");
             return;
         }
 
         int orangeValue = Integer.parseInt(orange);
-        if (orangeValue <= yellowValue || orangeValue >= 2528) {
+        if (orangeValue <= yellowValue || orangeValue >= 3793) {
             ToastUtils.showToast(this, "Param4 Error");
             return;
         }
 
         int redValue = Integer.parseInt(red);
-        if (redValue <= orangeValue || redValue >= 2529) {
+        if (redValue <= orangeValue || redValue >= 3794) {
             ToastUtils.showToast(this, "Param5 Error");
             return;
         }
 
         int purpleValue = Integer.parseInt(purple);
-        if (purpleValue <= redValue || purpleValue >= 2530) {
+        if (purpleValue <= redValue || purpleValue >= 3795) {
             ToastUtils.showToast(this, "Param6 Error");
             return;
         }

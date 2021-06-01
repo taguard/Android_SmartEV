@@ -242,7 +242,7 @@ public class PlugSettingActivity extends BaseActivity {
     public void resetEnergyClick(View view) {
         AlertMessageDialog dialog = new AlertMessageDialog();
         dialog.setTitle("Reset Energy Consumption");
-        dialog.setMessage("Please confirm again whether to reset the accumulated electricity? Value will be recounted after clearing.");
+        dialog.setMessage("Please confirm again whether to reset energy consumption data. After reset, all energy data will be cleaned.");
         dialog.setOnAlertConfirmListener(new AlertMessageDialog.OnAlertConfirmListener() {
             @Override
             public void onClick() {

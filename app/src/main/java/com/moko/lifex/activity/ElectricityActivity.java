@@ -20,7 +20,6 @@ import com.moko.lifex.entity.PowerInfo;
 import com.moko.support.MokoConstants;
 
 import java.lang.reflect.Type;
-import java.text.DecimalFormat;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -85,7 +84,7 @@ public class ElectricityActivity extends BaseActivity {
                         int current = powerInfo.current;
                         int power = powerInfo.power;
                         tvCurrent.setText(current + "");
-                        tvVoltage.setText(new DecimalFormat().format(voltage * 0.1));
+                        tvVoltage.setText(voltage + "");
                         tvPower.setText(power + "");
                     }
                 }

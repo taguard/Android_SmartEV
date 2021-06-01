@@ -41,7 +41,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
         android:gravity="center_vertical"
-        android:text="Energy accumulated period（min）"
+        android:text="Energy storage period（min）"
         android:textColor="@color/black_333333"
         android:textSize="18sp" />
 
