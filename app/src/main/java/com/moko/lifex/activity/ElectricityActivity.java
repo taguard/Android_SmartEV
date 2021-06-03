@@ -17,6 +17,7 @@ import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.entity.MsgCommon;
 import com.moko.lifex.entity.PowerInfo;
+import com.moko.lifex.utils.Utils;
 import com.moko.support.MokoConstants;
 
 import java.lang.reflect.Type;
@@ -80,12 +81,21 @@ public class ElectricityActivity extends BaseActivity {
                         Type infoType = new TypeToken<PowerInfo>() {
                         }.getType();
                         PowerInfo powerInfo = new Gson().fromJson(msgCommon.data, infoType);
-                        int voltage = powerInfo.voltage;
-                        int current = powerInfo.current;
-                        int power = powerInfo.power;
-                        tvCurrent.setText(current + "");
-                        tvVoltage.setText(voltage + "");
-                        tvPower.setText(power + "");
+                        if ("1".equals(mokoDevice.type)) {
+                            int voltage = (int) powerInfo.voltage;
+                            int current = (int) powerInfo.current;
+                            int power = (int) powerInfo.power;
+                            tvCurrent.setText(current + "");
+                            tvVoltage.setText(Utils.getDecimalFormat("0.#").format(voltage * 0.1));
+                            tvPower.setText(power + "");
+                        } else {
+                            float voltage = powerInfo.voltage;
+                            float current = powerInfo.current;
+                            float power = powerInfo.power;
+                            tvCurrent.setText(Utils.getDecimalFormat("0.#").format(current));
+                            tvVoltage.setText(Utils.getDecimalFormat("0.#").format(voltage));
+                            tvPower.setText(Utils.getDecimalFormat("0.#").format(power));
+                        }
                     }
                 }
             }

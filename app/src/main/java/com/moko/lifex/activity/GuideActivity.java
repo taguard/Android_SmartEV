@@ -44,12 +44,10 @@ public class GuideActivity extends BaseActivity {
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!isWriteStoragePermissionOpen()) {
                     showRequestPermissionDialog();
                     return;
                 }
-            }
         }
         delayGotoMain();
     }
@@ -85,7 +83,7 @@ public class GuideActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AppConstants.REQUEST_CODE_PERMISSION) {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!isWriteStoragePermissionOpen()) {
                     showOpenSettingsDialog();
                 } else {

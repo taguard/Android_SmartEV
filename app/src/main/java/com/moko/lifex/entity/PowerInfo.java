@@ -1,7 +1,7 @@
 package com.moko.lifex.entity;
 
 public class PowerInfo {
-    public int voltage;
-    public int current;
-    public int power;
+    public float voltage;
+    public float current;
+    public float power;
 }
