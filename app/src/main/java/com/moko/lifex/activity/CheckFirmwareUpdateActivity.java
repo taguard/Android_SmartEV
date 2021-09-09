@@ -1,54 +1,51 @@
 package com.moko.lifex.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
-import com.moko.lifex.dialog.UpdateTypeDialog;
-import com.moko.lifex.entity.MQTTConfig;
+import com.moko.lifex.dialog.BottomDialog;
 import com.moko.lifex.entity.MokoDevice;
-import com.moko.lifex.entity.MsgCommon;
-import com.moko.lifex.entity.OTAInfo;
-import com.moko.lifex.entity.OverloadInfo;
-import com.moko.lifex.entity.SetOTA;
-import com.moko.lifex.service.MokoService;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
-import com.moko.support.MokoConstants;
-import com.moko.support.log.LogModule;
+import com.moko.support.MQTTConstants;
+import com.moko.support.MQTTSupport;
+import com.moko.support.entity.MQTTConfig;
+import com.moko.support.entity.MsgCommon;
+import com.moko.support.entity.OTAInfo;
+import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.SetOTA;
+import com.moko.support.event.DeviceOnlineEvent;
+import com.moko.support.event.MQTTMessageArrivedEvent;
+import com.moko.support.handler.MQTTMessageAssembler;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * @Date 2018/6/7
- * @Author wenzheng.liu
- * @Description
- * @ClassPath com.moko.lifex.activity.CheckFirmwareUpdateActivity
- */
-public class CheckFirmwareUpdateActivity extends BaseActivity {
 
-    public static String TAG = "CheckFirmwareUpdateActivity";
+public class CheckFirmwareUpdateActivity extends BaseActivity {
+    private final String FILTER_ASCII = "[ -~]*";
+
+    public static String TAG = CheckFirmwareUpdateActivity.class.getSimpleName();
     @BindView(R.id.et_host_content)
     EditText etHostContent;
     @BindView(R.id.et_host_port)
@@ -59,12 +56,11 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     TextView tvUpdateType;
 
 
-    private MokoDevice mokoDevice;
+    private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
-
-    private String[] mUpdateType;
-
-    private MokoService mokoService;
+    private ArrayList<String> mValues;
+    private int mSelected;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,105 +68,95 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         setContentView(R.layout.activity_check_firmware);
         ButterKnife.bind(this);
         if (getIntent().getExtras() != null) {
-            mokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+            mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
-        mUpdateType = getResources().getStringArray(R.array.update_type);
-        tvUpdateType.setText(mUpdateType[0]);
-        String mqttConfigAppStr = SPUtiles.getStringValue(CheckFirmwareUpdateActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+
+            return null;
+        };
+        etHostContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        etHostCatalogue.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mHandler = new Handler(Looper.getMainLooper());
+        String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
-        bindService(new Intent(this, MokoService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        mValues = new ArrayList<>();
+        mValues.add("Firmware");
+        mValues.add("CA certificate");
+        mValues.add("Client certificate");
+        mValues.add("Private key");
+        tvUpdateType.setText(mValues.get(mSelected));
     }
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mokoService = ((MokoService.LocalBinder) service).getService();
-            // 注册广播接收器
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(MokoConstants.ACTION_MQTT_CONNECTION);
-            filter.addAction(MokoConstants.ACTION_MQTT_RECEIVE);
-            filter.addAction(MokoConstants.ACTION_MQTT_SUBSCRIBE);
-            filter.addAction(MokoConstants.ACTION_MQTT_UNSUBSCRIBE);
-            filter.addAction(AppConstants.ACTION_DEVICE_STATE);
-            registerReceiver(mReceiver, filter);
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
+        // 更新所有设备的网络状态
+        final String topic = event.getTopic();
+        final String message = event.getMessage();
+        if (TextUtils.isEmpty(message))
+            return;
+        MsgCommon<JsonObject> msgCommon;
+        try {
+            Type type = new TypeToken<MsgCommon<JsonObject>>() {
+            }.getType();
+            msgCommon = new Gson().fromJson(message, type);
+        } catch (Exception e) {
+            return;
         }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
+        if (!mMokoDevice.uniqueId.equals(msgCommon.id)) {
+            return;
         }
-    };
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (MokoConstants.ACTION_MQTT_CONNECTION.equals(action)) {
-                int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_CONNECTION_STATE, 0);
+        mMokoDevice.isOnline = true;
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
+            Type infoType = new TypeToken<OverloadInfo>() {
+            }.getType();
+            OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
+            mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
+            mMokoDevice.overloadValue = overLoadInfo.overload_value;
+        }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA) {
+            if (mHandler.hasMessages(0)) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
             }
-            if (MokoConstants.ACTION_MQTT_RECEIVE.equals(action)) {
-                String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                String message = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_MESSAGE);
-                MsgCommon<JsonObject> msgCommon;
-                try {
-                    Type type = new TypeToken<MsgCommon<JsonObject>>() {
-                    }.getType();
-                    msgCommon = new Gson().fromJson(message, type);
-                } catch (Exception e) {
-                    return;
-                }
-                if (mokoDevice.uniqueId.equals(msgCommon.id)) {
-                    mokoDevice.isOnline = true;
-                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OTA_INFO) {
-                        dismissLoadingProgressDialog();
-                        Type infoType = new TypeToken<OTAInfo>() {
-                        }.getType();
-                        OTAInfo otaInfo = new Gson().fromJson(msgCommon.data, infoType);
-                        String ota_result = otaInfo.ota_result;
-                        if ("R1".equals(ota_result)) {
-                            ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_success);
-                        } else {
-                            ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_failed);
-                        }
-                    }
-                    if (msgCommon.msg_id == MokoConstants.MSG_ID_D_2_A_OVERLOAD) {
-                        Type infoType = new TypeToken<OverloadInfo>() {
-                        }.getType();
-                        OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
-                        mokoDevice.isOverload = overLoadInfo.overload_state == 1;
-                        mokoDevice.overloadValue = overLoadInfo.overload_value;
-                    }
-                }
-            }
-            if (MokoConstants.ACTION_MQTT_SUBSCRIBE.equals(action)) {
-                int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-            }
-            if (MokoConstants.ACTION_MQTT_UNSUBSCRIBE.equals(action)) {
-                int state = intent.getIntExtra(MokoConstants.EXTRA_MQTT_STATE, 0);
-            }
-            if (AppConstants.ACTION_DEVICE_STATE.equals(action)) {
-                String topic = intent.getStringExtra(MokoConstants.EXTRA_MQTT_RECEIVE_TOPIC);
-                if (topic.equals(mokoDevice.topicPublish)) {
-                    mokoDevice.isOnline = false;
-                }
+            Type infoType = new TypeToken<OTAInfo>() {
+            }.getType();
+            OTAInfo otaInfo = new Gson().fromJson(msgCommon.data, infoType);
+            String ota_result = otaInfo.ota_result;
+            if ("R1".equals(ota_result)) {
+                ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_success);
+            } else {
+                ToastUtils.showToast(CheckFirmwareUpdateActivity.this, R.string.update_failed);
             }
         }
-    };
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
+        String deviceId = event.getDeviceId();
+        if (!mMokoDevice.deviceId.equals(deviceId)) {
+            return;
+        }
+        boolean online = event.isOnline();
+        mMokoDevice.isOnline = online;
+    }
 
     public void back(View view) {
         finish();
     }
 
     public void startUpdate(View view) {
-        if (!mokoService.isConnected()) {
+        if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        if (!mokoDevice.isOnline) {
+        if (!mMokoDevice.isOnline) {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        if (mokoDevice.isOverload) {
+        if (mMokoDevice.isOverload) {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
@@ -189,51 +175,44 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.mqtt_verify_catalogue);
             return;
         }
-        LogModule.i("升级固件");
-        showLoadingProgressDialog(getString(R.string.wait));
-        MsgCommon<SetOTA> msgCommon = new MsgCommon();
-        msgCommon.msg_id = MokoConstants.MSG_ID_A_2_D_SET_OTA;
-        msgCommon.id = mokoDevice.uniqueId;
-        SetOTA setOTA = new SetOTA();
-        setOTA.file_type = mSelected;
-        setOTA.domain_name = hostStr;
-        setOTA.port = Integer.parseInt(portStr);
-        setOTA.file_way = catalogueStr;
-        msgCommon.data = setOTA;
-        MqttMessage message = new MqttMessage();
-        message.setPayload(new Gson().toJson(msgCommon).getBytes());
-        message.setQos(appMqttConfig.qos);
+        XLog.i("升级固件");
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            ToastUtils.showToast(this, "Set up failed");
+        }, 50 * 1000);
+        showLoadingProgressDialog();
+        setOTA(hostStr, Integer.parseInt(portStr), catalogueStr);
+
+
+    }
+
+    private void setOTA(String host, int port, String catalogue) {
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
-            appTopic = mokoDevice.topicSubscribe;
+            appTopic = mMokoDevice.topicSubscribe;
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
+        SetOTA data = new SetOTA();
+        data.file_type = mSelected;
+        data.domain_name = host;
+        data.port = port;
+        data.file_way = catalogue;
+        String message = MQTTMessageAssembler.assembleWriteOTA(mMokoDevice.uniqueId, data);
         try {
-            mokoService.publish(appTopic, message);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_OTA, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mReceiver);
-        unbindService(serviceConnection);
-    }
-
-    private int mSelected;
 
     public void updateType(View view) {
-        UpdateTypeDialog dialog = new UpdateTypeDialog();
-        dialog.setSelected(mSelected);
-        dialog.setListener(new UpdateTypeDialog.OnDataSelectedListener() {
-            @Override
-            public void onDataSelected(int selected) {
-                mSelected = selected;
-                tvUpdateType.setText(mUpdateType[mSelected]);
-            }
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mValues, mSelected);
+        dialog.setListener(value -> {
+            mSelected = value;
+            tvUpdateType.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }

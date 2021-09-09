@@ -29,13 +29,8 @@ public class DBTools {
 
     public long insertDevice(MokoDevice mokoDevice) {
         ContentValues cv = new ContentValues();
-        cv.put(DBConstants.DEVICE_FIELD_FUNCTION, mokoDevice.function);
         cv.put(DBConstants.DEVICE_FIELD_NAME, mokoDevice.name);
         cv.put(DBConstants.DEVICE_FIELD_NICK_NAME, mokoDevice.nickName);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_1, mokoDevice.switchName1);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_2, mokoDevice.switchName2);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_3, mokoDevice.switchName3);
-        cv.put(DBConstants.DEVICE_FIELD_SPECIFICATIONS, mokoDevice.specifications);
         cv.put(DBConstants.DEVICE_FIELD_DEVICE_ID, mokoDevice.deviceId);
         cv.put(DBConstants.DEVICE_FIELD_UNIQUE_ID, mokoDevice.uniqueId);
         cv.put(DBConstants.DEVICE_FIELD_TYPE, mokoDevice.type);
@@ -53,20 +48,10 @@ public class DBTools {
             MokoDevice mokoDevice = new MokoDevice();
             mokoDevice.id = cursor.getInt(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_ID));
-            mokoDevice.function = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_FUNCTION));
             mokoDevice.name = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_NAME));
             mokoDevice.nickName = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_NICK_NAME));
-            mokoDevice.switchName1 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_1));
-            mokoDevice.switchName2 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_2));
-            mokoDevice.switchName3 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_3));
-            mokoDevice.specifications = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SPECIFICATIONS));
             mokoDevice.deviceId = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_DEVICE_ID));
             mokoDevice.uniqueId = cursor.getString(cursor
@@ -89,20 +74,10 @@ public class DBTools {
             mokoDevice = new MokoDevice();
             mokoDevice.id = cursor.getInt(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_ID));
-            mokoDevice.function = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_FUNCTION));
             mokoDevice.name = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_NAME));
             mokoDevice.nickName = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_NICK_NAME));
-            mokoDevice.switchName1 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_1));
-            mokoDevice.switchName2 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_2));
-            mokoDevice.switchName3 = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SWITCH_3));
-            mokoDevice.specifications = cursor.getString(cursor
-                    .getColumnIndex(DBConstants.DEVICE_FIELD_SPECIFICATIONS));
             mokoDevice.deviceId = cursor.getString(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_DEVICE_ID));
             mokoDevice.uniqueId = cursor.getString(cursor
@@ -124,9 +99,6 @@ public class DBTools {
         String[] whereValue = {mokoDevice.deviceId};
         ContentValues cv = new ContentValues();
         cv.put(DBConstants.DEVICE_FIELD_NICK_NAME, mokoDevice.nickName);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_1, mokoDevice.switchName1);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_2, mokoDevice.switchName2);
-        cv.put(DBConstants.DEVICE_FIELD_SWITCH_3, mokoDevice.switchName3);
         cv.put(DBConstants.DEVICE_FIELD_UNIQUE_ID, mokoDevice.uniqueId);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE, mokoDevice.topicSubscribe);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_PUBLISH, mokoDevice.topicPublish);

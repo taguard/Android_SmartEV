@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:onClick="more"
+            android:onClick="onMoreClick"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:scaleType="fitCenter"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="112dp"
-        android:onClick="switchClick"
+        android:onClick="onSwitchClick"
         android:src="@drawable/plug_switch_on" />
 
     <TextView
@@ -73,6 +73,7 @@
         android:text=""
         android:textColor="@color/blue_0188cc"
         android:textSize="15sp" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -81,18 +82,18 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
         android:layout_marginLeft="60dp"
-        android:layout_marginRight="60dp">
+        android:layout_marginRight="60dp"
+        android:layout_marginBottom="40dp">
 
         <TextView
             android:id="@+id/tv_device_schedule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawablePadding="4dp"
             android:drawableTop="@drawable/schedule_on"
+            android:drawablePadding="4dp"
             android:gravity="center_horizontal"
-            android:onClick="scheduleClick"
+            android:onClick="onScheduleClick"
             android:text="@string/device_detail_schedule"
             android:textColor="@color/blue_0188cc" />
 
@@ -105,10 +106,10 @@
             android:id="@+id/tv_device_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawablePadding="4dp"
             android:drawableTop="@drawable/timer_on"
+            android:drawablePadding="4dp"
             android:gravity="center_horizontal"
-            android:onClick="timerClick"
+            android:onClick="onTimerClick"
             android:text="@string/device_detail_timer"
             android:textColor="@color/blue_0188cc" />
 
@@ -120,11 +121,11 @@
         <TextView
             android:id="@+id/tv_device_statistics"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawablePadding="4dp"
+            android:layout_height="32dp"
             android:drawableTop="@drawable/statistics_on"
+            android:drawablePadding="4dp"
             android:gravity="center_horizontal"
-            android:onClick="statisticsClick"
+            android:onClick="onStatisticsClick"
             android:text="@string/device_detail_statistics"
             android:textColor="@color/blue_0188cc" />
     </LinearLayout>

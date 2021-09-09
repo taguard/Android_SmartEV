@@ -23,12 +23,6 @@ import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * @Date 2018/6/7
- * @Author wenzheng.liu
- * @Description
- * @ClassPath com.moko.lifex.activity.GuideActivity
- */
 public class GuideActivity extends BaseActivity {
 
     @BindView(R.id.iv_logo)
@@ -44,10 +38,10 @@ public class GuideActivity extends BaseActivity {
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!isWriteStoragePermissionOpen()) {
-                    showRequestPermissionDialog();
-                    return;
-                }
+            if (!isWriteStoragePermissionOpen()) {
+                showRequestPermissionDialog();
+                return;
+            }
         }
         delayGotoMain();
     }

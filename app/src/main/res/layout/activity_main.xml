@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_f2f2f2"
@@ -13,7 +14,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:onClick="setAppMqttConfig"
+            android:onClick="setAppMQTTConfig"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:scaleType="fitCenter"
@@ -49,17 +50,12 @@
         android:layout_height="0dp"
         android:layout_weight="1.0">
 
-        <ListView
-            android:id="@+id/lv_device_list"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_device_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/grey_ebebeb"
-            android:cacheColorHint="@color/transparent"
-            android:clipToPadding="false"
-            android:divider="@color/grey_d9d9d9"
-            android:dividerHeight="1dp"
-            android:listSelector="@color/transparent"
-            android:scrollbarStyle="outsideOverlay" />
+            android:overScrollMode="never"
+            tools:listitem="@layout/device_item" />
 
         <RelativeLayout
             android:id="@+id/rl_empty"

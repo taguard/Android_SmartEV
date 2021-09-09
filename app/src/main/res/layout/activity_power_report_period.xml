@@ -30,45 +30,46 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text=""
+            android:text="Power Report Period"
             android:textColor="@color/white_ffffff"
             android:textSize="17sp" />
     </RelativeLayout>
 
-    <TextView
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
-        android:gravity="center_vertical"
-        android:text="Power report period(s)"
-        android:textColor="@color/black_333333"
-        android:textSize="18sp" />
-
     <EditText
         android:id="@+id/et_power_report_period"
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
         android:background="@drawable/shape_edit_bg"
-        android:gravity="center"
         android:inputType="number"
         android:maxLength="3"
+        android:layout_marginTop="10dp"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:singleLine="true"
         android:text=""
-        android:textColor="@color/grey_808080"
-        android:textSize="18sp" />
+        android:textColor="@color/black_333333"
+        android:textSize="15sp" />
+
 
     <TextView
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:gravity="center_vertical"
+        android:text="Range: 1-600, unit: s"
+        android:textColor="@color/grey_808080"
+        android:textSize="13sp" />
+
+    <TextView
+        android:layout_width="150dp"
         android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/shape_btn_bg"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/shape_corner_btn_bg"
         android:gravity="center"
-        android:onClick="saveSettings"
+        android:onClick="onSaveSettingsClick"
         android:text="@string/confirm"
         android:textColor="@color/white_ffffff"
         android:textSize="18sp" />

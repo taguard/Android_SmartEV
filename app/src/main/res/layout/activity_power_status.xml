@@ -45,30 +45,41 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:button="@null"
-            android:drawableLeft="@drawable/radiobtn_conn"
-            android:drawablePadding="10dp"
-            android:paddingLeft="70dp"
-            android:text="Switched off" />
+            android:drawableRight="@drawable/radio_btn"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:text="OFF"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp" />
+
+        <View style="@style/divider_line" />
 
         <RadioButton
             android:id="@+id/rb_switch_on"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:button="@null"
-            android:drawableLeft="@drawable/radiobtn_conn"
-            android:drawablePadding="10dp"
-            android:paddingLeft="70dp"
-            android:text="Switched on" />
+            android:drawableRight="@drawable/radio_btn"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:text="ON"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp" />
+
+        <View style="@style/divider_line" />
 
         <RadioButton
             android:id="@+id/rb_last_status"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:button="@null"
-            android:drawableLeft="@drawable/radiobtn_conn"
-            android:drawablePadding="10dp"
-            android:paddingLeft="70dp"
-            android:text=" Revert to the last status" />
+            android:drawableRight="@drawable/radio_btn"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:text="Restore Last Mode"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp" />
 
+        <View style="@style/divider_line" />
     </RadioGroup>
 </LinearLayout>

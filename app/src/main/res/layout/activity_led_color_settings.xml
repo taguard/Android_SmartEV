@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
-                android:text="Select LED color when device ON"
+                android:text="Select power indicator color when device is ON"
                 android:textColor="@color/black_333333"
                 android:textSize="15sp" />
 
@@ -214,7 +214,7 @@
                 android:layout_marginRight="53dp"
                 android:background="@drawable/shape_corner_btn_bg"
                 android:gravity="center"
-                android:onClick="saveSettings"
+                android:onClick="onSaveSettingsClick"
                 android:text="@string/confirm"
                 android:textColor="@color/white_ffffff"
                 android:textSize="18sp" />

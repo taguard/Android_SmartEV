@@ -9,7 +9,7 @@ import com.lxj.xpopup.core.AttachPopupView;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.activity.MoreActivity;
-import com.moko.lifex.activity.PlugSettingActivity;
+import com.moko.lifex.activity.EnergyPlugSettingActivity;
 import com.moko.lifex.entity.MokoDevice;
 
 import androidx.annotation.NonNull;
@@ -48,7 +48,7 @@ public class CustomAttachPopup extends AttachPopupView {
             public void onClick(View v) {
                 // 跳转设置
                 if (mokoDevice != null) {
-                    Intent intent = new Intent(getContext(), PlugSettingActivity.class);
+                    Intent intent = new Intent(getContext(), EnergyPlugSettingActivity.class);
                     intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
                     getContext().startActivity(intent);
                     dismiss();

@@ -3,7 +3,7 @@ package com.moko.lifex.adapter;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.moko.lifex.R;
-import com.moko.lifex.entity.EnergyInfo;
+import com.moko.support.entity.EnergyInfo;
 
 public class EnergyListAdapter extends BaseQuickAdapter<EnergyInfo, BaseViewHolder> {
     public EnergyListAdapter() {

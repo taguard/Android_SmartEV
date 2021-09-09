@@ -8,12 +8,6 @@ import com.moko.lifex.base.BaseActivity;
 
 import butterknife.ButterKnife;
 
-/**
- * @Date 2018/6/11
- * @Author wenzheng.liu
- * @Description
- * @ClassPath com.moko.lifex.activity.OperationPlugStepsActivity
- */
 public class OperationPlugStepsActivity extends BaseActivity {
 
     @Override

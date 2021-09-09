@@ -38,7 +38,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="modifyName">
+        android:onClick="onModifyNameClick">
 
         <TextView
             android:id="@+id/modify_device_name"
@@ -75,7 +75,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="deviceInfo">
+        android:onClick="onDeviceInfoClick">
 
         <TextView
             android:layout_width="match_parent"
@@ -98,7 +98,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="checkNewFirmware">
+        android:onClick="onCheckNewFirmwareClick">
 
         <TextView
             android:layout_width="match_parent"
@@ -121,7 +121,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:onClick="modifyPowerStatus">
+        android:onClick="onModifyPowerStatusClick">
 
         <TextView
             android:layout_width="match_parent"

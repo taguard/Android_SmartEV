@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="ledColorSettingsClick"
+        android:onClick="onLEDColorSettingsClick"
         android:padding="12dp">
 
         <TextView
@@ -69,7 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="overloadClick"
+        android:onClick="onOverloadClick"
         android:padding="12dp">
 
         <TextView
@@ -98,13 +98,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="powerReportPeriodClick"
+        android:onClick="onPowerReportPeriodClick"
         android:padding="12dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Power report period"
+            android:text="Power Report Period"
             android:textColor="@color/black_333333"
             android:textSize="16sp" />
 
@@ -127,7 +127,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="energyReportPeriodClick"
+        android:onClick="onEnergyReportPeriodClick"
         android:padding="12dp"
         android:visibility="gone">
 
@@ -159,7 +159,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="energyStorageParamsClick"
+        android:onClick="onEnergyStorageParamsClick"
         android:padding="12dp">
 
         <TextView
@@ -188,7 +188,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="1px"
-        android:onClick="resetEnergyClick"
+        android:onClick="onResetEnergyClick"
         android:padding="12dp">
 
         <TextView

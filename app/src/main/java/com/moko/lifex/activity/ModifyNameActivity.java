@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,42 +20,35 @@ import com.moko.lifex.utils.ToastUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * @Date 2018/6/7
- * @Author wenzheng.liu
- * @Description
- * @ClassPath com.moko.lifex.activity.ModifyNameActivity
- */
 public class ModifyNameActivity extends BaseActivity {
-    public static String TAG = "ModifyNameActivity";
+
+    private final String FILTER_ASCII = "[ -~]*";
+    public static String TAG = ModifyNameActivity.class.getSimpleName();
 
     @BindView(R.id.et_nick_name)
     EditText etNickName;
     private MokoDevice device;
-
-    private InputFilter filter = new InputFilter() {
-        @Override
-        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-            if (source.equals(" ") || source.toString().contentEquals("\n")) return "";
-            else return null;
-        }
-    };
+    private InputFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modify_device_name);
         ButterKnife.bind(this);
-        device = (MokoDevice) getIntent().getSerializableExtra("mokodevice");
+        device = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        filter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+
+            return null;
+        };
         etNickName.setText(device.nickName);
         etNickName.setSelection(etNickName.getText().toString().length());
         etNickName.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(20)});
-        etNickName.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                InputMethodManager inputManager = (InputMethodManager) etNickName.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.showSoftInput(etNickName, 0);
-            }
+        etNickName.postDelayed(() -> {
+            InputMethodManager inputManager = (InputMethodManager) etNickName.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.showSoftInput(etNickName, 0);
         }, 300);
     }
 
@@ -72,6 +64,7 @@ public class ModifyNameActivity extends BaseActivity {
         // 跳转首页，刷新数据
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY, TAG);
+        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_ID, device.deviceId);
         startActivity(intent);
     }
 
