@@ -26,6 +26,7 @@ import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OTAInfo;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.SetOTA;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -116,6 +117,15 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
             mMokoDevice.overloadValue = overLoadInfo.overload_value;
         }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
+            }.getType();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            if (overloadOccur.state == 1)
+                finish();
+        }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -140,7 +150,8 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             return;
         }
         boolean online = event.isOnline();
-        mMokoDevice.isOnline = online;
+        if (!online)
+            finish();
     }
 
     public void back(View view) {
@@ -179,7 +190,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
             ToastUtils.showToast(this, "Set up failed");
-        }, 50 * 1000);
+        }, 60 * 1000);
         showLoadingProgressDialog();
         setOTA(hostStr, Integer.parseInt(portStr), catalogueStr);
 

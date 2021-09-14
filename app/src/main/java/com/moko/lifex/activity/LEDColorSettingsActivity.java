@@ -151,8 +151,7 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         }
         boolean online = event.isOnline();
         if (!online) {
-            mMokoDevice.isOnline = false;
-            mMokoDevice.on_off = false;
+            finish();
         }
     }
 
@@ -208,22 +207,6 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         } else {
             llColorSettings.setVisibility(View.VISIBLE);
         }
-    }
-
-    public void onSaveSettingsClick(View view) {
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
-        setLEDColor();
     }
 
     private void setLEDColor() {
@@ -320,5 +303,21 @@ public class LEDColorSettingsActivity extends BaseActivity implements NumberPick
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onSave(View view) {
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        if (!mMokoDevice.isOnline) {
+            ToastUtils.showToast(this, R.string.device_offline);
+            return;
+        }
+        if (mMokoDevice.isOverload) {
+            ToastUtils.showToast(this, R.string.device_overload);
+            return;
+        }
+        setLEDColor();
     }
 }

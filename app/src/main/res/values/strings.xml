@@ -71,6 +71,7 @@
     <string name="electricity_current">Current(mA)</string>
     <string name="electricity_voltage">Voltage(V)</string>
     <string name="electricity_power">Power(W)</string>
+    <string name="electricity_power_factor">Power Factor</string>
 
 
     <string name="permission_storage_close_title">Storage permission is not available</string>
@@ -128,6 +129,18 @@
         <item>Cyan</item>
         <item>Purple</item>
         <item>LED disable</item>
+    </string-array>
+
+    <string-array name="power_indicator_color">
+        <item>Active power indicator with color direct transition</item>
+        <item>Active power indicator with color smooth transition</item>
+        <item>White</item>
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Yellow</item>
+        <item>Cyan</item>
+        <item>Purple</item>
     </string-array>
 
 </resources>

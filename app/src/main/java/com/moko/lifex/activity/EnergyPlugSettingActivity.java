@@ -26,7 +26,6 @@ import com.moko.support.entity.EnergyTotal;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
-import com.moko.support.event.DeviceModifyNameEvent;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.event.MQTTPublishFailureEvent;
@@ -119,16 +118,6 @@ public class EnergyPlugSettingActivity extends BaseActivity {
         }
     }
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
-        // 修改了设备名称
-        String deviceId = event.getDeviceId();
-        if (deviceId.equals(mMokoDevice.deviceId)) {
-            mMokoDevice.nickName = event.getNickName();
-        }
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
         String deviceId = event.getDeviceId();
@@ -203,22 +192,22 @@ public class EnergyPlugSettingActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    public void onEnergyReportPeriodClick(View view) {
-        if (isWindowLocked()) {
-            return;
-        }
-        // 累计电能上报间隔设置
-        Intent intent = new Intent(this, EnergyReportPeriodActivity.class);
-        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
-        startActivity(intent);
-    }
+//    public void onEnergyReportPeriodClick(View view) {
+//        if (isWindowLocked()) {
+//            return;
+//        }
+//        // 累计电能上报间隔设置
+//        Intent intent = new Intent(this, EnergyReportParamsActivity.class);
+//        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
+//        startActivity(intent);
+//    }
 
     public void onEnergyStorageParamsClick(View view) {
         if (isWindowLocked()) {
             return;
         }
         // 累计电能存储参数设置
-        Intent intent = new Intent(this, EnergyStorageParamsActivity.class);
+        Intent intent = new Intent(this, EnergyReportParamsActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
         startActivity(intent);
     }

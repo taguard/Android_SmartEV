@@ -30,7 +30,6 @@ import com.moko.support.entity.EnergyValue;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
-import com.moko.support.event.DeviceModifyNameEvent;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.handler.MQTTMessageAssembler;
@@ -264,17 +263,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
             mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
             mMokoDevice.overloadValue = overLoadInfo.overload_value;
         }
-        
-    }
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
-        // 修改了设备名称
-        String deviceId = event.getDeviceId();
-        if (deviceId.equals(mMokoDevice.deviceId)) {
-            mMokoDevice.nickName = event.getNickName();
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -284,16 +273,15 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
             return;
         }
         boolean online = event.isOnline();
-        mMokoDevice.isOnline = online;
-        mMokoDevice.on_off = online;
+        if (!online)
+            finish();
     }
-
 
 
     public void back(View view) {
         finish();
     }
-    
+
     private void getEnergyHistoryToday() {
         XLog.i("读取当天历史累计电能");
         String appTopic;

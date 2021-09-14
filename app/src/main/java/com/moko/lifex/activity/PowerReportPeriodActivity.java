@@ -22,6 +22,7 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.ReportPeriod;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -58,14 +59,6 @@ public class PowerReportPeriodActivity extends BaseActivity {
         String mqttConfigAppStr = SPUtiles.getStringValue(PowerReportPeriodActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
         showLoadingProgressDialog();
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
@@ -94,14 +87,16 @@ public class PowerReportPeriodActivity extends BaseActivity {
             return;
         }
         mMokoDevice.isOnline = true;
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
-            Type infoType = new TypeToken<OverloadInfo>() {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
             }.getType();
-            OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
-            mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
-            mMokoDevice.overloadValue = overLoadInfo.overload_value;
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            if (overloadOccur.state == 1)
+                finish();
         }
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_REPORT_INTERVAL) {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_POWER_REPORT_INTERVAL) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
@@ -120,16 +115,14 @@ public class PowerReportPeriodActivity extends BaseActivity {
             return;
         }
         boolean online = event.isOnline();
-        if (!online) {
-            mMokoDevice.isOnline = false;
-            mMokoDevice.on_off = false;
-        }
+        if (!online)
+            finish();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishSuccessEvent(MQTTPublishSuccessEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_REPORT_INTERVAL) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL) {
             ToastUtils.showToast(this, "Set up succeed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -141,7 +134,7 @@ public class PowerReportPeriodActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishFailureEvent(MQTTPublishFailureEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_REPORT_INTERVAL) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL) {
             ToastUtils.showToast(this, "Set up failed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -156,32 +149,24 @@ public class PowerReportPeriodActivity extends BaseActivity {
     }
 
     private void getPowerReportPeriod() {
-        XLog.i("读取电量上报间隔");
+        XLog.i("读取电量信息上报间隔");
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        String message = MQTTMessageAssembler.assembleReadReportInterval(mMokoDevice.uniqueId);
+        String message = MQTTMessageAssembler.assembleReadPowerReportInterval(mMokoDevice.uniqueId);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_REPORT_INTERVAL, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
-    public void onSaveSettingsClick(View view) {
+    public void onSave(View view) {
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
             return;
         }
         String reportPeriodStr = etPowerReportPeriod.getText().toString();
@@ -199,11 +184,11 @@ public class PowerReportPeriodActivity extends BaseActivity {
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setReportInterval(reportPeriod);
+        setPowerReportInterval(reportPeriod);
     }
 
-    private void setReportInterval(int reportPeriod) {
-        XLog.i("设置电量上报间隔");
+    private void setPowerReportInterval(int reportPeriod) {
+        XLog.i("设置电量信息上报间隔");
         ReportPeriod period = new ReportPeriod();
         period.report_interval = reportPeriod;
         String appTopic;
@@ -212,9 +197,9 @@ public class PowerReportPeriodActivity extends BaseActivity {
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        String message = MQTTMessageAssembler.assembleConfigReportInterval(mMokoDevice.uniqueId, period);
+        String message = MQTTMessageAssembler.assembleConfigPowerReportInterval(mMokoDevice.uniqueId, period);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_REPORT_INTERVAL, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

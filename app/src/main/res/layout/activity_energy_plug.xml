@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ll_bg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,6 +23,7 @@
             android:src="@drawable/back" />
 
         <TextView
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -79,54 +81,58 @@
         android:layout_height="0dp"
         android:layout_weight="1.0" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
         android:layout_marginBottom="40dp">
 
-        <TextView
-            android:id="@+id/tv_device_schedule"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableTop="@drawable/schedule_on"
-            android:drawablePadding="4dp"
-            android:gravity="center_horizontal"
-            android:onClick="onScheduleClick"
-            android:text="@string/device_detail_schedule"
-            android:textColor="@color/blue_0188cc" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0" />
 
         <TextView
             android:id="@+id/tv_device_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableTop="@drawable/timer_on"
+            android:drawableTop="@drawable/selector_timer"
             android:drawablePadding="4dp"
             android:gravity="center_horizontal"
             android:onClick="onTimerClick"
             android:text="@string/device_detail_timer"
-            android:textColor="@color/blue_0188cc" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0" />
+            android:textColor="@drawable/selector_text_color"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/tv_device_power"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tv_device_statistics"
+            android:id="@+id/tv_device_power"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:drawableTop="@drawable/statistics_on"
+            android:layout_height="0dp"
+            android:drawableTop="@drawable/selector_power"
             android:drawablePadding="4dp"
             android:gravity="center_horizontal"
-            android:onClick="onStatisticsClick"
-            android:text="@string/device_detail_statistics"
-            android:textColor="@color/blue_0188cc" />
-    </LinearLayout>
+            android:onClick="onPowerClick"
+            android:text="@string/device_detail_power"
+            android:textColor="@drawable/selector_text_color"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/tv_device_timer"
+            app:layout_constraintRight_toLeftOf="@id/tv_device_energy"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_device_energy"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:drawableTop="@drawable/selector_energy"
+            android:drawablePadding="4dp"
+            android:gravity="center_horizontal"
+            android:onClick="onEnergyClick"
+            android:text="@string/device_detail_energy"
+            android:textColor="@drawable/selector_text_color"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/tv_device_power"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

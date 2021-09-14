@@ -30,6 +30,7 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.SwitchInfo;
 import com.moko.support.event.DeviceDeletedEvent;
 import com.moko.support.event.DeviceModifyNameEvent;
@@ -70,7 +71,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     TextView tvTitle;
     private ArrayList<MokoDevice> devices;
     private DeviceAdapter adapter;
-    public Handler mHandler;
+    private Handler mHandler;
     private MQTTConfig appMqttConfig;
 
     @Override
@@ -184,7 +185,8 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             String from = getIntent().getStringExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY);
             String deviceId = getIntent().getStringExtra(AppConstants.EXTRA_KEY_DEVICE_ID);
             if (ModifyNameActivity.TAG.equals(from)
-                    || MoreActivity.TAG.equals(from)) {
+                    || MoreActivity.TAG.equals(from)
+                    || DeviceSettingActivity.TAG.equals(from)) {
                 devices.clear();
                 devices.addAll(DBTools.getInstance(this).selectAllDevice());
                 if (!TextUtils.isEmpty(deviceId)) {
@@ -277,7 +279,15 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             return;
         }
         if (device.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
+            ToastUtils.showToast(this, "Socket is overload, please check it!");
+            return;
+        }
+        if (device.isOvercurrent) {
+            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
+            return;
+        }
+        if (device.isOvervoltage) {
+            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
             return;
         }
         showLoadingProgressDialog();
@@ -303,17 +313,28 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
 
     @Override
     public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
         MokoDevice device = (MokoDevice) adapter.getItem(position);
-        if ("2".equals(device.type)) {
+        if ("2".equals(device.type) || "3".equals(device.type)) {
+            // MK115、MK116
             if (!device.isOnline) {
                 ToastUtils.showToast(this, R.string.device_offline);
                 return;
             }
-            Intent intent = new Intent(this, MokoPlugActivity.class);
+            Intent intent = new Intent(this, EnergyPlugActivity.class);
+            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
+            startActivity(intent);
+        } else if ("4".equals(device.type)) {
+            // MK117
+            Intent intent = new Intent(this, EnergyPlugDetailActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
         } else {
-            Intent intent = new Intent(this, EnergyPlugActivity.class);
+            // MK114
+            Intent intent = new Intent(this, PlugActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
         }
@@ -413,12 +434,13 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                     }.getType();
                     SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
                     String switch_state = switchInfo.switch_state;
-                    int overload_state = switchInfo.overload_state;
                     // 启动设备定时离线，62s收不到应答则认为离线
                     if (!switch_state.equals(device.on_off ? "on" : "off")) {
                         device.on_off = !device.on_off;
                     }
-                    device.isOverload = overload_state == 1;
+                    device.isOverload = switchInfo.overload_state == 1;
+                    device.isOvercurrent = switchInfo.overcurrent_state == 1;
+                    device.isOvervoltage = switchInfo.overpressure_state == 1;
                 }
                 if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
                     Type infoType = new TypeToken<OverloadInfo>() {
@@ -426,6 +448,24 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                     OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
                     device.isOverload = overLoadInfo.overload_state == 1;
                     device.overloadValue = overLoadInfo.overload_value;
+                }
+                if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR) {
+                    Type infoType = new TypeToken<OverloadOccur>() {
+                    }.getType();
+                    OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+                    device.isOverload = overloadOccur.state == 1;
+                }
+                if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR) {
+                    Type infoType = new TypeToken<OverloadOccur>() {
+                    }.getType();
+                    OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+                    device.isOvervoltage = overloadOccur.state == 1;
+                }
+                if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+                    Type infoType = new TypeToken<OverloadOccur>() {
+                    }.getType();
+                    OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+                    device.isOvercurrent = overloadOccur.state == 1;
                 }
                 adapter.replaceData(devices);
                 break;

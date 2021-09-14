@@ -11,13 +11,15 @@ public class MokoDevice implements Serializable {
     public String uniqueId;
     public String type;
     public boolean on_off;
-    public String company_name;
-    public String production_date;
-    public String product_model;
-    public String firmware_version;
+//    public String company_name;
+//    public String production_date;
+//    public String product_model;
+//    public String firmware_version;
     public String topicPublish;
     public String topicSubscribe;
     public boolean isOnline;
     public boolean isOverload;
+    public boolean isOvercurrent;
+    public boolean isOvervoltage;
     public int overloadValue;
 }

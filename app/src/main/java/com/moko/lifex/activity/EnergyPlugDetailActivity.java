@@ -16,29 +16,29 @@ import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.lxj.xpopup.XPopup;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.dialog.AlertMessageDialog;
 import com.moko.lifex.dialog.TimerDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
-import com.moko.lifex.utils.Utils;
-import com.moko.lifex.view.CustomAttachPopup;
 import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
 import com.moko.support.entity.LoadInsertion;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.SetTimer;
 import com.moko.support.entity.SwitchInfo;
-import com.moko.support.entity.SystemTimeInfo;
 import com.moko.support.entity.TimerInfo;
 import com.moko.support.event.DeviceModifyNameEvent;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
+import com.moko.support.event.MQTTPublishFailureEvent;
+import com.moko.support.event.MQTTPublishSuccessEvent;
 import com.moko.support.handler.MQTTMessageAssembler;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -46,13 +46,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
-import java.util.Calendar;
 
 import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MokoPlugActivity extends BaseActivity {
+public class EnergyPlugDetailActivity extends BaseActivity {
     @BindView(R.id.rl_title)
     RelativeLayout rlTitle;
     @BindView(R.id.iv_switch_state)
@@ -63,14 +62,14 @@ public class MokoPlugActivity extends BaseActivity {
     TextView tvSwitchState;
     @BindView(R.id.tv_timer_state)
     TextView tvTimerState;
-    @BindView(R.id.iv_more)
-    ImageView ivMore;
     @BindView(R.id.tv_device_timer)
     TextView tvDeviceTimer;
     @BindView(R.id.tv_device_power)
     TextView tvDevicePower;
     @BindView(R.id.tv_device_energy)
     TextView tvDeviceEnergy;
+    @BindView(R.id.tv_title)
+    TextView tvTitle;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
@@ -78,22 +77,18 @@ public class MokoPlugActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_moko_plug);
+        setContentView(R.layout.activity_energy_plug);
         ButterKnife.bind(this);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        tvTitle.setText(mMokoDevice.nickName);
         mHandler = new Handler(Looper.getMainLooper());
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
+        changeSwitchState();
+        if (mMokoDevice.isOverload
+                || mMokoDevice.isOvervoltage
+                || mMokoDevice.isOvercurrent) {
+            showOverDialog();
             return;
         }
         showLoadingProgressDialog();
@@ -101,8 +96,84 @@ public class MokoPlugActivity extends BaseActivity {
             dismissLoadingProgressDialog();
             finish();
         }, 30 * 1000);
-        setSystemTime();
-        getOverload();
+        getSwitchInfo();
+    }
+
+    private void showOverDialog() {
+        String status = "";
+        if (mMokoDevice.isOverload)
+            status = "overload";
+        if (mMokoDevice.isOvervoltage)
+            status = "overvoltage";
+        if (mMokoDevice.isOvercurrent)
+            status = "overcurrent";
+        String message = String.format("Socket is %s, do you want to clear the protection state?", status);
+        AlertMessageDialog dialog = new AlertMessageDialog();
+        dialog.setTitle("Warning");
+        dialog.setMessage(message);
+        dialog.setOnAlertCancelListener(() -> {
+            finish();
+        });
+        dialog.setOnAlertConfirmListener(() -> {
+            showClearOverStatusDialog();
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
+    private void showClearOverStatusDialog() {
+        AlertMessageDialog dialog = new AlertMessageDialog();
+        dialog.setTitle("Warning");
+        dialog.setMessage("Please confirm your load is within the protection threshold, otherwise, it will enter protection state again!");
+        dialog.setOnAlertCancelListener(() -> {
+            finish();
+        });
+        dialog.setOnAlertConfirmListener(() -> {
+            showLoadingProgressDialog();
+            mHandler.postDelayed(() -> {
+                dismissLoadingProgressDialog();
+                finish();
+            }, 30 * 1000);
+            clearOverStatus();
+        });
+        dialog.show(getSupportFragmentManager());
+
+    }
+
+    private void clearOverStatus() {
+        XLog.i("清除过载状态");
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = mMokoDevice.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
+        if (mMokoDevice.isOverload) {
+            String message = MQTTMessageAssembler.assembleConfigClearOverloadStatus(mMokoDevice.uniqueId);
+            try {
+                MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+        if (mMokoDevice.isOvervoltage) {
+            String message = MQTTMessageAssembler.assembleConfigClearOverVoltageStatus(mMokoDevice.uniqueId);
+            try {
+                MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_VOLTAGE_PROTECTION, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+        if (mMokoDevice.isOvercurrent) {
+            String message = MQTTMessageAssembler.assembleConfigClearOverCurrentStatus(mMokoDevice.uniqueId);
+            try {
+                MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_CURRENT_PROTECTION, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -133,13 +204,19 @@ public class MokoPlugActivity extends BaseActivity {
             }.getType();
             SwitchInfo switchInfo = new Gson().fromJson(msgCommon.data, infoType);
             String switch_state = switchInfo.switch_state;
-            int overload_state = switchInfo.overload_state;
             // 启动设备定时离线，62s收不到应答则认为离线
             if (!switch_state.equals(mMokoDevice.on_off ? "on" : "off")) {
                 mMokoDevice.on_off = !mMokoDevice.on_off;
             }
-            mMokoDevice.isOverload = overload_state == 1;
+            mMokoDevice.isOverload = switchInfo.overload_state == 1;
+            mMokoDevice.isOvercurrent = switchInfo.overcurrent_state == 1;
+            mMokoDevice.isOvervoltage = switchInfo.overpressure_state == 1;
             changeSwitchState();
+            if (mMokoDevice.isOverload
+                    || mMokoDevice.isOvervoltage
+                    || mMokoDevice.isOvercurrent) {
+                showOverDialog();
+            }
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_TIMER_INFO) {
             if (mHandler.hasMessages(0)) {
@@ -157,28 +234,64 @@ public class MokoPlugActivity extends BaseActivity {
                 tvTimerState.setVisibility(View.GONE);
             } else {
                 tvTimerState.setVisibility(View.VISIBLE);
-                String timer = String.format("%s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
+                String timer = String.format("Device will turn %s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
                 tvTimerState.setText(timer);
             }
         }
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
-            if (mHandler.hasMessages(0)) {
-                dismissLoadingProgressDialog();
-                mHandler.removeMessages(0);
-            }
-            Type infoType = new TypeToken<OverloadInfo>() {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
             }.getType();
-            OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
-            mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
-            mMokoDevice.overloadValue = overLoadInfo.overload_value;
-            changeSwitchState();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            mMokoDevice.isOverload = overloadOccur.state == 1;
+            mMokoDevice.on_off = false;
+            showOverDialog();
+        }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
+            }.getType();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            mMokoDevice.isOvervoltage = overloadOccur.state == 1;
+            mMokoDevice.on_off = false;
+            showOverDialog();
+        }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
+            }.getType();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            mMokoDevice.isOvercurrent = overloadOccur.state == 1;
+            mMokoDevice.on_off = false;
+            showOverDialog();
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_LOAD_INSERTION) {
             Type infoType = new TypeToken<LoadInsertion>() {
             }.getType();
             LoadInsertion loadInsertion = new Gson().fromJson(msgCommon.data, infoType);
-            if (loadInsertion.load == 1) {
-                ToastUtils.showToast(MokoPlugActivity.this, "Load insertion");
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, loadInsertion.load == 1 ? "Load starts work！" : "Load stops work！");
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTPublishSuccessEvent(MQTTPublishSuccessEvent event) {
+        int msgId = event.getMsgId();
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION
+                || msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_VOLTAGE_PROTECTION
+                || msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_CURRENT_PROTECTION) {
+            if (mHandler.hasMessages(0)) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+            }
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTPublishFailureEvent(MQTTPublishFailureEvent event) {
+        int msgId = event.getMsgId();
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION
+                || msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_VOLTAGE_PROTECTION
+                || msgId == MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_CURRENT_PROTECTION) {
+            if (mHandler.hasMessages(0)) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
             }
         }
     }
@@ -189,6 +302,7 @@ public class MokoPlugActivity extends BaseActivity {
         String deviceId = event.getDeviceId();
         if (deviceId.equals(mMokoDevice.deviceId)) {
             mMokoDevice.nickName = event.getNickName();
+            tvTitle.setText(mMokoDevice.nickName);
         }
     }
 
@@ -199,12 +313,8 @@ public class MokoPlugActivity extends BaseActivity {
             return;
         }
         boolean online = event.isOnline();
-        if (!online) {
-            mMokoDevice.isOnline = false;
-            mMokoDevice.on_off = false;
-            tvTimerState.setVisibility(View.GONE);
-            changeSwitchState();
-        }
+        if (!online)
+            finish();
     }
 
     private void changeSwitchState() {
@@ -216,8 +326,6 @@ public class MokoPlugActivity extends BaseActivity {
             switchState = getString(R.string.device_detail_switch_offline);
         } else if (mMokoDevice.on_off) {
             switchState = getString(R.string.device_detail_switch_on);
-        } else if (mMokoDevice.isOverload) {
-            switchState = getString(R.string.device_detail_overload, mMokoDevice.overloadValue);
         } else {
             switchState = getString(R.string.device_detail_switch_off);
         }
@@ -237,28 +345,20 @@ public class MokoPlugActivity extends BaseActivity {
         tvDeviceEnergy.setCompoundDrawables(null, drawableEnergy, null, null);
         tvDeviceEnergy.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
         tvTimerState.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
-        if (popup != null && popup.isShow()) {
-            popup.setBg(mMokoDevice.on_off);
-        }
     }
 
     public void back(View view) {
         finish();
     }
 
-    private CustomAttachPopup popup;
-
     public void onMoreClick(View view) {
         if (isWindowLocked()) {
             return;
         }
-        popup = new CustomAttachPopup(this);
-        popup.setData(mMokoDevice);
-        XPopup.Builder builder = new XPopup.Builder(this);
-        builder.atView(view)
-                .offsetX(Utils.dip2px(this, 10))
-                .asCustom(popup)
-                .show();
+        // Energy
+        Intent intent = new Intent(this, DeviceSettingActivity.class);
+        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
+        startActivity(intent);
     }
 
     public void onTimerClick(View view) {
@@ -266,33 +366,53 @@ public class MokoPlugActivity extends BaseActivity {
             return;
         }
         if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.network_error);
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.network_error);
             return;
         }
         if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.device_offline);
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.device_offline);
             return;
         }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.device_overload);
-            return;
-        }
+//        if (mMokoDevice.isOverload) {
+//            ToastUtils.showToast(this, "Socket is overload, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvercurrent) {
+//            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvervoltage) {
+//            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
+//            return;
+//        }
         TimerDialog dialog = new TimerDialog(this);
         dialog.setData(mMokoDevice.on_off);
         dialog.setListener(new TimerDialog.TimerListener() {
             @Override
             public void onConfirmClick(TimerDialog dialog) {
                 if (!MQTTSupport.getInstance().isConnected()) {
-                    ToastUtils.showToast(MokoPlugActivity.this, R.string.network_error);
+                    ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.network_error);
                     return;
                 }
                 if (!mMokoDevice.isOnline) {
-                    ToastUtils.showToast(MokoPlugActivity.this, R.string.device_offline);
+                    ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.device_offline);
                     return;
                 }
+//                if (mMokoDevice.isOverload) {
+//                    ToastUtils.showToast(EnergyPlugDetailActivity.this, "Socket is overload, please check it!");
+//                    return;
+//                }
+//                if (mMokoDevice.isOvercurrent) {
+//                    ToastUtils.showToast(EnergyPlugDetailActivity.this, "Socket is overcurrent, please check it!");
+//                    return;
+//                }
+//                if (mMokoDevice.isOvervoltage) {
+//                    ToastUtils.showToast(EnergyPlugDetailActivity.this, "Socket is overvoltage, please check it!");
+//                    return;
+//                }
                 mHandler.postDelayed(() -> {
                     dismissLoadingProgressDialog();
-                    ToastUtils.showToast(MokoPlugActivity.this, "Set up failed");
+                    ToastUtils.showToast(EnergyPlugDetailActivity.this, "Set up failed");
                 }, 30 * 1000);
                 showLoadingProgressDialog();
                 setTimer(dialog.getWvHour(), dialog.getWvMinute());
@@ -322,13 +442,25 @@ public class MokoPlugActivity extends BaseActivity {
 
     public void onPowerClick(View view) {
         if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.network_error);
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.network_error);
             return;
         }
         if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(MokoPlugActivity.this, R.string.device_offline);
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, R.string.device_offline);
             return;
         }
+//        if (mMokoDevice.isOverload) {
+//            ToastUtils.showToast(this, "Socket is overload, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvercurrent) {
+//            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvervoltage) {
+//            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
+//            return;
+//        }
         // Power
         Intent intent = new Intent(this, ElectricityActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
@@ -344,8 +476,20 @@ public class MokoPlugActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
+//        if (mMokoDevice.isOverload) {
+//            ToastUtils.showToast(this, "Socket is overload, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvercurrent) {
+//            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvervoltage) {
+//            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
+//            return;
+//        }
         // Energy
-        Intent intent = new Intent(this, EnergyActivity.class);
+        Intent intent = new Intent(this, EnergyTotalActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
         startActivity(intent);
     }
@@ -359,14 +503,22 @@ public class MokoPlugActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
+//        if (mMokoDevice.isOverload) {
+//            ToastUtils.showToast(this, "Socket is overload, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvercurrent) {
+//            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
+//            return;
+//        }
+//        if (mMokoDevice.isOvervoltage) {
+//            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
+//            return;
+//        }
         XLog.i("切换开关");
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
-            ToastUtils.showToast(MokoPlugActivity.this, "Set up failed");
+            ToastUtils.showToast(EnergyPlugDetailActivity.this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
         changeSwitch();
@@ -389,26 +541,7 @@ public class MokoPlugActivity extends BaseActivity {
         }
     }
 
-    private void setSystemTime() {
-        XLog.i("同步时间");
-        SystemTimeInfo systemTimeInfo = new SystemTimeInfo();
-        systemTimeInfo.timestamp = Utils.calendar2StrDate(Calendar.getInstance(), "yyyy-MM-dd&HH:mm:ss");
-        String appTopic;
-        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
-            appTopic = mMokoDevice.topicSubscribe;
-        } else {
-            appTopic = appMqttConfig.topicPublish;
-        }
-        String message = MQTTMessageAssembler.assembleWriteTimeInfo(mMokoDevice.uniqueId, systemTimeInfo);
-        try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void getOverload() {
+    private void getSwitchInfo() {
         XLog.i("读取过载状态");
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
@@ -416,9 +549,9 @@ public class MokoPlugActivity extends BaseActivity {
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        String message = MQTTMessageAssembler.assembleReadOverload(mMokoDevice.uniqueId);
+        String message = MQTTMessageAssembler.assembleReadSwitchInfo(mMokoDevice.uniqueId);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_OVERLOAD, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_SWITCH_INFO, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

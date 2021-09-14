@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -20,6 +21,7 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.DeviceInfo;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
+import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.handler.MQTTMessageAssembler;
@@ -37,14 +39,20 @@ public class DeviceInfoActivity extends BaseActivity {
 
     @BindView(R.id.tv_company_name)
     TextView tvCompanyName;
-    @BindView(R.id.tv_device_date)
-    TextView tvDeviceDate;
     @BindView(R.id.tv_device_name)
     TextView tvDeviceName;
     @BindView(R.id.tv_device_version)
     TextView tvDeviceVersion;
     @BindView(R.id.tv_device_mac)
     TextView tvDeviceMac;
+    @BindView(R.id.tv_hardware_version)
+    TextView tvHardwareVersion;
+    @BindView(R.id.rl_hardware_version)
+    RelativeLayout rlHardwareVersion;
+    @BindView(R.id.tv_software_version)
+    TextView tvSoftwareVersion;
+    @BindView(R.id.rl_software_version)
+    RelativeLayout rlSoftwareVersion;
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -86,6 +94,15 @@ public class DeviceInfoActivity extends BaseActivity {
         if (!mMokoDevice.uniqueId.equals(msgCommon.id)) {
             return;
         }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
+            }.getType();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            if (overloadOccur.state == 1)
+                finish();
+        }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_DEVICE_INFO) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -95,17 +112,21 @@ public class DeviceInfoActivity extends BaseActivity {
             }.getType();
             DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
             String company_name = deviceInfo.company_name;
-            String production_date = deviceInfo.production_date;
+            String hardware_version = deviceInfo.hardware_version;
+            String software_version = deviceInfo.software_version;
             String product_model = deviceInfo.product_model;
             String firmware_version = deviceInfo.firmware_version;
             String device_mac = deviceInfo.device_mac;
-            mMokoDevice.company_name = company_name;
-            mMokoDevice.production_date = production_date;
-            mMokoDevice.product_model = product_model;
-            mMokoDevice.firmware_version = firmware_version;
-            mMokoDevice.deviceId = device_mac;
-            tvCompanyName.setText(company_name);
-            tvDeviceDate.setText(production_date);
+            if (!TextUtils.isEmpty(hardware_version)) {
+                rlHardwareVersion.setVisibility(View.VISIBLE);
+                tvHardwareVersion.setText(hardware_version);
+            }
+            if (!TextUtils.isEmpty(software_version)) {
+                rlSoftwareVersion.setVisibility(View.VISIBLE);
+                tvSoftwareVersion.setText(software_version);
+            }
+            if (!TextUtils.isEmpty(company_name))
+                tvCompanyName.setText(company_name);
             tvDeviceName.setText(product_model);
             tvDeviceVersion.setText(firmware_version);
             tvDeviceMac.setText(device_mac);
@@ -119,7 +140,8 @@ public class DeviceInfoActivity extends BaseActivity {
             return;
         }
         boolean online = event.isOnline();
-        mMokoDevice.isOnline = online;
+        if (!online)
+            finish();
     }
 
 

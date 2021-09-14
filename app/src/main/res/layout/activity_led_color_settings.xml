@@ -29,6 +29,16 @@
             android:textColor="@color/white_ffffff"
             android:textSize="18sp" />
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:clickable="true"
+            android:onClick="onSave"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:src="@drawable/ic_save" />
+
 
         <View
             style="@style/divider_line"
@@ -205,19 +215,6 @@
                     android:textColor="@color/black_333333"
                     android:textSize="15sp" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginLeft="53dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="53dp"
-                android:background="@drawable/shape_corner_btn_bg"
-                android:gravity="center"
-                android:onClick="onSaveSettingsClick"
-                android:text="@string/confirm"
-                android:textColor="@color/white_ffffff"
-                android:textSize="18sp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

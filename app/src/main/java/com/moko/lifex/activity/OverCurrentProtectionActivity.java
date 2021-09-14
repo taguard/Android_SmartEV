@@ -5,9 +5,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -19,10 +19,11 @@ import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
-import com.moko.support.entity.EnergyStorageParams;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
+import com.moko.support.entity.OverloadProtection;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.event.MQTTPublishFailureEvent;
@@ -34,50 +35,43 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class EnergyStorageParamsActivity extends BaseActivity {
+public class OverCurrentProtectionActivity extends BaseActivity {
 
 
-    @BindView(R.id.et_storage_period)
-    EditText etStoragePeriod;
-    @BindView(R.id.et_storage_percent)
-    EditText etStoragePercent;
-    private MokoDevice mMokoDevice;
+    @BindView(R.id.cb_over_current_protection)
+    CheckBox cbOverCurrentProtection;
+    @BindView(R.id.et_current_threshold)
+    EditText etCurrentThreshold;
+    @BindView(R.id.et_time_threshold)
+    EditText etTimeThreshold;
     private MQTTConfig appMqttConfig;
-
+    private MokoDevice mMokoDevice;
     private Handler mHandler;
+    private int productMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_energy_saved_params);
+        setContentView(R.layout.activity_over_current_protection);
         ButterKnife.bind(this);
-        if (getIntent().getExtras() != null) {
-            mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
-        }
-        String mqttConfigAppStr = SPUtiles.getStringValue(EnergyStorageParamsActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+        String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+        mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        productMode = getIntent().getIntExtra(AppConstants.EXTRA_KEY_PRODUCT_MODE, 0);
         mHandler = new Handler(Looper.getMainLooper());
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
         showLoadingProgressDialog();
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
             finish();
         }, 30 * 1000);
-        getStorageParams();
+        getOverCurrentProtection();
     }
-
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
@@ -98,43 +92,36 @@ public class EnergyStorageParamsActivity extends BaseActivity {
             return;
         }
         mMokoDevice.isOnline = true;
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
-            Type infoType = new TypeToken<OverloadInfo>() {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
             }.getType();
-            OverloadInfo overLoadInfo = new Gson().fromJson(msgCommon.data, infoType);
-            mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
-            mMokoDevice.overloadValue = overLoadInfo.overload_value;
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            if (overloadOccur.state == 1)
+                finish();
         }
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_REPORT_INTERVAL) {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_PROTECTION) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
             }
-            Type infoType = new TypeToken<EnergyStorageParams>() {
+            Type statusType = new TypeToken<OverloadProtection>() {
             }.getType();
-            EnergyStorageParams storageParams = new Gson().fromJson(msgCommon.data, infoType);
-            etStoragePeriod.setText(String.valueOf(storageParams.time_interval));
-            etStoragePercent.setText(String.valueOf(storageParams.power_change));
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
-        String deviceId = event.getDeviceId();
-        if (!mMokoDevice.deviceId.equals(deviceId)) {
-            return;
-        }
-        boolean online = event.isOnline();
-        if (!online) {
-            mMokoDevice.isOnline = false;
-            mMokoDevice.on_off = false;
+            OverloadProtection overloadProtection = new Gson().fromJson(msgCommon.data, statusType);
+            int enable = overloadProtection.protection_enable;
+            int value = (int) overloadProtection.protection_value;
+            int judge_time = overloadProtection.judge_time;
+            cbOverCurrentProtection.setChecked(enable == 1);
+            etCurrentThreshold.setText(String.valueOf(value));
+            etTimeThreshold.setText(String.valueOf(judge_time));
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishSuccessEvent(MQTTPublishSuccessEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_ENERGY_STORAGE_PARAMS) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_OVER_CURRENT_PROTECTION) {
             ToastUtils.showToast(this, "Set up succeed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -146,7 +133,7 @@ public class EnergyStorageParamsActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishFailureEvent(MQTTPublishFailureEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_ENERGY_STORAGE_PARAMS) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_OVER_CURRENT_PROTECTION) {
             ToastUtils.showToast(this, "Set up failed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -155,56 +142,71 @@ public class EnergyStorageParamsActivity extends BaseActivity {
         }
     }
 
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
+        String deviceId = event.getDeviceId();
+        if (!mMokoDevice.deviceId.equals(deviceId)) {
+            return;
+        }
+        boolean online = event.isOnline();
+        if (!online)
+            finish();
+    }
+
+
     public void back(View view) {
         finish();
     }
 
-    private void getStorageParams() {
-        XLog.i("读取累计电能储存参数");
+
+    private void getOverCurrentProtection() {
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        String message = MQTTMessageAssembler.assembleReadEnergyStorageParams(mMokoDevice.uniqueId);
+        String message = MQTTMessageAssembler.assembleReadOverCurrentProtection(mMokoDevice.uniqueId);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_ENERGY_STORAGE_PARAMS, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_OVER_CURRENT_PROTECTION, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
-    public void onSaveSettingsClick(View view) {
+    public void onSave(View view) {
+        if (isWindowLocked())
+            return;
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        if (!mMokoDevice.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
+        float max = 0;
+        if (productMode == 1) {
+            max = 19.2f;
+        } else if (productMode == 2) {
+            max = 18;
+        } else if (productMode == 3) {
+            max = 15.8f;
         }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(this, R.string.device_overload);
-            return;
-        }
-        String storagePeriodStr = etStoragePeriod.getText().toString();
-        if (TextUtils.isEmpty(storagePeriodStr)) {
+        String currentThresholdStr = etCurrentThreshold.getText().toString();
+        if (TextUtils.isEmpty(currentThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        int storagePeriod = Integer.parseInt(storagePeriodStr);
-        if (storagePeriod < 1 || storagePeriod > 60) {
+        float currentThreshold = new BigDecimal(currentThresholdStr).floatValue();
+        if (currentThreshold < 0.1 || currentThreshold > max) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        String storagePercentStr = etStoragePercent.getText().toString();
-        if (TextUtils.isEmpty(storagePercentStr)) {
+        String timeThresholdStr = etTimeThreshold.getText().toString();
+        if (TextUtils.isEmpty(timeThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        int storagePercent = Integer.parseInt(storagePercentStr);
-        if (storagePercent < 1 || storagePercent > 100) {
+        int timeThreshold = Integer.parseInt(timeThresholdStr);
+        if (timeThreshold < 1 || timeThreshold > 30) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
@@ -213,23 +215,23 @@ public class EnergyStorageParamsActivity extends BaseActivity {
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setEnergyStorageParams(storagePeriod, storagePercent);
+        setOverCurrentProtection(currentThreshold, timeThreshold);
     }
 
-    private void setEnergyStorageParams(int storagePeriod, int storagePercent) {
-        XLog.i("设置累计电能储存参数");
-        EnergyStorageParams params = new EnergyStorageParams();
-        params.time_interval = storagePeriod;
-        params.power_change = storagePercent;
+    private void setOverCurrentProtection(float currentThreshold, int timeThreshold) {
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        String message = MQTTMessageAssembler.assembleConfigEnergyStorageParams(mMokoDevice.uniqueId, params);
+        OverloadProtection protection = new OverloadProtection();
+        protection.protection_enable = cbOverCurrentProtection.isChecked() ? 1 : 0;
+        protection.protection_value = currentThreshold;
+        protection.judge_time = timeThreshold;
+        String message = MQTTMessageAssembler.assembleConfigOverCurrentProtection(mMokoDevice.uniqueId, protection);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_ENERGY_STORAGE_PARAMS, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_OVER_CURRENT_PROTECTION, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

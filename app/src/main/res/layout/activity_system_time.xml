@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white_ffffff"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:background="@color/blue_0188cc">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="back"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="System time"
+            android:textColor="@color/white_ffffff"
+            android:textSize="17sp" />
+
+
+        <View
+            style="@style/divider_line"
+            android:layout_alignParentBottom="true"
+            android:background="@color/grey_999999" />
+    </RelativeLayout>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:clickable="true"
+        android:drawableRight="@drawable/arrow_right"
+        android:gravity="center_vertical"
+        android:onClick="onSyncTimeFromNTPClick"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:text="Sync Time From NTP"
+        android:textColor="@color/black_333333"
+        android:textSize="15sp" />
+
+    <View style="@style/divider_line" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:clickable="true"
+        android:onClick="onSyncTimeFromNTP"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Sync Time From Phone"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/shape_corner_btn_bg"
+            android:clickable="true"
+            android:gravity="center"
+            android:minWidth="100dp"
+            android:onClick="onSyncClick"
+            android:text="Sync"
+            android:textColor="@color/white_ffffff"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View style="@style/divider_line" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TimeZone"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_time_zone"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/shape_corner_btn_bg"
+            android:clickable="true"
+            android:gravity="center"
+            android:minWidth="100dp"
+            android:onClick="onSelectTimeZoneClick"
+            android:text="UTC+08:00"
+            android:textColor="@color/white_ffffff"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View style="@style/divider_line" />
+
+    <TextView
+        android:id="@+id/tv_device_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="12dp"
+        android:text="Device time: 2021-7-21 16:07 UTC+08:00"
+        android:textColor="@color/grey_b3b3b3"
+        android:textSize="15sp" />
+</LinearLayout>

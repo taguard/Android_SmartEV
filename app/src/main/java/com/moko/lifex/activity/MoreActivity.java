@@ -30,7 +30,6 @@ import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
-import com.moko.support.entity.DeviceInfo;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
@@ -112,21 +111,6 @@ public class MoreActivity extends BaseActivity {
             mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
             mMokoDevice.overloadValue = overLoadInfo.overload_value;
         }
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_DEVICE_INFO) {
-            Type infoType = new TypeToken<DeviceInfo>() {
-            }.getType();
-            DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
-            String company_name = deviceInfo.company_name;
-            String production_date = deviceInfo.production_date;
-            String product_model = deviceInfo.product_model;
-            String firmware_version = deviceInfo.firmware_version;
-            String device_mac = deviceInfo.device_mac;
-            mMokoDevice.company_name = company_name;
-            mMokoDevice.production_date = production_date;
-            mMokoDevice.product_model = product_model;
-            mMokoDevice.firmware_version = firmware_version;
-            mMokoDevice.deviceId = device_mac;
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -136,7 +120,8 @@ public class MoreActivity extends BaseActivity {
             return;
         }
         boolean online = event.isOnline();
-        mMokoDevice.isOnline = online;
+        if (!online)
+            finish();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -174,7 +159,9 @@ public class MoreActivity extends BaseActivity {
         int msgId = event.getMsgId();
         if (msgId == MQTTConstants.CONFIG_MSG_ID_RESET) {
             ToastUtils.showToast(this, "Set up failed");
-            mHandler.removeMessages(0);
+            if (mHandler.hasMessages(0)) {
+                mHandler.removeMessages(0);
+            }
             dismissLoadingProgressDialog();
         }
     }

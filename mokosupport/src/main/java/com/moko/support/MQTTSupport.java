@@ -99,6 +99,15 @@ public class MQTTSupport {
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 XLog.w(String.format("%s:%s", TAG, "connect failure"));
+                if (mqttAndroidClient != null) {
+                    mqttAndroidClient.close();
+                    try {
+                        mqttAndroidClient.disconnect();
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                    mqttAndroidClient = null;
+                }
                 EventBus.getDefault().post(new MQTTConnectionFailureEvent());
             }
         };
@@ -414,6 +423,7 @@ public class MQTTSupport {
     public void disconnectMqtt() {
         if (!isConnected())
             return;
+        mqttAndroidClient.close();
         try {
             mqttAndroidClient.disconnect();
         } catch (MqttException e) {
@@ -484,8 +494,6 @@ public class MQTTSupport {
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                if (isWindowLocked())
-                    return;
                 XLog.w(String.format("%s:%s->%s", TAG, topic, "publish failure"));
                 EventBus.getDefault().post(new MQTTPublishFailureEvent(topic, msgId));
             }
@@ -497,18 +505,5 @@ public class MQTTSupport {
             return mqttAndroidClient.isConnected();
         }
         return false;
-    }
-
-    // 记录上次页面控件点击时间,屏蔽无效点击事件
-    protected long mLastOnClickTime = 0;
-
-    public boolean isWindowLocked() {
-        long current = SystemClock.elapsedRealtime();
-        if (current - mLastOnClickTime > 500) {
-            mLastOnClickTime = current;
-            return false;
-        } else {
-            return true;
-        }
     }
 }

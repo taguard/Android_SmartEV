@@ -23,15 +23,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Check Update"
+            android:text="OTA"
             android:textColor="@color/white_ffffff"
-            android:textSize="18sp" />
+            android:textSize="17sp" />
 
 
-        <View
-            style="@style/divider_line"
-            android:layout_alignParentBottom="true"
-            android:background="@color/grey_999999" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -50,25 +46,28 @@
 
         <TextView
             android:id="@+id/tv_update_type"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="80dp"
-            android:background="@drawable/shape_corner_btn_bg_white"
-            android:drawableRight="@drawable/pull"
-            android:gravity="center_vertical"
+            android:background="@drawable/shape_corner_btn_bg"
+            android:clickable="true"
+            android:gravity="center"
+            android:minWidth="70dp"
             android:onClick="updateType"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:singleLine="true"
             android:text="Firmware"
-            android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textColor="@color/white_ffffff"
+            android:textSize="15sp" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:paddingLeft="12dp"
         android:paddingRight="12dp">
 
@@ -83,10 +82,12 @@
         <EditText
             android:id="@+id/et_host_content"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="45dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="80dp"
             android:background="@drawable/shape_corner_btn_bg_white"
+            android:hint="1-64 Characters"
+            android:maxLength="64"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:singleLine="true"
@@ -98,6 +99,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:paddingLeft="12dp"
         android:paddingRight="12dp">
 
@@ -112,10 +115,11 @@
         <EditText
             android:id="@+id/et_host_port"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="45dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="80dp"
             android:background="@drawable/shape_corner_btn_bg_white"
+            android:hint="0-65535"
             android:inputType="number"
             android:maxLength="5"
             android:paddingLeft="5dp"
@@ -129,6 +133,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:paddingLeft="12dp"
         android:paddingRight="12dp">
 
@@ -143,10 +149,12 @@
         <EditText
             android:id="@+id/et_host_catalogue"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="45dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="80dp"
             android:background="@drawable/shape_corner_btn_bg_white"
+            android:hint="1-100 Characters"
+            android:maxLength="100"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:singleLine="true"
@@ -167,9 +175,10 @@
         android:layout_marginRight="53dp"
         android:layout_marginBottom="50dp"
         android:background="@drawable/shape_corner_btn_bg"
+        android:clickable="true"
         android:gravity="center"
         android:onClick="startUpdate"
         android:text="Start Update"
         android:textColor="@color/white_ffffff"
-        android:textSize="18sp" />
+        android:textSize="15sp" />
 </LinearLayout>

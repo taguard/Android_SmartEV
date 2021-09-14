@@ -22,6 +22,8 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
+import com.moko.support.entity.OverloadOccur;
+import com.moko.support.entity.PowerDefaultStatus;
 import com.moko.support.entity.PowerStatus;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -91,11 +93,6 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
             return;
         }
         mMokoDevice.isOnline = true;
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_SWITCH_STATE) {
-            rbSwitchOff.setEnabled(true);
-            rbSwitchOn.setEnabled(true);
-            rbLastStatus.setEnabled(true);
-        }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
             Type infoType = new TypeToken<OverloadInfo>() {
             }.getType();
@@ -103,15 +100,33 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
             mMokoDevice.isOverload = overLoadInfo.overload_state == 1;
             mMokoDevice.overloadValue = overLoadInfo.overload_value;
         }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
+                || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
+            Type infoType = new TypeToken<OverloadOccur>() {
+            }.getType();
+            OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
+            if (overloadOccur.state == 1)
+                finish();
+        }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_POWER_STATUS) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
             }
-            Type statusType = new TypeToken<PowerStatus>() {
-            }.getType();
-            PowerStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
-            switch (powerStatus.switch_state) {
+            int status;
+            if ("4".equals(mMokoDevice.type)) {
+                Type statusType = new TypeToken<PowerStatus>() {
+                }.getType();
+                PowerDefaultStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
+                status = powerStatus.default_status;
+            } else {
+                Type statusType = new TypeToken<PowerStatus>() {
+                }.getType();
+                PowerStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
+                status = powerStatus.switch_state;
+            }
+            switch (status) {
                 case 0:
                     rbSwitchOff.setChecked(true);
                     break;
@@ -158,10 +173,8 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
             return;
         }
         boolean online = event.isOnline();
-        mMokoDevice.isOnline = online;
-        rbSwitchOff.setEnabled(online);
-        rbSwitchOn.setEnabled(online);
-        rbLastStatus.setEnabled(online);
+        if (!online)
+            finish();
     }
 
 
@@ -172,13 +185,24 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        PowerStatus powerStatus = new PowerStatus();
-        powerStatus.switch_state = status;
-        String message = MQTTMessageAssembler.assembleWritePowerStatus(mMokoDevice.uniqueId, powerStatus);
-        try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_POWER_STATUS, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
+        if ("4".equals(mMokoDevice.type)) {
+            PowerDefaultStatus powerStatus = new PowerDefaultStatus();
+            powerStatus.default_status = status;
+            String message = MQTTMessageAssembler.assembleWritePowerDefaultStatus(mMokoDevice.uniqueId, powerStatus);
+            try {
+                MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_POWER_STATUS, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        } else {
+            PowerStatus powerStatus = new PowerStatus();
+            powerStatus.switch_state = status;
+            String message = MQTTMessageAssembler.assembleWritePowerStatus(mMokoDevice.uniqueId, powerStatus);
+            try {
+                MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_POWER_STATUS, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -195,10 +219,6 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
         }
         if (!mMokoDevice.isOnline) {
             ToastUtils.showToast(PowerStatusActivity.this, R.string.device_offline);
-            return;
-        }
-        if (mMokoDevice.isOverload) {
-            ToastUtils.showToast(PowerStatusActivity.this, R.string.device_overload);
             return;
         }
         mHandler.postDelayed(() -> {

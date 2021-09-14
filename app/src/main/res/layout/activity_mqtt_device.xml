@@ -10,7 +10,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="44dp"
         android:background="@color/blue_0188cc">
 
         <ImageView
@@ -402,7 +402,7 @@
                         android:clickable="true"
                         android:gravity="center"
                         android:minWidth="70dp"
-                        android:onClick="selectTimeZone"
+                        android:onClick="onSelectTimeZoneClick"
                         android:padding="12dp"
                         android:text="UTC+00"
                         android:textColor="@color/white_ffffff"

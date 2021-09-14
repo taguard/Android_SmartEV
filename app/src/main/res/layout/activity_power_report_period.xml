@@ -33,6 +33,16 @@
             android:text="Power Report Period"
             android:textColor="@color/white_ffffff"
             android:textSize="17sp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:clickable="true"
+            android:onClick="onSave"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:src="@drawable/ic_save" />
     </RelativeLayout>
 
     <EditText
@@ -52,26 +62,13 @@
         android:textColor="@color/black_333333"
         android:textSize="15sp" />
 
-
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        android:gravity="center_vertical"
+        android:gravity="center_horizontal"
         android:text="Range: 1-600, unit: s"
         android:textColor="@color/grey_808080"
         android:textSize="13sp" />
-
-    <TextView
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/shape_corner_btn_bg"
-        android:gravity="center"
-        android:onClick="onSaveSettingsClick"
-        android:text="@string/confirm"
-        android:textColor="@color/white_ffffff"
-        android:textSize="18sp" />
 
 </LinearLayout>
