@@ -116,7 +116,7 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
             }
             int status;
             if ("4".equals(mMokoDevice.type)) {
-                Type statusType = new TypeToken<PowerStatus>() {
+                Type statusType = new TypeToken<PowerDefaultStatus>() {
                 }.getType();
                 PowerDefaultStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
                 status = powerStatus.default_status;

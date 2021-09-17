@@ -23,7 +23,6 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.LEDColorInfo;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -62,6 +61,8 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
+    private int productType;
+    private int maxValue = 4416;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,13 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
         ButterKnife.bind(this);
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        }
+        productType = getIntent().getIntExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, 0);
+        if (productType == 2) {
+            maxValue = 2160;
+        }
+        if (productType == 3) {
+            maxValue = 3588;
         }
         npvColorSettings.setMinValue(0);
         npvColorSettings.setMaxValue(8);
@@ -207,7 +215,7 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
         }
     }
 
-    public void onSaveSettingsClick(View view) {
+    public void onSave(View view) {
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
@@ -223,62 +231,62 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
         String red = etRed.getText().toString();
         String purple = etPurple.getText().toString();
         if (TextUtils.isEmpty(blue)) {
-            ToastUtils.showToast(this, "Param1 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         if (TextUtils.isEmpty(green)) {
-            ToastUtils.showToast(this, "Param2 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         if (TextUtils.isEmpty(yellow)) {
-            ToastUtils.showToast(this, "Param3 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         if (TextUtils.isEmpty(orange)) {
-            ToastUtils.showToast(this, "Param4 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         if (TextUtils.isEmpty(red)) {
-            ToastUtils.showToast(this, "Param5 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         if (TextUtils.isEmpty(purple)) {
-            ToastUtils.showToast(this, "Param6 Error");
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         int blueValue = Integer.parseInt(blue);
-        if (blueValue <= 0 || blueValue >= 4411) {
-            ToastUtils.showToast(this, "Param1 Error");
+        if (blueValue <= 0 || blueValue >= (maxValue - 5)) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int greenValue = Integer.parseInt(green);
-        if (greenValue <= blueValue || greenValue >= 4412) {
-            ToastUtils.showToast(this, "Param2 Error");
+        if (greenValue <= blueValue || greenValue >= (maxValue - 4)) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int yellowValue = Integer.parseInt(yellow);
-        if (yellowValue <= greenValue || yellowValue >= 4413) {
-            ToastUtils.showToast(this, "Param3 Error");
+        if (yellowValue <= greenValue || yellowValue >= (maxValue - 3)) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int orangeValue = Integer.parseInt(orange);
-        if (orangeValue <= yellowValue || orangeValue >= 4414) {
-            ToastUtils.showToast(this, "Param4 Error");
+        if (orangeValue <= yellowValue || orangeValue >= (maxValue - 2)) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int redValue = Integer.parseInt(red);
-        if (redValue <= orangeValue || redValue >= 4415) {
-            ToastUtils.showToast(this, "Param5 Error");
+        if (redValue <= orangeValue || redValue >= (maxValue - 1)) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int purpleValue = Integer.parseInt(purple);
-        if (purpleValue <= redValue || purpleValue >= 4416) {
-            ToastUtils.showToast(this, "Param6 Error");
+        if (purpleValue <= redValue || purpleValue > maxValue) {
+            ToastUtils.showToast(this, "Para Error");
             return;
         }
         mHandler.postDelayed(() -> {

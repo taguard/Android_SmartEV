@@ -117,7 +117,7 @@ public class MQTTConstants {
     public static final int CONFIG_MSG_ID_CONNECT_TIMEOUT = 2120;
     public static final int CONFIG_MSG_ID_LOAD_STATUS_NOTIFY = 2116;
     public static final int CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC = 2121;
-    public static final int CONFIG_MSG_ID_SYNC_TIME_FROM_NTP = 2115;
+    public static final int CONFIG_MSG_ID_SYNC_TIME_FROM_NTP = 2114;
     public static final int CONFIG_MSG_ID_OVERLOAD_PROTECTION = 2102;
     public static final int CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION = 2104;
     public static final int CONFIG_MSG_ID_OVER_VOLTAGE_PROTECTION = 2106;
@@ -140,6 +140,7 @@ public class MQTTConstants {
     public static final int NOTIFY_MSG_ID_ENERGY_HISTORY_TODAY = 1015;
     public static final int NOTIFY_MSG_ID_ENERGY_TOTAL = 1017;
     public static final int NOTIFY_MSG_ID_ENERGY_CURRENT = 1018;
+    public static final int NOTIFY_MSG_ID_ENERGY_HISTORY_MONTH_NEW = 1020;
     public static final int NOTIFY_MSG_ID_INDICATOR_STATUS = 1119;
     public static final int NOTIFY_MSG_ID_DEVICE_STATUS_REPORT_INTERVAL = 1101;
     public static final int NOTIFY_MSG_ID_CONNECT_TIMEOUT = 1121;

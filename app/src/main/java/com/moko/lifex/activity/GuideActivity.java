@@ -18,6 +18,11 @@ import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.utils.Utils;
+import com.moko.support.event.MQTTUnSubscribeFailureEvent;
+import com.moko.support.event.MQTTUnSubscribeSuccessEvent;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import androidx.core.app.ActivityCompat;
 import butterknife.BindView;
@@ -238,5 +243,13 @@ public class GuideActivity extends BaseActivity {
                     }
                 }).create();
         dialog.show();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTUnSubscribeSuccessEvent(MQTTUnSubscribeSuccessEvent event) {
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTUnSubscribeFailureEvent(MQTTUnSubscribeFailureEvent event) {
     }
 }

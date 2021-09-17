@@ -19,10 +19,10 @@ import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
+import com.moko.support.entity.DeviceInfo;
 import com.moko.support.entity.IndicatorStatus;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -50,6 +50,7 @@ public class LEDSettingActivity extends BaseActivity {
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
+    private int productType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,7 @@ public class LEDSettingActivity extends BaseActivity {
             finish();
         }, 30 * 1000);
         getIndicatorStatus();
+        getDeviceInfo();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -108,6 +110,23 @@ public class LEDSettingActivity extends BaseActivity {
             int power_led = status.power_led;
             cbNetworkIndicatorStatus.setChecked(network_led == 1);
             cbPowerIndicatorStatus.setChecked(power_led == 1);
+        }
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_DEVICE_INFO) {
+            if (mHandler.hasMessages(0)) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+            }
+            Type infoType = new TypeToken<DeviceInfo>() {
+            }.getType();
+            DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
+            String product_type = deviceInfo.product_type;
+            if ("MK117-F/E".equalsIgnoreCase(product_type)) {
+                productType = 1;
+            } else if ("MK117-B".equalsIgnoreCase(product_type)) {
+                productType = 2;
+            } else if ("MK117-G".equalsIgnoreCase(product_type)) {
+                productType = 3;
+            }
         }
     }
 
@@ -208,8 +227,28 @@ public class LEDSettingActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
+        if (productType == 0) {
+            ToastUtils.showToast(this, "Para Error");
+            return;
+        }
         Intent i = new Intent(this, PowerIndicatorColorActivity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
+        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, productType);
         startActivity(i);
+    }
+
+    private void getDeviceInfo() {
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = mMokoDevice.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
+        String message = MQTTMessageAssembler.assembleReadDeviceInfo(mMokoDevice.uniqueId);
+        try {
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.READ_MSG_ID_DEVICE_INFO, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -17,10 +17,11 @@ import com.moko.lifex.db.DBTools;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.ToastUtils;
 
+import androidx.fragment.app.FragmentActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ModifyNameActivity extends BaseActivity {
+public class ModifyNameActivity extends FragmentActivity {
 
     private final String FILTER_ASCII = "[ -~]*";
     public static String TAG = ModifyNameActivity.class.getSimpleName();

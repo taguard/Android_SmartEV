@@ -63,7 +63,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
-        productMode = getIntent().getIntExtra(AppConstants.EXTRA_KEY_PRODUCT_MODE, 0);
+        productMode = getIntent().getIntExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, 0);
         mHandler = new Handler(Looper.getMainLooper());
         showLoadingProgressDialog();
         mHandler.postDelayed(() -> {
@@ -110,7 +110,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
             }.getType();
             OverloadProtection overloadProtection = new Gson().fromJson(msgCommon.data, statusType);
             int enable = overloadProtection.protection_enable;
-            int value = (int) overloadProtection.protection_value;
+            float value = overloadProtection.protection_value;
             int judge_time = overloadProtection.judge_time;
             cbOverCurrentProtection.setChecked(enable == 1);
             etCurrentThreshold.setText(String.valueOf(value));

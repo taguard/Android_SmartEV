@@ -29,7 +29,6 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.LoadInsertion;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.SetTimer;
 import com.moko.support.entity.SwitchInfo;
@@ -73,6 +72,7 @@ public class EnergyPlugDetailActivity extends BaseActivity {
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
+    private boolean mIsOver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +100,8 @@ public class EnergyPlugDetailActivity extends BaseActivity {
     }
 
     private void showOverDialog() {
+        if (mIsOver)
+            return;
         String status = "";
         if (mMokoDevice.isOverload)
             status = "overload";
@@ -118,6 +120,7 @@ public class EnergyPlugDetailActivity extends BaseActivity {
             showClearOverStatusDialog();
         });
         dialog.show(getSupportFragmentManager());
+        mIsOver = true;
     }
 
     private void showClearOverStatusDialog() {
@@ -210,7 +213,7 @@ public class EnergyPlugDetailActivity extends BaseActivity {
             }
             mMokoDevice.isOverload = switchInfo.overload_state == 1;
             mMokoDevice.isOvercurrent = switchInfo.overcurrent_state == 1;
-            mMokoDevice.isOvervoltage = switchInfo.overpressure_state == 1;
+            mMokoDevice.isOvervoltage = switchInfo.overvoltage_state == 1;
             changeSwitchState();
             if (mMokoDevice.isOverload
                     || mMokoDevice.isOvervoltage
@@ -244,7 +247,11 @@ public class EnergyPlugDetailActivity extends BaseActivity {
             OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
             mMokoDevice.isOverload = overloadOccur.state == 1;
             mMokoDevice.on_off = false;
-            showOverDialog();
+            if (mMokoDevice.isOverload) {
+                showOverDialog();
+            } else {
+                mIsOver = false;
+            }
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR) {
             Type infoType = new TypeToken<OverloadOccur>() {
@@ -252,7 +259,11 @@ public class EnergyPlugDetailActivity extends BaseActivity {
             OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
             mMokoDevice.isOvervoltage = overloadOccur.state == 1;
             mMokoDevice.on_off = false;
-            showOverDialog();
+            if (mMokoDevice.isOvervoltage) {
+                showOverDialog();
+            } else {
+                mIsOver = false;
+            }
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_CURRENT_OCCUR) {
             Type infoType = new TypeToken<OverloadOccur>() {
@@ -260,7 +271,11 @@ public class EnergyPlugDetailActivity extends BaseActivity {
             OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
             mMokoDevice.isOvercurrent = overloadOccur.state == 1;
             mMokoDevice.on_off = false;
-            showOverDialog();
+            if (mMokoDevice.isOvercurrent) {
+                showOverDialog();
+            } else {
+                mIsOver = false;
+            }
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_LOAD_INSERTION) {
             Type infoType = new TypeToken<LoadInsertion>() {

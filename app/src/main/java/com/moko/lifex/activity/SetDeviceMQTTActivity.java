@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -88,6 +89,8 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     EditText etNtpUrl;
     @BindView(R.id.tv_time_zone)
     TextView tvTimeZone;
+    @BindView(R.id.ll_ntp)
+    LinearLayout llNtp;
     private GeneralDeviceFragment generalFragment;
     private UserDeviceFragment userFragment;
     private SSLDeviceFragment sslFragment;
@@ -171,6 +174,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         isSupportNTP = Integer.parseInt(mDeviceResult.device_type) == 4;
         if (!isSupportNTP)
             return;
+        llNtp.setVisibility(View.VISIBLE);
         // MK117
         mTimeZones = new ArrayList<>();
         for (int i = 0; i <= 48; i++) {
@@ -234,7 +238,11 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                 if (mokoDevice == null) {
                     mokoDevice = new MokoDevice();
                     mokoDevice.name = mDeviceResult.device_name;
-                    mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, mDeviceResult.device_id);
+                    if (isSupportNTP) {
+                        mokoDevice.nickName = mDeviceResult.device_name;
+                    } else {
+                        mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, mDeviceResult.device_id);
+                    }
                     mokoDevice.deviceId = mDeviceResult.device_id;
                     mokoDevice.type = mDeviceResult.device_type;
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
@@ -259,7 +267,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketConnectionEvent(SocketConnectionEvent event) {
         int status = event.getStatus();
-        if (status == MokoConstants.CONN_STATUS_FAILED) {
+        if (status == MokoConstants.CONN_STATUS_CLOSED) {
             if (!isSettingSuccess)
                 finish();
         }
@@ -635,7 +643,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         sslFragment.selectCertFile();
     }
 
-    public void selectTimeZone(View view) {
+    public void onSelectTimeZoneClick(View view) {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();

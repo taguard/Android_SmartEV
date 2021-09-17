@@ -18,9 +18,9 @@ public class MokoConstants {
     public static final int RESPONSE_FAILED_MQTT_WIFI = 3;
     // conn status
     public static final int CONN_STATUS_SUCCESS = 0;
-    public static final int CONN_STATUS_CONNECTING = 1;
-    public static final int CONN_STATUS_FAILED = 2;
-    public static final int CONN_STATUS_TIMEOUT = 3;
+    public static final int CONN_STATUS_FAILED = 1;
+    public static final int CONN_STATUS_TIMEOUT = 2;
+    public static final int CONN_STATUS_CLOSED = 3;
     // mqtt conn status
     public static final int MQTT_CONN_STATUS_LOST = 0;
     public static final int MQTT_CONN_STATUS_SUCCESS = 1;

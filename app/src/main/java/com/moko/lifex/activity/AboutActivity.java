@@ -7,19 +7,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.moko.lifex.R;
-import com.moko.lifex.base.BaseActivity;
 import com.moko.lifex.utils.Utils;
 
+import androidx.fragment.app.FragmentActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * @Date 2020/1/6
- * @Author wenzheng.liu
- * @Description 
- * @ClassPath com.moko.lifex.activity.AboutActivity
- */
-public class AboutActivity extends BaseActivity {
+public class AboutActivity extends FragmentActivity {
 
     @BindView(R.id.tv_soft_version)
     TextView tvSoftVersion;

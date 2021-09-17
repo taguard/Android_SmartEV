@@ -39,7 +39,7 @@ public class ProtectionSettingActivity extends BaseActivity {
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
-    private int productMode;
+    private int productType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,13 +99,13 @@ public class ProtectionSettingActivity extends BaseActivity {
             Type infoType = new TypeToken<DeviceInfo>() {
             }.getType();
             DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
-            String product_model = deviceInfo.product_model;
-            if ("MK117-F/E".equalsIgnoreCase(product_model)) {
-                productMode = 1;
-            } else if ("MK117-B".equalsIgnoreCase(product_model)) {
-                productMode = 2;
-            } else if ("MK117-G".equalsIgnoreCase(product_model)) {
-                productMode = 3;
+            String product_type = deviceInfo.product_type;
+            if ("MK117-F/E".equalsIgnoreCase(product_type)) {
+                productType = 1;
+            } else if ("MK117-B".equalsIgnoreCase(product_type)) {
+                productType = 2;
+            } else if ("MK117-G".equalsIgnoreCase(product_type)) {
+                productType = 3;
             }
         }
     }
@@ -124,39 +124,39 @@ public class ProtectionSettingActivity extends BaseActivity {
     public void onOverloadProtectionClick(View view) {
         if (isWindowLocked())
             return;
-        if (productMode == 0) {
+        if (productType == 0) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
         Intent i = new Intent(this, OverloadProtectionActivity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
-        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_MODE, productMode);
+        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, productType);
         startActivity(i);
     }
 
     public void onOverVoltageProtectionClick(View view) {
         if (isWindowLocked())
             return;
-        if (productMode == 0) {
+        if (productType == 0) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
         Intent i = new Intent(this, OverVoltageProtectionActivity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
-        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_MODE, productMode);
+        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, productType);
         startActivity(i);
     }
 
     public void onOverCurrentProtectionClick(View view) {
         if (isWindowLocked())
             return;
-        if (productMode == 0) {
+        if (productType == 0) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
         Intent i = new Intent(this, OverCurrentProtectionActivity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
-        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_MODE, productMode);
+        i.putExtra(AppConstants.EXTRA_KEY_PRODUCT_TYPE, productType);
         startActivity(i);
     }
 

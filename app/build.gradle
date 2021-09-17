@@ -10,6 +10,7 @@ android {
         targetSdkVersion 29
         versionCode 15
         versionName "1.1.11"
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -56,4 +57,5 @@ dependencies {
     implementation 'cn.carbswang.android:NumberPickerView:1.1.1'
     implementation 'com.lxj:xpopup:1.8.10'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
+    implementation 'com.android.support:multidex:1.0.3'
 }

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.moko.support.log.LogModule;
+import com.elvishew.xlog.XLog;
 
 public class DBOpenHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "moko_lifex";
@@ -21,7 +21,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_DEVICE);
-        LogModule.i("创建数据库");
+        XLog.i("创建数据库");
     }
 
     /**
@@ -29,8 +29,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        LogModule.i("数据库升级");
-        LogModule.i("旧版本:" + oldVersion + ";新版本:" + newVersion);
+        XLog.i("数据库升级");
+        XLog.i("旧版本:" + oldVersion + ";新版本:" + newVersion);
     }
 
     /**

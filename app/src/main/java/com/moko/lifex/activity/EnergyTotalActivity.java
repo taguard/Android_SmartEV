@@ -32,7 +32,6 @@ import com.moko.support.entity.EnergyTotal;
 import com.moko.support.entity.EnergyValue;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -48,6 +47,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -74,6 +74,8 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
     RadioButton rbTotal;
     @BindView(R.id.tv_title)
     TextView tvTitle;
+    @BindView(R.id.cl_energy_list)
+    ConstraintLayout clEnergyList;
     private EnergyListAdapter adapter;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -148,7 +150,7 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
             EnergyHistoryToday energyHistoryToday = new Gson().fromJson(msgCommon.data, infoType);
             energyTotalToday = energyHistoryToday.today_energy;
             electricityConstant = energyHistoryToday.EC;
-            if (electricityConstant != 0) {
+            if (electricityConstant != 0 && rbDaily.isChecked()) {
                 float totalToday = energyTotalToday * 1.0f / electricityConstant;
                 String energyTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
                 tvEnergyTotal.setText(energyTotalToday);
@@ -168,14 +170,14 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 EnergyInfo energyInfo = new EnergyInfo();
                 energyInfo.recordDate = Utils.calendar2StrDate(c, "yyyy-MM-dd&HH:mm");
                 energyInfo.type = 0;
-                energyInfo.hour = String.format("%s:00", energyInfo.recordDate.substring(11));
+                energyInfo.hour = energyInfo.recordDate.substring(11);
                 energyInfo.value = String.valueOf(energyValue.value);
                 energyInfo.energy = energyValue.value;
                 energyInfosToday.add(energyInfo);
             }
             adapter.replaceData(energyInfosToday);
         }
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_HISTORY_MONTH) {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_HISTORY_MONTH_NEW) {
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
@@ -183,7 +185,7 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
             Type infoType = new TypeToken<EnergyHistoryMonth>() {
             }.getType();
             EnergyHistoryMonth energyHistoryMonth = new Gson().fromJson(msgCommon.data, infoType);
-            Calendar calendar = Utils.strDate2Calendar(energyHistoryMonth.timestamp, "yyyy-MM-dd&HH");
+            Calendar calendar = Utils.strDate2Calendar(energyHistoryMonth.start_time, "yyyy-MM-dd&HH:mm");
             if (energyHistoryMonth.result == null || energyHistoryMonth.result.isEmpty())
                 return;
             energyInfosMonth.clear();
@@ -212,7 +214,7 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
             electricityConstant = currentInfo.EC;
 
             EnergyInfo energyInfoMonth = new EnergyInfo();
-            energyInfoMonth.recordDate = currentInfo.timestamp.substring(0, 16);
+            energyInfoMonth.recordDate = currentInfo.timestamp.substring(0, 13);
             energyInfoMonth.date = energyInfoMonth.recordDate.substring(5, 10);
             energyInfoMonth.hour = energyInfoMonth.recordDate.substring(11, 13);
             energyInfoMonth.value = String.valueOf(currentInfo.current_hour_energy);
@@ -230,14 +232,14 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 energyInfosMonth.add(energyInfoMonth);
             }
             EnergyInfo energyInfoToday = new EnergyInfo();
-            energyInfoToday.recordDate = currentInfo.timestamp.substring(0, 16);
+            energyInfoToday.recordDate = currentInfo.timestamp.substring(0, 13);
             energyInfoToday.date = energyInfoToday.recordDate.substring(5, 10);
-            energyInfoToday.hour = energyInfoToday.recordDate.substring(11, 16);
+            energyInfoToday.hour = String.format("%s:00", energyInfoToday.recordDate.substring(11, 13));
             energyInfoToday.value = String.valueOf(currentInfo.current_hour_energy);
-            String time = currentInfo.timestamp.substring(14);
+            String time = currentInfo.timestamp.substring(14, 19);
             if (!energyInfosToday.isEmpty()) {
                 EnergyInfo first = energyInfosToday.get(0);
-                if (energyInfoToday.recordDate.equals(first.recordDate)) {
+                if (energyInfoToday.hour.equals(first.hour)) {
                     first.value = String.valueOf(currentInfo.current_hour_energy);
                 } else {
                     if ("00:00".equals(time)) {
@@ -281,9 +283,6 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 return;
             electricityConstant = energyTotalBean.EC;
             energyTotal = energyTotalBean.all_energy;
-            float total = energyTotal * 1.0f / electricityConstant;
-            String energyTotalStr = Utils.getDecimalFormat("0.##").format(total);
-            tvEnergyTotal.setText(energyTotalStr);
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD_OCCUR
                 || msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVER_VOLTAGE_OCCUR
@@ -402,7 +401,7 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 if (energyInfosToday != null) {
                     adapter.replaceData(energyInfosToday);
                 }
-                tvDuration.setVisibility(View.VISIBLE);
+                clEnergyList.setVisibility(View.VISIBLE);
                 break;
             case R.id.rb_monthly:
                 if (electricityConstant != 0) {
@@ -420,7 +419,7 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 if (energyInfosMonth != null) {
                     adapter.replaceData(energyInfosMonth);
                 }
-                tvDuration.setVisibility(View.VISIBLE);
+                clEnergyList.setVisibility(View.VISIBLE);
                 break;
             case R.id.rb_total:
                 if (electricityConstant != 0) {
@@ -428,8 +427,8 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                     float total = energyTotal * 1.0f / electricityConstant;
                     String energyTotalStr = Utils.getDecimalFormat("0.##").format(total);
                     tvEnergyTotal.setText(energyTotalStr);
-                    tvDuration.setVisibility(View.GONE);
                 }
+                clEnergyList.setVisibility(View.GONE);
                 break;
         }
     }

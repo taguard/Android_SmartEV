@@ -5,5 +5,5 @@ public class SwitchInfo {
     public int overload_state;
     public int load_state;
     public int overcurrent_state;
-    public int overpressure_state;
+    public int overvoltage_state;
 }

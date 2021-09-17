@@ -440,7 +440,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                     }
                     device.isOverload = switchInfo.overload_state == 1;
                     device.isOvercurrent = switchInfo.overcurrent_state == 1;
-                    device.isOvervoltage = switchInfo.overpressure_state == 1;
+                    device.isOvervoltage = switchInfo.overvoltage_state == 1;
                 }
                 if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OVERLOAD) {
                     Type infoType = new TypeToken<OverloadInfo>() {

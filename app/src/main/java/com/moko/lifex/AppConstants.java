@@ -24,7 +24,7 @@ public class AppConstants {
     public static final String EXTRA_KEY_FROM_ACTIVITY = "EXTRA_KEY_FROM_ACTIVITY";
     public static final String EXTRA_KEY_DEVICE_ID = "EXTRA_KEY_UNIQUE_ID";
     public static final String EXTRA_KEY_DEVICE = "EXTRA_KEY_DEVICE";
-    public static final String EXTRA_KEY_PRODUCT_MODE = "EXTRA_KEY_PRODUCT_MODE";
+    public static final String EXTRA_KEY_PRODUCT_TYPE = "EXTRA_KEY_PRODUCT_TYPE";
     public static final String EXTRA_DELETE_DEVICE_ID = "EXTRA_DELETE_DEVICE_ID";
     public static final String EXTRA_KEY_POWER_STATUS = "EXTRA_KEY_POWER_STATUS";
     public static final String EXTRA_KEY_MQTT_CONFIG_APP = "EXTRA_KEY_MQTT_CONFIG_APP";

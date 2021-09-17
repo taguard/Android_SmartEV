@@ -53,7 +53,11 @@ public class AddMokoPlugActivity extends BaseActivity {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("header", MokoConstants.HEADER_GET_DEVICE_INFO);
             SocketSupport.getInstance().sendMessage(jsonObject.toString());
-        } else {
+        } else if (status == MokoConstants.CONN_STATUS_FAILED) {
+            ToastUtils.showToast(this, "Open socket failed");
+            dismissLoadingProgressDialog();
+        } else if (status == MokoConstants.CONN_STATUS_TIMEOUT) {
+            ToastUtils.showToast(this, "Open socket timeout");
             dismissLoadingProgressDialog();
         }
     }
@@ -61,6 +65,7 @@ public class AddMokoPlugActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSocketResponseEvent(SocketResponseEvent event) {
         DeviceResponse response = event.getResponse();
+        dismissLoadingProgressDialog();
         if (response.code == MokoConstants.RESPONSE_SUCCESS) {
             if (response.result.header == MokoConstants.HEADER_GET_DEVICE_INFO) {
                 DeviceResult deviceResult = response.result;

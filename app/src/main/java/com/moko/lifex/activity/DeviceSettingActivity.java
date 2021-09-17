@@ -194,7 +194,9 @@ public class DeviceSettingActivity extends BaseActivity {
                         }
                         mMokoDevice.nickName = nickName;
                         DBTools.getInstance(DeviceSettingActivity.this).updateDevice(mMokoDevice);
-                        EventBus.getDefault().post(new DeviceModifyNameEvent(mMokoDevice.deviceId));
+                        DeviceModifyNameEvent event = new DeviceModifyNameEvent(mMokoDevice.deviceId);
+                        event.setNickName(nickName);
+                        EventBus.getDefault().post(event);
                         dialog.dismiss();
                     }
                 })

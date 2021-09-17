@@ -138,6 +138,7 @@ public class MQTTSupport {
 
                 @Override
                 public void connectionLost(Throwable cause) {
+                    XLog.w("Connection lost");
                     EventBus.getDefault().post(new MQTTConnectionLostEvent());
                 }
 

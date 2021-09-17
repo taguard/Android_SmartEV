@@ -58,7 +58,9 @@ public class SocketSupport {
     }
 
     public void sendMessage(String message) {
-        mSocketThread.send(message);
+        new Thread(() -> {
+            mSocketThread.send(message);
+        }).start();
     }
 
 
@@ -104,21 +106,27 @@ public class SocketSupport {
                             XLog.i("4.断开连接");
                             isRun = false;
                             close();
+                            break;
                         }
                     } else {
                         XLog.i("没有可用连接");
                         socketState(MokoConstants.CONN_STATUS_FAILED);
+                        break;
                     }
                 } catch (SocketTimeoutException e) {
                     XLog.i("获取数据超时");
                     e.printStackTrace();
-                    socketState(MokoConstants.CONN_STATUS_TIMEOUT);
+                    isRun = false;
                     close();
-                    conn();
+                    socketState(MokoConstants.CONN_STATUS_TIMEOUT);
+                    break;
                 } catch (Exception e) {
                     XLog.i("数据接收错误" + e.getMessage());
                     e.printStackTrace();
+                    isRun = false;
                     close();
+                    socketState(MokoConstants.CONN_STATUS_CLOSED);
+                    break;
                 }
             }
         }
@@ -130,7 +138,6 @@ public class SocketSupport {
             try {
                 XLog.i("获取到ip端口:" + ip + ":" + port);
                 XLog.i("连接中……");
-                socketState(MokoConstants.CONN_STATUS_CONNECTING);
                 client = new Socket(ip, port);
 //            client.setSoTimeout(timeout);// 设置阻塞时间
                 XLog.i("连接成功");
@@ -189,7 +196,7 @@ public class SocketSupport {
         public void close() {
             try {
                 isRun = false;
-                if (client != null) {
+                if (client != null && client.isConnected()) {
                     XLog.i("close in");
                     in.close();
                     XLog.i("close out");

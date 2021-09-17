@@ -4,11 +4,11 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.moko.lifex.R;
-import com.moko.lifex.base.BaseActivity;
 
+import androidx.fragment.app.FragmentActivity;
 import butterknife.ButterKnife;
 
-public class OperationPlugStepsActivity extends BaseActivity {
+public class OperationPlugStepsActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
