@@ -80,7 +80,7 @@ public class ElectricityActivity extends BaseActivity {
                 tvCurrent.setText(Utils.getDecimalFormat("0.#").format(current));
                 tvVoltage.setText(Utils.getDecimalFormat("0.#").format(voltage));
                 tvPower.setText(Utils.getDecimalFormat("0.#").format(power));
-                tvPowerFactor.setText(Utils.getDecimalFormat("0.##").format(power_factor));
+                tvPowerFactor.setText(Utils.getDecimalFormat("0.###").format(power_factor));
             } else if ("2".equals(mMokoDevice.type) || "3".equals(mMokoDevice.type)) {
                 float voltage = powerInfo.voltage;
                 float current = powerInfo.current;
