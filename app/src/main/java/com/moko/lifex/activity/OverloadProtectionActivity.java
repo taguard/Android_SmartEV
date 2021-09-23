@@ -181,10 +181,8 @@ public class OverloadProtectionActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        int max = 0;
-        if (productMode == 1) {
-            max = 4416;
-        } else if (productMode == 2) {
+        int max = 4416;
+        if (productMode == 2) {
             max = 2160;
         } else if (productMode == 3) {
             max = 3588;

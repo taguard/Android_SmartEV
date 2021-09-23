@@ -304,6 +304,9 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
             }
+            energyInfosToday.clear();
+            adapter.replaceData(energyInfosToday);
+            tvEnergyTotal.setText("0");
         }
     }
 

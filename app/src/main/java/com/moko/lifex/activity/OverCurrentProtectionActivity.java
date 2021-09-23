@@ -182,10 +182,8 @@ public class OverCurrentProtectionActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        float max = 0;
-        if (productMode == 1) {
-            max = 19.2f;
-        } else if (productMode == 2) {
+        float max = 19.2f;
+        if (productMode == 2) {
             max = 18;
         } else if (productMode == 3) {
             max = 15.8f;

@@ -111,7 +111,7 @@ public class MQTTMessageAssembler {
     public static String assembleWriteTimeInfo(String id, SystemTimeInfo data) {
         MsgCommon<SystemTimeInfo> msgCommon = new MsgCommon();
         msgCommon.id = id;
-        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_OTA;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME;
         msgCommon.data = data;
         String message = new Gson().toJson(msgCommon);
         XLog.e("app_to_device--->" + message);

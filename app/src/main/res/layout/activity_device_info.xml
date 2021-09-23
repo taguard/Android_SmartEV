@@ -41,7 +41,7 @@
             android:layout_weight="1.0"
             android:text="@string/device_info_name"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_device_name"
@@ -69,7 +69,7 @@
             android:layout_weight="1.0"
             android:text="Manufacturer"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_company_name"
@@ -97,7 +97,7 @@
             android:layout_marginLeft="12dp"
             android:text="Hardware Version"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_hardware_version"
@@ -128,7 +128,7 @@
             android:layout_marginLeft="12dp"
             android:text="Software Version"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_software_version"
@@ -160,7 +160,7 @@
             android:layout_weight="1.0"
             android:text="@string/device_info_version"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_device_version"
@@ -188,7 +188,7 @@
             android:layout_weight="1.0"
             android:text="@string/device_info_mac"
             android:textColor="@color/black_333333"
-            android:textSize="18sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_device_mac"
