@@ -3,6 +3,7 @@ package com.moko.lifex.activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -38,6 +39,8 @@ public class ElectricityActivity extends BaseActivity {
     TextView tvPower;
     @BindView(R.id.tv_power_factor)
     TextView tvPowerFactor;
+    @BindView(R.id.rl_power_factor)
+    RelativeLayout rlPowerFactor;
 
     private MokoDevice mMokoDevice;
 
@@ -47,6 +50,9 @@ public class ElectricityActivity extends BaseActivity {
         setContentView(R.layout.activity_electricity_manager);
         ButterKnife.bind(this);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        if ("4".equals(mMokoDevice.type)) {
+            rlPowerFactor.setVisibility(View.VISIBLE);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

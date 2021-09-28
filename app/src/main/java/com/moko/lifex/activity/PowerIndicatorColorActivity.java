@@ -255,31 +255,31 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
             return;
         }
         int blueValue = Integer.parseInt(blue);
-        if (blueValue <= 0 || blueValue >= (maxValue - 5)) {
+        if (blueValue <= 0 || blueValue > (maxValue - 5)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int greenValue = Integer.parseInt(green);
-        if (greenValue <= blueValue || greenValue >= (maxValue - 4)) {
+        if (greenValue <= blueValue || greenValue > (maxValue - 4)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int yellowValue = Integer.parseInt(yellow);
-        if (yellowValue <= greenValue || yellowValue >= (maxValue - 3)) {
+        if (yellowValue <= greenValue || yellowValue > (maxValue - 3)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int orangeValue = Integer.parseInt(orange);
-        if (orangeValue <= yellowValue || orangeValue >= (maxValue - 2)) {
+        if (orangeValue <= yellowValue || orangeValue > (maxValue - 2)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
 
         int redValue = Integer.parseInt(red);
-        if (redValue <= orangeValue || redValue >= (maxValue - 1)) {
+        if (redValue <= orangeValue || redValue > (maxValue - 1)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }

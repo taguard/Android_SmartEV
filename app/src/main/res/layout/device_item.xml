@@ -2,9 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="80dp"
+    android:layout_marginBottom="1dp"
+    android:background="@color/white_ffffff"
     android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal"
-    android:background="@color/white_ffffff"
     android:padding="12dp">
 
     <RelativeLayout
@@ -27,8 +28,8 @@
             android:layout_marginLeft="15dp"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@id/iv_device"
-            android:drawablePadding="14dp"
             android:drawableRight="@drawable/arrow_right"
+            android:drawablePadding="14dp"
             android:gravity="center_vertical"
             android:singleLine="true"
             android:text=""
@@ -40,8 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/iv_device"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="15dp"
+            android:layout_marginBottom="5dp"
             android:layout_toRightOf="@id/iv_device"
             android:gravity="center_vertical"
             android:text=""

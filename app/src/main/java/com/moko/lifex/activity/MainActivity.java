@@ -35,6 +35,7 @@ import com.moko.support.entity.SwitchInfo;
 import com.moko.support.event.DeviceDeletedEvent;
 import com.moko.support.event.DeviceModifyNameEvent;
 import com.moko.support.event.DeviceOnlineEvent;
+import com.moko.support.event.DeviceUpdateEvent;
 import com.moko.support.event.MQTTConnectionCompleteEvent;
 import com.moko.support.event.MQTTConnectionFailureEvent;
 import com.moko.support.event.MQTTConnectionLostEvent;
@@ -52,6 +53,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -101,9 +103,12 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
             tvTitle.setText(getString(R.string.mqtt_connecting));
         }
-        MQTTSupport.getInstance().connectMqtt(appMqttConfigStr);
+        MQTTSupport.getInstance().connectMqtt(appMqttConfig);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // connect event
+    ///////////////////////////////////////////////////////////////////////////
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionCompleteEvent(MQTTConnectionCompleteEvent event) {
         tvTitle.setText(getString(R.string.guide_center));
@@ -121,6 +126,9 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         tvTitle.setText(getString(R.string.mqtt_connect_failed));
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // topic message event
+    ///////////////////////////////////////////////////////////////////////////
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
         // 更新所有设备的网络状态
@@ -153,6 +161,10 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // device event
+    ///////////////////////////////////////////////////////////////////////////
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
         // 修改了设备名称
@@ -171,8 +183,42 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     public void onDeviceDeletedEvent(DeviceDeletedEvent event) {
         // 删除了设备
         int id = event.getId();
+        Iterator<MokoDevice> iterator = devices.iterator();
+        while (iterator.hasNext()) {
+            MokoDevice device = iterator.next();
+            if (id == device.id) {
+                iterator.remove();
+                break;
+            }
+        }
+        adapter.replaceData(devices);
+        if (devices.isEmpty()) {
+            rlEmpty.setVisibility(View.VISIBLE);
+            rvDeviceList.setVisibility(View.GONE);
+        }
         if (id > 0 && mHandler.hasMessages(id)) {
             mHandler.removeMessages(id);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDeviceUpdateEvent(DeviceUpdateEvent event) {
+        String deviceId = event.getDeviceId();
+        if (TextUtils.isEmpty(deviceId))
+            return;
+        MokoDevice mokoDevice = DBTools.getInstance(this).selectDevice(deviceId);
+        if (devices.isEmpty()) {
+            devices.add(mokoDevice);
+        } else {
+            Iterator<MokoDevice> iterator = devices.iterator();
+            while (iterator.hasNext()) {
+                MokoDevice device = iterator.next();
+                if (deviceId.equals(device.deviceId)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+            devices.add(mokoDevice);
         }
     }
 
@@ -187,11 +233,13 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             if (ModifyNameActivity.TAG.equals(from)
                     || MoreActivity.TAG.equals(from)
                     || DeviceSettingActivity.TAG.equals(from)) {
-                devices.clear();
-                devices.addAll(DBTools.getInstance(this).selectAllDevice());
                 if (!TextUtils.isEmpty(deviceId)) {
+                    MokoDevice mokoDevice = DBTools.getInstance(this).selectDevice(deviceId);
+                    if (mokoDevice == null)
+                        return;
                     for (final MokoDevice device : devices) {
                         if (deviceId.equals(device.deviceId)) {
+                            device.nickName = mokoDevice.nickName;
                             device.isOnline = true;
                             if (mHandler.hasMessages(device.id)) {
                                 mHandler.removeMessages(device.id);
@@ -364,12 +412,6 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             XLog.i(String.format("删除设备:%s", mokoDevice.name));
             DBTools.getInstance(MainActivity.this).deleteDevice(mokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mokoDevice.id));
-            devices.remove(mokoDevice);
-            adapter.replaceData(devices);
-            if (devices.isEmpty()) {
-                rlEmpty.setVisibility(View.VISIBLE);
-                rvDeviceList.setVisibility(View.GONE);
-            }
         });
         dialog.show(getSupportFragmentManager());
         return true;
@@ -388,9 +430,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             }
             for (MokoDevice device : devices) {
                 try {
-                    if (TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
-                        MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
-                    }
+                    MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }

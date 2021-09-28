@@ -126,7 +126,6 @@ public class SetAppMQTTActivity extends BaseActivity implements RadioGroup.OnChe
     public void onMQTTConnectionCompleteEvent(MQTTConnectionCompleteEvent event) {
         EventBus.getDefault().cancelEventDelivery(event);
         String mqttConfigStr = new Gson().toJson(mqttConfig, MQTTConfig.class);
-        SPUtiles.setStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, mqttConfigStr);
         etMqttHost.post(() -> {
             ToastUtils.showToast(SetAppMQTTActivity.this, getString(R.string.success));
             dismissLoadingProgressDialog();
@@ -142,6 +141,7 @@ public class SetAppMQTTActivity extends BaseActivity implements RadioGroup.OnChe
     public void onMQTTConnectionFailureEvent(MQTTConnectionFailureEvent event) {
         ToastUtils.showToast(SetAppMQTTActivity.this, getString(R.string.mqtt_connect_failed));
         dismissLoadingProgressDialog();
+        finish();
     }
 
     private void initData() {
@@ -244,9 +244,11 @@ public class SetAppMQTTActivity extends BaseActivity implements RadioGroup.OnChe
             return;
         }
         String mqttConfigStr = new Gson().toJson(mqttConfig, MQTTConfig.class);
+        SPUtiles.setStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, mqttConfigStr);
+
         MQTTSupport.getInstance().disconnectMqtt();
         showLoadingProgressDialog();
-        etMqttHost.postDelayed(() -> MQTTSupport.getInstance().connectMqtt(mqttConfigStr), 2000);
+        etMqttHost.postDelayed(() -> MQTTSupport.getInstance().connectMqtt(mqttConfig), 2000);
     }
 
     public void selectCertificate(View view) {

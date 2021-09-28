@@ -40,12 +40,14 @@ import com.moko.support.entity.DeviceResponse;
 import com.moko.support.entity.DeviceResult;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
+import com.moko.support.event.DeviceUpdateEvent;
 import com.moko.support.event.MQTTConnectionCompleteEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.event.SocketConnectionEvent;
 import com.moko.support.event.SocketResponseEvent;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -257,6 +259,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
                     DBTools.getInstance(this).updateDevice(mokoDevice);
                 }
+                EventBus.getDefault().post(new DeviceUpdateEvent(mokoDevice.deviceId));
                 Intent modifyIntent = new Intent(this, ModifyNameActivity.class);
                 modifyIntent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
                 startActivity(modifyIntent);

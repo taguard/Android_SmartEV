@@ -51,7 +51,7 @@
         android:layout_marginRight="12dp"
         android:background="@drawable/shape_edit_bg"
         android:inputType="number"
-        android:maxLength="3"
+        android:maxLength="4"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:singleLine="true"

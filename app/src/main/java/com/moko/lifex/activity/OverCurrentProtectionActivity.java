@@ -186,7 +186,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
         if (productMode == 2) {
             max = 18;
         } else if (productMode == 3) {
-            max = 15.8f;
+            max = 15.6f;
         }
         String currentThresholdStr = etCurrentThreshold.getText().toString();
         if (TextUtils.isEmpty(currentThresholdStr)) {

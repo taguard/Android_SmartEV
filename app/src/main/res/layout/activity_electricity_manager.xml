@@ -134,8 +134,10 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/rl_power_factor"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"

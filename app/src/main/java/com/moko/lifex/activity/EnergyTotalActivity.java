@@ -86,6 +86,8 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
     ArrayList<EnergyInfo> energyInfosToday;
     ArrayList<EnergyInfo> energyInfosMonth;
     private Handler mHandler;
+    private String mStartTime;
+    private String mTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,10 +101,6 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
         String mqttConfigAppStr = SPUtiles.getStringValue(EnergyTotalActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
-        Calendar calendar = Calendar.getInstance();
-        String time = Utils.calendar2StrDate(calendar, "HH");
-        String date = Utils.calendar2StrDate(calendar, "MM-dd");
-        tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
         energyInfosToday = new ArrayList<>();
         energyInfosMonth = new ArrayList<>();
         adapter = new EnergyListAdapter();
@@ -176,6 +174,12 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 energyInfosToday.add(energyInfo);
             }
             adapter.replaceData(energyInfosToday);
+            if (TextUtils.isEmpty(energyHistoryToday.timestamp))
+                return;
+            mTimestamp = energyHistoryToday.timestamp;
+            String time = energyHistoryToday.timestamp.substring(11, 13);
+            String date = energyHistoryToday.timestamp.substring(5, 10);
+            tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_HISTORY_MONTH_NEW) {
             if (mHandler.hasMessages(0)) {
@@ -203,6 +207,12 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                 energyTotalMonth += energyValue.value;
                 energyInfosMonth.add(energyInfo);
             }
+            if (TextUtils.isEmpty(energyHistoryMonth.timestamp))
+                return;
+            mTimestamp = energyHistoryMonth.timestamp;
+            if (TextUtils.isEmpty(energyHistoryMonth.start_time))
+                return;
+            mStartTime = energyHistoryMonth.start_time;
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_CURRENT) {
             Type infoType = new TypeToken<EnergyCurrentInfo>() {
@@ -270,6 +280,9 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                     tvEnergyTotal.setText(energyTotal);
                 }
             }
+            if (TextUtils.isEmpty(currentInfo.timestamp))
+                return;
+            mTimestamp = currentInfo.timestamp;
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_TOTAL) {
             if (mHandler.hasMessages(0)) {
@@ -396,15 +409,16 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                     String energyTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
                     tvEnergyTotal.setText(energyTotalToday);
                 }
-                Calendar calendarDaily = Calendar.getInstance();
-                String time = Utils.calendar2StrDate(calendarDaily, "HH");
-                String date = Utils.calendar2StrDate(calendarDaily, "MM-dd");
-                tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
                 tvUnit.setText("Hour");
                 if (energyInfosToday != null) {
                     adapter.replaceData(energyInfosToday);
                 }
                 clEnergyList.setVisibility(View.VISIBLE);
+                if (TextUtils.isEmpty(mTimestamp))
+                    return;
+                String time = mTimestamp.substring(11, 13);
+                String date = mTimestamp.substring(5, 10);
+                tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
                 break;
             case R.id.rb_monthly:
                 if (electricityConstant != 0) {
@@ -413,16 +427,16 @@ public class EnergyTotalActivity extends BaseActivity implements RadioGroup.OnCh
                     String energyTotalMonthly = Utils.getDecimalFormat("0.##").format(totalMonthly);
                     tvEnergyTotal.setText(energyTotalMonthly);
                 }
-                Calendar calendarMonthly = Calendar.getInstance();
-                String end = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
-                calendarMonthly.add(Calendar.DAY_OF_MONTH, -29);
-                String start = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
-                tvDuration.setText(String.format("%s to %s", start, end));
                 tvUnit.setText("Date");
                 if (energyInfosMonth != null) {
                     adapter.replaceData(energyInfosMonth);
                 }
                 clEnergyList.setVisibility(View.VISIBLE);
+                if (TextUtils.isEmpty(mTimestamp) || TextUtils.isEmpty(mStartTime))
+                    return;
+                String end = mTimestamp.substring(5, 10);
+                String start = mStartTime.substring(5, 10);
+                tvDuration.setText(String.format("%s to %s", start, end));
                 break;
             case R.id.rb_total:
                 if (electricityConstant != 0) {

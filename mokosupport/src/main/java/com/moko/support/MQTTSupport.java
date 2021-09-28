@@ -2,11 +2,9 @@ package com.moko.support;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.elvishew.xlog.XLog;
-import com.google.gson.Gson;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.event.MQTTConnectionCompleteEvent;
 import com.moko.support.event.MQTTConnectionFailureEvent;
@@ -99,24 +97,14 @@ public class MQTTSupport {
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 XLog.w(String.format("%s:%s", TAG, "connect failure"));
-                if (mqttAndroidClient != null) {
-                    mqttAndroidClient.close();
-                    try {
-                        mqttAndroidClient.disconnect();
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-                    mqttAndroidClient = null;
-                }
                 EventBus.getDefault().post(new MQTTConnectionFailureEvent());
             }
         };
     }
 
-    public void connectMqtt(String mqttAppConfigStr) {
-        if (TextUtils.isEmpty(mqttAppConfigStr))
+    public void connectMqtt(MQTTConfig mqttConfig) {
+        if (mqttConfig == null)
             return;
-        MQTTConfig mqttConfig = new Gson().fromJson(mqttAppConfigStr, MQTTConfig.class);
         if (!mqttConfig.isError()) {
             String uri;
             if (mqttConfig.connectMode > 0) {
@@ -138,6 +126,8 @@ public class MQTTSupport {
 
                 @Override
                 public void connectionLost(Throwable cause) {
+                    if (mqttAndroidClient == null)
+                        return;
                     XLog.w("Connection lost");
                     EventBus.getDefault().post(new MQTTConnectionLostEvent());
                 }
@@ -417,20 +407,21 @@ public class MQTTSupport {
 
     private void connectMqtt(MqttConnectOptions options) throws MqttException {
         if (mqttAndroidClient != null && !mqttAndroidClient.isConnected()) {
+            XLog.w("start connect");
             mqttAndroidClient.connect(options, null, listener);
         }
     }
 
     public void disconnectMqtt() {
-        if (!isConnected())
-            return;
-        mqttAndroidClient.close();
-        try {
-            mqttAndroidClient.disconnect();
-        } catch (MqttException e) {
-            e.printStackTrace();
+        if (mqttAndroidClient != null) {
+            mqttAndroidClient.close();
+            try {
+                mqttAndroidClient.disconnect();
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            mqttAndroidClient = null;
         }
-        mqttAndroidClient = null;
     }
 
     public void subscribe(String topic, int qos) throws MqttException {
