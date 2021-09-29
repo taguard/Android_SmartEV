@@ -8,8 +8,8 @@ android {
         applicationId "com.moko.lifex"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 15
-        versionName "1.1.11"
+        versionCode 16
+        versionName "1.1.12"
         multiDexEnabled true
     }
 
