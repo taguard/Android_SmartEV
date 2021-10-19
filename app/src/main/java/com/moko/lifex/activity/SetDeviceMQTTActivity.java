@@ -283,7 +283,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             switch (response.result.header) {
                 case MokoConstants.HEADER_SET_MQTT_INFO:
                     // 判断是哪种连接方式，是否需要发送证书文件
-                    if (mqttDeviceConfig.connectMode < 2) {
+                    if (mqttDeviceConfig.connectMode < 2 && TextUtils.isEmpty(mqttDeviceConfig.caPath)) {
                         sendTopic();
                     } else {
                         // 先发送CA证书
@@ -291,7 +291,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     }
                     break;
                 case MokoConstants.HEADER_SET_MQTT_SSL:
-                    if (mqttDeviceConfig.connectMode == 2) {
+                    if (mqttDeviceConfig.connectMode < 3) {
                         if (mOffset == mSize || mLen == -1) {
                             sendTopic();
                             return;
@@ -547,8 +547,17 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         mqttDeviceConfig.topicPublish = topicPublish;
         mqttDeviceConfig.username = userFragment.getUsername();
         mqttDeviceConfig.password = userFragment.getPassword();
-        mqttDeviceConfig.connectMode = sslFragment.getConnectMode();
-        mqttDeviceConfig.caPath = sslFragment.getCaPath();
+        int connectMode = sslFragment.getConnectMode();
+        if (connectMode == 2) {
+            mqttDeviceConfig.connectMode = isSupportNTP ? connectMode : 1;
+        } else {
+            mqttDeviceConfig.connectMode = connectMode;
+        }
+        if (connectMode > 1) {
+            mqttDeviceConfig.caPath = sslFragment.getCaPath();
+        } else {
+            mqttDeviceConfig.caPath = "";
+        }
         mqttDeviceConfig.clientKeyPath = sslFragment.getClientKeyPath();
         mqttDeviceConfig.clientCertPath = sslFragment.getClientCertPath();
         mqttDeviceConfig.deviceId = deviceId;
