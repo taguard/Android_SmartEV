@@ -23,6 +23,7 @@ public class MQTTConfig implements Serializable {
     public String topicPublish;
     public String ntpUrl;
     public int timeZone;
+    public int channelDomain;
 
     public boolean isError() {
         return TextUtils.isEmpty(host)

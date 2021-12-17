@@ -11,6 +11,10 @@ public class MokoConstants {
     public static final int HEADER_SET_DEVICE_ID = 4007;
     public static final int HEADER_SET_NTP_URL = 4008;
     public static final int HEADER_SET_TIMEZONE = 4009;
+    public static final int HEADER_SET_TIMEZONE_PRO = 4010;
+    public static final int HEADER_SET_CHANNEL_DOMAIN = 4011;
+    public static final int HEADER_GET_TIMEZONE_PRO = 4012;
+    public static final int HEADER_GET_CHANNEL_DOMAIN = 4013;
     // response
     public static final int RESPONSE_SUCCESS = 0;
     public static final int RESPONSE_FAILED_LENGTH = 1;

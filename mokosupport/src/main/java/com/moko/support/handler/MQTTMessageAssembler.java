@@ -8,6 +8,7 @@ import com.moko.support.entity.EnergyReportParams;
 import com.moko.support.entity.IndicatorStatus;
 import com.moko.support.entity.LEDColorInfo;
 import com.moko.support.entity.LoadStatusNotify;
+import com.moko.support.entity.MQTTSettings;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadProtection;
 import com.moko.support.entity.OverloadValue;
@@ -353,6 +354,16 @@ public class MQTTMessageAssembler {
         return message;
     }
 
+    public static String assembleConfigSystemTimePro(String id, SystemTime data) {
+        MsgCommon<SystemTime> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO;
+        msgCommon.data = data;
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
     public static String assembleReadSyncTimeFromNTP(String id) {
         MsgCommon msgCommon = new MsgCommon();
         msgCommon.id = id;
@@ -451,6 +462,26 @@ public class MQTTMessageAssembler {
         MsgCommon msgCommon = new MsgCommon();
         msgCommon.id = id;
         msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_CLEAR_OVER_CURRENT_PROTECTION;
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
+    public static String assembleConfigMQTTSettings(String id, MQTTSettings data) {
+        MsgCommon<MQTTSettings> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_MQTT_SETTINGS;
+        msgCommon.data = data;
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
+    public static String assembleConfigMQTTReconnect(String id) {
+        MsgCommon<Object> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_MQTT_RECONNECT;
+        msgCommon.data = new Object();
         String message = new Gson().toJson(msgCommon);
         XLog.e("app_to_device--->" + message);
         return message;

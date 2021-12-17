@@ -117,6 +117,9 @@ public class MQTTConstants {
     public static final int CONFIG_MSG_ID_CONNECT_TIMEOUT = 2120;
     public static final int CONFIG_MSG_ID_LOAD_STATUS_NOTIFY = 2116;
     public static final int CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC = 2124;
+    public static final int CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO = 2125;
+    public static final int CONFIG_MSG_ID_MQTT_SETTINGS = 2126;
+    public static final int CONFIG_MSG_ID_MQTT_RECONNECT = 2127;
     public static final int CONFIG_MSG_ID_SYNC_TIME_FROM_NTP = 2114;
     public static final int CONFIG_MSG_ID_OVERLOAD_PROTECTION = 2102;
     public static final int CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION = 2104;
@@ -147,6 +150,8 @@ public class MQTTConstants {
     public static final int NOTIFY_MSG_ID_LOAD_STATUS_NOTIFY = 1117;
     public static final int NOTIFY_MSG_ID_SETTINGS_FOR_DEVICE = 1123;
     public static final int NOTIFY_MSG_ID_SYSTEM_TIME_WITH_UTC = 1122;
+    public static final int NOTIFY_MSG_ID_MQTT_SETTINGS = 1124;
+    public static final int NOTIFY_MSG_ID_MQTT_RECONNECT = 1125;
     public static final int NOTIFY_MSG_ID_SYNC_TIME_FROM_NTP = 1115;
     public static final int NOTIFY_MSG_ID_OVERLOAD_PROTECTION = 1103;
     public static final int NOTIFY_MSG_ID_OVERLOAD_OCCUR = 1105;

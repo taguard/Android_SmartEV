@@ -22,7 +22,6 @@ import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.SystemTime;
 import com.moko.support.entity.SystemTimeInfo;
@@ -67,7 +66,11 @@ public class SystemTimeActivity extends BaseActivity {
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         mTimeZones = new ArrayList<>();
-        for (int i = 0; i <= 48; i++) {
+        int max = 48;
+        if ("5".equals(mMokoDevice.type)) {
+            max = 52;
+        }
+        for (int i = 0; i <= max; i++) {
             if (i < 24) {
                 mTimeZones.add(String.format("UTC-%02d:%02d", (24 - i) / 2, ((i % 2 == 1) ? 30 : 00)));
             } else if (i == 24) {
@@ -143,7 +146,8 @@ public class SystemTimeActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishSuccessEvent(MQTTPublishSuccessEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC
+                || msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO) {
             ToastUtils.showToast(this, "Set up succeed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -161,7 +165,8 @@ public class SystemTimeActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishFailureEvent(MQTTPublishFailureEvent event) {
         int msgId = event.getMsgId();
-        if (msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC
+                || msgId == MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO) {
             ToastUtils.showToast(this, "Set up failed");
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
@@ -203,6 +208,24 @@ public class SystemTimeActivity extends BaseActivity {
         }
     }
 
+    private void setSystemTimePro() {
+        String appTopic;
+        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+            appTopic = mMokoDevice.topicSubscribe;
+        } else {
+            appTopic = appMqttConfig.topicPublish;
+        }
+        SystemTime systemTime = new SystemTime();
+        systemTime.time_zone = mSelectedTimeZone - 24;
+        systemTime.timestamp = Calendar.getInstance().getTimeInMillis() / 1000;
+        String message = MQTTMessageAssembler.assembleConfigSystemTimePro(mMokoDevice.uniqueId, systemTime);
+        try {
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void getSystemTime() {
         String appTopic;
@@ -236,6 +259,10 @@ public class SystemTimeActivity extends BaseActivity {
                 ToastUtils.showToast(this, "Set up failed");
             }, 30 * 1000);
             showLoadingProgressDialog();
+            if ("5".equals(mMokoDevice.type)) {
+                setSystemTimePro();
+                return;
+            }
             setSystemTime();
         });
         dialog.show(getSupportFragmentManager());
@@ -249,6 +276,10 @@ public class SystemTimeActivity extends BaseActivity {
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
+        if ("5".equals(mMokoDevice.type)) {
+            setSystemTimePro();
+            return;
+        }
         setSystemTime();
     }
 

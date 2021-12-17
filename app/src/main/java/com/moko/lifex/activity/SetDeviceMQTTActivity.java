@@ -93,6 +93,10 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     TextView tvTimeZone;
     @BindView(R.id.ll_ntp)
     LinearLayout llNtp;
+    @BindView(R.id.tv_channel_domain)
+    TextView tvChannelDomain;
+    @BindView(R.id.ll_channel_domain)
+    LinearLayout llChannelDomain;
     private GeneralDeviceFragment generalFragment;
     private UserDeviceFragment userFragment;
     private SSLDeviceFragment sslFragment;
@@ -104,6 +108,8 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
 
     private ArrayList<String> mTimeZones;
     private int mSelectedTimeZone;
+    private ArrayList<String> mChannelDomains;
+    private int mSelectedChannelDomain;
     private String mWifiSSID;
     private String mWifiPassword;
     private CustomDialog mqttConnDialog;
@@ -114,6 +120,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     private InputFilter filter;
     private DeviceResult mDeviceResult;
     private boolean isSupportNTP;
+    private boolean isSupportChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,13 +180,49 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         vpMqtt.setOffscreenPageLimit(3);
         rgMqtt.setOnCheckedChangeListener(this);
         mHandler = new Handler(Looper.getMainLooper());
-        isSupportNTP = Integer.parseInt(mDeviceResult.device_type) == 4;
-        if (!isSupportNTP)
+        isSupportNTP = Integer.parseInt(mDeviceResult.device_type) >= 4;
+        isSupportChannel = Integer.parseInt(mDeviceResult.device_type) == 5;
+        if (!isSupportNTP && !isSupportChannel)
             return;
-        llNtp.setVisibility(View.VISIBLE);
+        int max = 48;
+        if (isSupportNTP) {
+            llNtp.setVisibility(View.VISIBLE);
+        }
+        if (isSupportChannel) {
+            // MK117D
+            llChannelDomain.setVisibility(View.VISIBLE);
+            max = 52;
+            mChannelDomains = new ArrayList<>();
+            mChannelDomains.add("Argentina,Mexico");
+            mChannelDomains.add("Australia,New Zealand");
+            mChannelDomains.add("Bahrain、Egypt、Israel、India");
+            mChannelDomains.add("Bolivia、Chile、China、El Salvador");
+            mChannelDomains.add("Canada");
+            mChannelDomains.add("Europe");
+            mChannelDomains.add("Indonesia");
+            mChannelDomains.add("Japan");
+            mChannelDomains.add("Jordan");
+            mChannelDomains.add("Korea、US");
+            mChannelDomains.add("Latin America-1");
+            mChannelDomains.add("Latin America-2");
+            mChannelDomains.add("Latin America-3");
+            mChannelDomains.add("Lebanon");
+            mChannelDomains.add("Malaysia");
+            mChannelDomains.add("Qatar");
+            mChannelDomains.add("Russia");
+            mChannelDomains.add("Singapore");
+            mChannelDomains.add("Taiwan");
+            mChannelDomains.add("Tunisia");
+            mChannelDomains.add("Venezuela");
+            mChannelDomains.add("Worldwide");
+            mSelectedChannelDomain = 9;
+            tvChannelDomain.setText(mChannelDomains.get(mSelectedChannelDomain));
+            showLoadingProgressDialog();
+            getTimezonePro();
+        }
         // MK117
         mTimeZones = new ArrayList<>();
-        for (int i = 0; i <= 48; i++) {
+        for (int i = 0; i <= max; i++) {
             if (i < 24) {
                 mTimeZones.add(String.format("UTC-%02d:%02d", (24 - i) / 2, ((i % 2 == 1) ? 30 : 00)));
             } else if (i == 24) {
@@ -281,6 +324,18 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         DeviceResponse response = event.getResponse();
         if (response.code == MokoConstants.RESPONSE_SUCCESS) {
             switch (response.result.header) {
+                case MokoConstants.HEADER_GET_TIMEZONE_PRO:
+                    DeviceResult timeZoneResult = response.result;
+                    mSelectedTimeZone = timeZoneResult.time_zone;
+                    tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
+                    getChannelDomain();
+                    break;
+                case MokoConstants.HEADER_GET_CHANNEL_DOMAIN:
+                    DeviceResult channelDomainResult = response.result;
+                    mSelectedChannelDomain = channelDomainResult.channel_plan;
+                    tvChannelDomain.setText(mChannelDomains.get(mSelectedChannelDomain));
+                    dismissLoadingMessageDialog();
+                    break;
                 case MokoConstants.HEADER_SET_MQTT_INFO:
                     // 判断是哪种连接方式，是否需要发送证书文件
                     if (mqttDeviceConfig.connectMode < 2 && TextUtils.isEmpty(mqttDeviceConfig.caPath)) {
@@ -340,10 +395,18 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     }
                     break;
                 case MokoConstants.HEADER_SET_NTP_URL:
+                    if (isSupportChannel) {
+                        sendTimezonePro();
+                        break;
+                    }
                     sendTimezone();
                     break;
                 case MokoConstants.HEADER_SET_TIMEZONE:
+                case MokoConstants.HEADER_SET_CHANNEL_DOMAIN:
                     sendWIFI();
+                    break;
+                case MokoConstants.HEADER_SET_TIMEZONE_PRO:
+                    sendChannelDomain();
                     break;
                 case MokoConstants.HEADER_SET_WIFI_INFO:
                     // 设置成功，保存数据，网络可用后订阅mqtt主题
@@ -471,18 +534,48 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
 
     private void sendNTPUrl() {
         // 设定NTP服务器
-        JsonObject wifiInfo = new JsonObject();
-        wifiInfo.addProperty("header", MokoConstants.HEADER_SET_NTP_URL);
-        wifiInfo.addProperty("domain", mqttDeviceConfig.ntpUrl);
-        SocketSupport.getInstance().sendMessage(wifiInfo.toString());
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_SET_NTP_URL);
+        jsonObject.addProperty("domain", mqttDeviceConfig.ntpUrl);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
     }
 
     private void sendTimezone() {
         // 设定时区
-        JsonObject wifiInfo = new JsonObject();
-        wifiInfo.addProperty("header", MokoConstants.HEADER_SET_TIMEZONE);
-        wifiInfo.addProperty("time_zone", mqttDeviceConfig.timeZone);
-        SocketSupport.getInstance().sendMessage(wifiInfo.toString());
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_SET_TIMEZONE);
+        jsonObject.addProperty("time_zone", mqttDeviceConfig.timeZone);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
+    }
+
+    private void sendTimezonePro() {
+        // 设定时区
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_SET_TIMEZONE_PRO);
+        jsonObject.addProperty("time_zone", mqttDeviceConfig.timeZone);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
+    }
+
+    private void sendChannelDomain() {
+        // 设定信道
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_SET_CHANNEL_DOMAIN);
+        jsonObject.addProperty("time_zone", mqttDeviceConfig.timeZone);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
+    }
+
+    private void getTimezonePro() {
+        // 获取时区
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_GET_TIMEZONE_PRO);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
+    }
+
+    private void getChannelDomain() {
+        // 获取信道
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("header", MokoConstants.HEADER_GET_CHANNEL_DOMAIN);
+        SocketSupport.getInstance().sendMessage(jsonObject.toString());
     }
 
     public void back(View view) {
@@ -565,6 +658,9 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             String ntpUrl = etNtpUrl.getText().toString().replaceAll(" ", "");
             mqttDeviceConfig.ntpUrl = ntpUrl;
             mqttDeviceConfig.timeZone = mSelectedTimeZone - 24;
+        }
+        if (isSupportChannel) {
+            mqttDeviceConfig.channelDomain = mSelectedChannelDomain;
         }
 
         if (!mqttDeviceConfig.topicPublish.isEmpty() && !mqttDeviceConfig.topicSubscribe.isEmpty()
@@ -667,6 +763,19 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         dialog.show(getSupportFragmentManager());
     }
 
+
+    public void onSelectChannelDomainClick(View view) {
+        if (isWindowLocked())
+            return;
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mChannelDomains, mSelectedChannelDomain);
+        dialog.setListener(value -> {
+            mSelectedChannelDomain = value;
+            tvChannelDomain.setText(mChannelDomains.get(value));
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
     private int progress;
 
     private void showConnMqttDialog() {
@@ -763,4 +872,5 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                 break;
         }
     }
+
 }

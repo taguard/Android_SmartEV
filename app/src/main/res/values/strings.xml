@@ -111,6 +111,8 @@
     <string name="version_info">Version:%s</string>
     <string name="about_moko_name">MOKO TECHNOLOGY LTD.</string>
     <string name="setting_syncing">syncing</string>
+    <string name="channel_domain"><![CDATA[Channel & Domain]]></string>
+    <string name="channel_domain_tips"><![CDATA[Note: Configure 2.4G&5G channel by selecting your domain, channels will be matched according to the domain]]></string>
 
     <string-array name="update_type">
         <item>Firmware</item>

@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
@@ -55,6 +56,8 @@ public class DeviceSettingActivity extends BaseActivity {
     public static String TAG = DeviceSettingActivity.class.getSimpleName();
     @BindView(R.id.tv_name)
     TextView tvName;
+    @BindView(R.id.rl_modify_mqtt_settings)
+    RelativeLayout rlModifyMqttSettings;
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -77,6 +80,9 @@ public class DeviceSettingActivity extends BaseActivity {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
+        if ("5".equals(mMokoDevice.type)) {
+            rlModifyMqttSettings.setVisibility(View.VISIBLE);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -312,6 +318,18 @@ public class DeviceSettingActivity extends BaseActivity {
         Intent i = new Intent(this, LoadStatusNotifyActivity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
         startActivity(i);
+    }
+
+    public void onModifyMQTTClick(View view) {
+        if (isWindowLocked())
+            return;
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        Intent intent = new Intent(this, ModifyMQTTSettingsActivity.class);
+        intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
+        startActivity(intent);
     }
 
     public void onOTAClick(View view) {
