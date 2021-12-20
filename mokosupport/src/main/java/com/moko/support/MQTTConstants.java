@@ -120,6 +120,9 @@ public class MQTTConstants {
     public static final int CONFIG_MSG_ID_SYSTEM_TIME_WITH_UTC_PRO = 2125;
     public static final int CONFIG_MSG_ID_MQTT_SETTINGS = 2126;
     public static final int CONFIG_MSG_ID_MQTT_RECONNECT = 2127;
+    public static final int CONFIG_MSG_ID_OTA_FIRMWARE = 2128;
+    public static final int CONFIG_MSG_ID_OTA_ONE_WAY = 2129;
+    public static final int CONFIG_MSG_ID_OTA_BOTH_WAY = 2130;
     public static final int CONFIG_MSG_ID_SYNC_TIME_FROM_NTP = 2114;
     public static final int CONFIG_MSG_ID_OVERLOAD_PROTECTION = 2102;
     public static final int CONFIG_MSG_ID_CLEAR_OVERLOAD_PROTECTION = 2104;

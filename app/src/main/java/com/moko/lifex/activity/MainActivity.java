@@ -396,8 +396,8 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             Intent intent = new Intent(this, EnergyPlugActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
-        } else if ("4".equals(device.type)) {
-            // MK117
+        } else if ("4".equals(device.type) || "5".equals(device.type)) {
+            // MK117、MK117D
             Intent intent = new Intent(this, EnergyPlugDetailActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);

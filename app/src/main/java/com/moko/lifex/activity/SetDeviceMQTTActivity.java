@@ -326,7 +326,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             switch (response.result.header) {
                 case MokoConstants.HEADER_GET_TIMEZONE_PRO:
                     DeviceResult timeZoneResult = response.result;
-                    mSelectedTimeZone = timeZoneResult.time_zone;
+                    mSelectedTimeZone = timeZoneResult.time_zone + 24;
                     tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
                     getChannelDomain();
                     break;
@@ -334,7 +334,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     DeviceResult channelDomainResult = response.result;
                     mSelectedChannelDomain = channelDomainResult.channel_plan;
                     tvChannelDomain.setText(mChannelDomains.get(mSelectedChannelDomain));
-                    dismissLoadingMessageDialog();
+                    dismissLoadingProgressDialog();
                     break;
                 case MokoConstants.HEADER_SET_MQTT_INFO:
                     // 判断是哪种连接方式，是否需要发送证书文件
@@ -391,6 +391,10 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     if (!TextUtils.isEmpty(mqttDeviceConfig.ntpUrl)) {
                         sendNTPUrl();
                     } else {
+                        if (isSupportChannel) {
+                            sendTimezonePro();
+                            break;
+                        }
                         sendTimezone();
                     }
                     break;
@@ -560,7 +564,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         // 设定信道
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("header", MokoConstants.HEADER_SET_CHANNEL_DOMAIN);
-        jsonObject.addProperty("time_zone", mqttDeviceConfig.timeZone);
+        jsonObject.addProperty("channel_plan", mqttDeviceConfig.timeZone);
         SocketSupport.getInstance().sendMessage(jsonObject.toString());
     }
 

@@ -10,6 +10,9 @@ import com.moko.support.entity.LEDColorInfo;
 import com.moko.support.entity.LoadStatusNotify;
 import com.moko.support.entity.MQTTSettings;
 import com.moko.support.entity.MsgCommon;
+import com.moko.support.entity.OTABothWayParams;
+import com.moko.support.entity.OTAFirmwareParams;
+import com.moko.support.entity.OTAOneWayParams;
 import com.moko.support.entity.OverloadProtection;
 import com.moko.support.entity.OverloadValue;
 import com.moko.support.entity.PowerDefaultStatus;
@@ -482,6 +485,36 @@ public class MQTTMessageAssembler {
         msgCommon.id = id;
         msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_MQTT_RECONNECT;
         msgCommon.data = new Object();
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
+    public static String assembleConfigOTAFirmware(String id, OTAFirmwareParams data) {
+        MsgCommon<OTAFirmwareParams> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_OTA_FIRMWARE;
+        msgCommon.data = data;
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
+    public static String assembleConfigOTAOneWay(String id, OTAOneWayParams data) {
+        MsgCommon<OTAOneWayParams> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_OTA_ONE_WAY;
+        msgCommon.data = data;
+        String message = new Gson().toJson(msgCommon);
+        XLog.e("app_to_device--->" + message);
+        return message;
+    }
+
+    public static String assembleConfigOTABothWay(String id, OTABothWayParams data) {
+        MsgCommon<OTABothWayParams> msgCommon = new MsgCommon();
+        msgCommon.id = id;
+        msgCommon.msg_id = MQTTConstants.CONFIG_MSG_ID_OTA_BOTH_WAY;
+        msgCommon.data = data;
         String message = new Gson().toJson(msgCommon);
         XLog.e("app_to_device--->" + message);
         return message;

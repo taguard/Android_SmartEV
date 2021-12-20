@@ -339,7 +339,12 @@ public class DeviceSettingActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        Intent intent = new Intent(this, CheckFirmwareUpdateActivity.class);
+        Intent intent;
+        if ("5".equals(mMokoDevice.type)) {
+            intent = new Intent(this, OTAProActivity.class);
+        } else {
+            intent = new Intent(this, CheckFirmwareUpdateActivity.class);
+        }
         intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
         startActivity(intent);
     }
