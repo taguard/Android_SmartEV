@@ -133,8 +133,7 @@ public class FileUtils {
                 File file = new File(path.substring(path.indexOf("/storage")));
                 return file.exists() ? file.toString() : null;
             }
-            return null;
-//            return getDataColumn(context, uri, null, null);
+            return getDataColumn(context, uri, null, null);
         }
         // File
         else if ("file".equalsIgnoreCase(uri.getScheme())) {
