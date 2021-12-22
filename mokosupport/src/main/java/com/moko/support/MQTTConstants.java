@@ -155,6 +155,7 @@ public class MQTTConstants {
     public static final int NOTIFY_MSG_ID_SYSTEM_TIME_WITH_UTC = 1122;
     public static final int NOTIFY_MSG_ID_MQTT_SETTINGS = 1124;
     public static final int NOTIFY_MSG_ID_MQTT_RECONNECT = 1125;
+    public static final int NOTIFY_MSG_ID_OTA_RESULT = 1126;
     public static final int NOTIFY_MSG_ID_SYNC_TIME_FROM_NTP = 1115;
     public static final int NOTIFY_MSG_ID_OVERLOAD_PROTECTION = 1103;
     public static final int NOTIFY_MSG_ID_OVERLOAD_OCCUR = 1105;

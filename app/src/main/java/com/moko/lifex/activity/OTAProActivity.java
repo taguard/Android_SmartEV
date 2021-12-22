@@ -27,8 +27,8 @@ import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OTABothWayParams;
 import com.moko.support.entity.OTAFirmwareParams;
-import com.moko.support.entity.OTAInfo;
 import com.moko.support.entity.OTAOneWayParams;
+import com.moko.support.entity.OTAResult;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
 import com.moko.support.handler.MQTTMessageAssembler;
@@ -137,16 +137,19 @@ public class OTAProActivity extends BaseActivity {
             return;
         }
         mMokoDevice.isOnline = true;
-        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA) {
+        if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_RESULT) {
+            Type infoType = new TypeToken<OTAResult>() {
+            }.getType();
+            OTAResult otaResult = new Gson().fromJson(msgCommon.data, infoType);
+            int ota_result = otaResult.ota_result;
+            int type = otaResult.type;
+            if (type != (mSelected + 1))
+                return;
             if (mHandler.hasMessages(0)) {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
             }
-            Type infoType = new TypeToken<OTAInfo>() {
-            }.getType();
-            OTAInfo otaInfo = new Gson().fromJson(msgCommon.data, infoType);
-            String ota_result = otaInfo.ota_result;
-            if ("R1".equals(ota_result)) {
+            if (ota_result == 0) {
                 ToastUtils.showToast(this, R.string.update_success);
             } else {
                 ToastUtils.showToast(this, R.string.update_failed);
