@@ -192,6 +192,7 @@ public class MQTTSupport {
                         // 双向验证
                         try {
                             connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
+                            connOpts.setHttpsHostnameVerificationEnabled(false);
                         } catch (Exception e) {
                             // 读取stacktrace信息
                             final Writer result = new StringWriter();
