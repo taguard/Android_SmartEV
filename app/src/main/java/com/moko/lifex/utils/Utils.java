@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
 
 import java.io.File;
@@ -85,12 +86,22 @@ public class Utils {
         Intent intent;
         if (files.length == 1) {
             intent = new Intent(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(files[0]));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Uri fileUri = IOUtils.insertDownloadFile(context, files[0]);
+                intent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            } else {
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(files[0]));
+            }
             intent.putExtra(Intent.EXTRA_TEXT, body);
         } else {
             ArrayList<Uri> uris = new ArrayList<>();
             for (int i = 0; i < files.length; i++) {
-                uris.add(Uri.fromFile(files[i]));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    Uri fileUri = IOUtils.insertDownloadFile(context, files[i]);
+                    uris.add(fileUri);
+                } else {
+                    uris.add(Uri.fromFile(files[i]));
+                }
             }
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);

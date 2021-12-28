@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
@@ -29,6 +30,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 
 import androidx.annotation.IdRes;
@@ -248,7 +253,21 @@ public class SetAppMQTTActivity extends BaseActivity implements RadioGroup.OnChe
 
         MQTTSupport.getInstance().disconnectMqtt();
         showLoadingProgressDialog();
-        etMqttHost.postDelayed(() -> MQTTSupport.getInstance().connectMqtt(mqttConfig), 2000);
+        etMqttHost.postDelayed(() -> {
+            try {
+                MQTTSupport.getInstance().connectMqtt(mqttConfig);
+            } catch (FileNotFoundException e) {
+                dismissLoadingProgressDialog();
+                ToastUtils.showToast(this, "The SSL certificates path is invalid, please select a valid file path and save it.");
+                // 读取stacktrace信息
+                final Writer result = new StringWriter();
+                final PrintWriter printWriter = new PrintWriter(result);
+                e.printStackTrace(printWriter);
+                StringBuffer errorReport = new StringBuffer();
+                errorReport.append(result.toString());
+                XLog.e(errorReport.toString());
+            }
+        }, 2000);
     }
 
     public void selectCertificate(View view) {

@@ -37,6 +37,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -102,7 +103,7 @@ public class MQTTSupport {
         };
     }
 
-    public void connectMqtt(MQTTConfig mqttConfig) {
+    public void connectMqtt(MQTTConfig mqttConfig) throws FileNotFoundException {
         if (mqttConfig == null)
             return;
         if (!mqttConfig.isError()) {
@@ -126,9 +127,6 @@ public class MQTTSupport {
 
                 @Override
                 public void connectionLost(Throwable cause) {
-                    if (mqttAndroidClient == null)
-                        return;
-                    XLog.w("Connection lost");
                     EventBus.getDefault().post(new MQTTConnectionLostEvent());
                 }
 
@@ -178,6 +176,12 @@ public class MQTTSupport {
                         // 单向验证
                         try {
                             connOpts.setSocketFactory(getSingleSocketFactory(mqttConfig.caPath));
+                        } catch (FileNotFoundException fileNotFoundException) {
+                            if (mqttAndroidClient != null) {
+                                mqttAndroidClient.close();
+                                mqttAndroidClient = null;
+                            }
+                            throw fileNotFoundException;
                         } catch (Exception e) {
                             // 读取stacktrace信息
                             final Writer result = new StringWriter();
@@ -193,6 +197,12 @@ public class MQTTSupport {
                         try {
                             connOpts.setSocketFactory(getSocketFactory(mqttConfig.caPath, mqttConfig.clientKeyPath, mqttConfig.clientCertPath));
                             connOpts.setHttpsHostnameVerificationEnabled(false);
+                        } catch (FileNotFoundException fileNotFoundException) {
+                            if (mqttAndroidClient != null) {
+                                mqttAndroidClient.close();
+                                mqttAndroidClient = null;
+                            }
+                            throw fileNotFoundException;
                         } catch (Exception e) {
                             // 读取stacktrace信息
                             final Writer result = new StringWriter();

@@ -1,6 +1,7 @@
 package com.moko.lifex.activity;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,6 +52,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -103,7 +108,34 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
             tvTitle.setText(getString(R.string.mqtt_connecting));
         }
-        MQTTSupport.getInstance().connectMqtt(appMqttConfig);
+        StringBuffer buffer = new StringBuffer();
+        // 记录机型
+        buffer.append("机型：");
+        buffer.append(android.os.Build.MODEL);
+        buffer.append("=====");
+        // 记录版本号
+        buffer.append("手机系统版本：");
+        buffer.append(android.os.Build.VERSION.RELEASE);
+        buffer.append("=====");
+        // 记录APP版本
+        buffer.append("APP版本：");
+        buffer.append(Utils.getVersionInfo(this));
+        XLog.d(buffer.toString());
+        try {
+            MQTTSupport.getInstance().connectMqtt(appMqttConfig);
+        } catch (FileNotFoundException e) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                ToastUtils.showToast(this, "Please select your SSL certificates again, otherwise the APP can't use normally.");
+                startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
+            }
+            // 读取stacktrace信息
+            final Writer result = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(result);
+            e.printStackTrace(printWriter);
+            StringBuffer errorReport = new StringBuffer();
+            errorReport.append(result.toString());
+            XLog.e(errorReport.toString());
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
