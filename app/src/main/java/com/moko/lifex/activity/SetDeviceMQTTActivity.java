@@ -564,7 +564,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         // 设定信道
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("header", MokoConstants.HEADER_SET_CHANNEL_DOMAIN);
-        jsonObject.addProperty("channel_plan", mqttDeviceConfig.timeZone);
+        jsonObject.addProperty("channel_plan", mqttDeviceConfig.channelDomain);
         SocketSupport.getInstance().sendMessage(jsonObject.toString());
     }
 
