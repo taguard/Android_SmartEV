@@ -192,7 +192,7 @@ public class OTAProActivity extends BaseActivity {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
             }
-            if (!TextUtils.isEmpty(portStr) && Integer.parseInt(portStr) > 65535) {
+            if (TextUtils.isEmpty(portStr) || Integer.parseInt(portStr) > 65535) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_port_empty);
                 return;
             }
@@ -209,7 +209,7 @@ public class OTAProActivity extends BaseActivity {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
             }
-            if (!TextUtils.isEmpty(portStr) && Integer.parseInt(portStr) > 65535) {
+            if (TextUtils.isEmpty(portStr) || Integer.parseInt(portStr) > 65535) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_port_empty);
                 return;
             }
@@ -228,7 +228,7 @@ public class OTAProActivity extends BaseActivity {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
             }
-            if (!TextUtils.isEmpty(portStr) && Integer.parseInt(portStr) > 65535) {
+            if (TextUtils.isEmpty(portStr) || Integer.parseInt(portStr) > 65535) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_port_empty);
                 return;
             }
@@ -345,8 +345,8 @@ public class OTAProActivity extends BaseActivity {
         params.host = hostStr;
         params.port = Integer.parseInt(portStr);
         params.ca_way = bothWayCaStr;
-        params.client_cer_way = bothWayClientKeyStr;
-        params.client_key_way = bothWayClientCertStr;
+        params.client_cer_way = bothWayClientCertStr;
+        params.client_key_way = bothWayClientKeyStr;
         String message = MQTTMessageAssembler.assembleConfigOTABothWay(mMokoDevice.uniqueId, params);
         try {
             MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_OTA_BOTH_WAY, appMqttConfig.qos);

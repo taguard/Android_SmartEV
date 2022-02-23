@@ -376,7 +376,7 @@
 
 
                 <TextView
-                    android:id="@+id/tv_subscribe_topic"
+                    android:id="@+id/tv_publish_topic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
@@ -409,7 +409,7 @@
 
 
                 <TextView
-                    android:id="@+id/tv_publish_topic"
+                    android:id="@+id/tv_subscribe_topic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"

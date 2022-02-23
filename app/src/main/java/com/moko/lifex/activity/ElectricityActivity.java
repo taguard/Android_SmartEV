@@ -50,7 +50,7 @@ public class ElectricityActivity extends BaseActivity {
         setContentView(R.layout.activity_electricity_manager);
         ButterKnife.bind(this);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
-        if ("4".equals(mMokoDevice.type)) {
+        if ("4".equals(mMokoDevice.type) || "5".equals(mMokoDevice.type)) {
             rlPowerFactor.setVisibility(View.VISIBLE);
         }
     }
@@ -78,7 +78,7 @@ public class ElectricityActivity extends BaseActivity {
             Type infoType = new TypeToken<PowerInfo>() {
             }.getType();
             PowerInfo powerInfo = new Gson().fromJson(msgCommon.data, infoType);
-            if ("4".equals(mMokoDevice.type)) {
+            if ("4".equals(mMokoDevice.type) || "5".equals(mMokoDevice.type)) {
                 float voltage = powerInfo.voltage;
                 float current = powerInfo.current;
                 float power = powerInfo.power;

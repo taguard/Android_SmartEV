@@ -343,12 +343,12 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         if (isWindowLocked())
             return;
         if (appMqttConfig == null) {
-            startActivity(new Intent(this, SetAppMQTTActivity.class));
+            startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
             return;
         }
         if (Utils.isNetworkAvailable(this)) {
             if (TextUtils.isEmpty(appMqttConfig.host)) {
-                startActivity(new Intent(this, SetAppMQTTActivity.class));
+                startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
                 return;
             }
             startActivity(new Intent(this, AddMokoPlugActivity.class));
@@ -569,9 +569,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
-            return;
-        if (requestCode == AppConstants.REQUEST_CODE_MQTT_CONFIG_APP) {
+        if (requestCode == AppConstants.REQUEST_CODE_MQTT_CONFIG_APP && resultCode == RESULT_OK) {
             String appMqttConfigStr = data.getStringExtra(AppConstants.EXTRA_KEY_MQTT_CONFIG_APP);
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
             tvTitle.setText(getString(R.string.app_name));

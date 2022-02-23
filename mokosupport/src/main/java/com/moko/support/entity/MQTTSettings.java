@@ -32,7 +32,7 @@ public class MQTTSettings {
     public String mqtt_passwd;
     public int clean_session = 1;
     public int keep_alive = 60;
-    public int qos = 0;
+    public int qos = 1;
     public String subscribe_topic;
     public String publish_topic;
     public String client_id;

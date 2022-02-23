@@ -100,11 +100,14 @@ public class ProtectionSettingActivity extends BaseActivity {
             }.getType();
             DeviceInfo deviceInfo = new Gson().fromJson(msgCommon.data, infoType);
             String product_type = deviceInfo.product_type;
-            if ("MK117-F/E".equalsIgnoreCase(product_type)) {
+            if ("MK117-F/E".equalsIgnoreCase(product_type)
+                    || "MK117D-F/E".equalsIgnoreCase(product_type)) {
                 productType = 1;
-            } else if ("MK117-B".equalsIgnoreCase(product_type)) {
+            } else if ("MK117-B".equalsIgnoreCase(product_type)
+                    || "MK117D-B".equalsIgnoreCase(product_type)) {
                 productType = 2;
-            } else if ("MK117-G".equalsIgnoreCase(product_type)) {
+            } else if ("MK117-G".equalsIgnoreCase(product_type)
+                    || "MK117D-G".equalsIgnoreCase(product_type)) {
                 productType = 3;
             }
         }

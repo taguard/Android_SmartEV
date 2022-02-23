@@ -115,7 +115,7 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
                 mHandler.removeMessages(0);
             }
             int status;
-            if ("4".equals(mMokoDevice.type)) {
+            if ("4".equals(mMokoDevice.type) || "5".equals(mMokoDevice.type)) {
                 Type statusType = new TypeToken<PowerDefaultStatus>() {
                 }.getType();
                 PowerDefaultStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
@@ -185,7 +185,7 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
         } else {
             appTopic = appMqttConfig.topicPublish;
         }
-        if ("4".equals(mMokoDevice.type)) {
+        if ("4".equals(mMokoDevice.type) || "5".equals(mMokoDevice.type)) {
             PowerDefaultStatus powerStatus = new PowerDefaultStatus();
             powerStatus.default_status = status;
             String message = MQTTMessageAssembler.assembleWritePowerDefaultStatus(mMokoDevice.uniqueId, powerStatus);
