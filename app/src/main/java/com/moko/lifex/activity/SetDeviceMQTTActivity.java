@@ -286,13 +286,17 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     if (isSupportNTP) {
                         mokoDevice.nickName = mDeviceResult.device_name;
                     } else {
-                        mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, mDeviceResult.device_id);
+                        String suffix = "";
+                        if (!TextUtils.isEmpty(mDeviceResult.device_id) && mDeviceResult.device_id.length() >= 4) {
+                            suffix = mDeviceResult.device_id.substring(mDeviceResult.device_id.length() - 4);
+                        }
+                        mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, suffix);
                     }
                     mokoDevice.deviceId = mDeviceResult.device_id;
                     mokoDevice.type = mDeviceResult.device_type;
+                    mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
-                    mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
                     DBTools.getInstance(this).insertDevice(mokoDevice);
                 } else {
                     mokoDevice.name = mDeviceResult.device_name;

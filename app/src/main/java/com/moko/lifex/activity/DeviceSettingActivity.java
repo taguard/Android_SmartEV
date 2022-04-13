@@ -131,7 +131,7 @@ public class DeviceSettingActivity extends BaseActivity {
                     e.printStackTrace();
                 }
             }
-            XLog.i(String.format("删除设备:%s", mMokoDevice.name));
+            XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
             tvName.postDelayed(() -> {
@@ -391,7 +391,7 @@ public class DeviceSettingActivity extends BaseActivity {
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-            XLog.i(String.format("删除设备:%s", mMokoDevice.name));
+            XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
             tvName.postDelayed(() -> {

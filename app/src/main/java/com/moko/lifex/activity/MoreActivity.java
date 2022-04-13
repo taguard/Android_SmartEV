@@ -140,7 +140,7 @@ public class MoreActivity extends BaseActivity {
                     e.printStackTrace();
                 }
             }
-            XLog.i(String.format("删除设备:%s", mMokoDevice.name));
+            XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(MoreActivity.this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
             tvDeviceName.postDelayed(() -> {
@@ -267,7 +267,7 @@ public class MoreActivity extends BaseActivity {
                     e.printStackTrace();
                 }
             }
-            XLog.i(String.format("删除设备:%s", mMokoDevice.name));
+            XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
             tvDeviceName.postDelayed(() -> {
