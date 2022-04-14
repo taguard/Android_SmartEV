@@ -121,6 +121,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     private DeviceResult mDeviceResult;
     private boolean isSupportNTP;
     private boolean isSupportChannel;
+    private String deviceName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -283,15 +284,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                 if (mokoDevice == null) {
                     mokoDevice = new MokoDevice();
                     mokoDevice.name = mDeviceResult.device_name;
-                    if (isSupportNTP) {
-                        mokoDevice.nickName = mDeviceResult.device_name;
-                    } else {
-                        String suffix = "";
-                        if (!TextUtils.isEmpty(mDeviceResult.device_id) && mDeviceResult.device_id.length() >= 4) {
-                            suffix = mDeviceResult.device_id.substring(mDeviceResult.device_id.length() - 4);
-                        }
-                        mokoDevice.nickName = String.format("%s-%s", mDeviceResult.device_name, suffix);
-                    }
+                    mokoDevice.nickName = deviceName;
                     mokoDevice.deviceId = mDeviceResult.device_id;
                     mokoDevice.type = mDeviceResult.device_type;
                     mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
@@ -676,11 +669,21 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             ToastUtils.showToast(this, "Subscribed and published topic can't be same !");
             return;
         }
+        if (isSupportNTP) {
+            deviceName = mDeviceResult.device_name;
+        } else {
+            String suffix = "";
+            if (!TextUtils.isEmpty(mDeviceResult.device_id) && mDeviceResult.device_id.length() >= 4) {
+                suffix = mDeviceResult.device_id.substring(mDeviceResult.device_id.length() - 4);
+            }
+            deviceName = String.format("%s-%s", mDeviceResult.device_name, suffix);
+        }
+
         if ("{device_name}/{device_id}/app_to_device".equals(mqttDeviceConfig.topicSubscribe)) {
-            mqttDeviceConfig.topicSubscribe = String.format("%s/%s/app_to_device", mDeviceResult.device_name, deviceId);
+            mqttDeviceConfig.topicSubscribe = String.format("%s/%s/app_to_device", deviceName, deviceId);
         }
         if ("{device_name}/{device_id}/device_to_app".equals(mqttDeviceConfig.topicPublish)) {
-            mqttDeviceConfig.topicPublish = String.format("%s/%s/device_to_app", mDeviceResult.device_name, deviceId);
+            mqttDeviceConfig.topicPublish = String.format("%s/%s/device_to_app", deviceName, deviceId);
         }
         isDeviceConnectSuccess = false;
         showWifiInputDialog();
