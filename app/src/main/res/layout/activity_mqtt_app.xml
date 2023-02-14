@@ -11,7 +11,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:background="@color/blue_0188cc">
+        android:background="@color/light_black">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -50,6 +50,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/light_black"
             android:orientation="vertical">
 
             <TextView
@@ -58,21 +59,22 @@
                 android:gravity="center_vertical"
                 android:padding="12dp"
                 android:text="Broker Setting"
-                android:textColor="@color/black_333333"
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white_ffffff"
+                android:background="@color/light_black"
                 android:padding="12dp">
 
                 <TextView
+
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Host"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_host"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -89,7 +91,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -102,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Port"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_port"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -121,7 +123,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="@id/et_mqtt_host"
@@ -133,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Client Id"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_client_id"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -151,7 +153,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -166,13 +168,13 @@
                 android:gravity="center_vertical"
                 android:padding="12dp"
                 android:text="Topics"
-                android:textColor="@color/black_333333"
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white_ffffff"
+                android:background="@color/light_black"
                 android:padding="12dp">
 
                 <TextView
@@ -180,7 +182,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Subscribe"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_subscribe_topic"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -197,7 +199,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -210,7 +212,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Publish"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_publish_topic"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -228,7 +230,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -241,7 +243,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="Note: Input your topics to communicate with the device or set the topics to empty"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="13sp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
@@ -290,6 +292,7 @@
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/vp_mqtt"
+                android:background="@color/light_black"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>

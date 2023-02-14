@@ -9,10 +9,21 @@
     <color name="grey_999999">#999999</color>
     <color name="grey_d9d9d9">#d9d9d9</color>
     <color name="grey_b3b3b3">#b3b3b3</color>
-    <color name="grey_f2f2f2">#f2f2f2</color>
     <color name="grey_808080">#808080</color>
     <color name="grey_cccccc">#cccccc</color>
     <color name="blue_0188cc">#0188cc</color>
     <color name="red_ff0000">#ff0000</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="lightColor">#D9D9D9</color>
+    <color name="light_black">#252525</color>
+    <color name="light_yellow">#FFB931</color>
+    <color name="yellow_color">#A67523</color>
+    <color name="compartmenr_selected_color">#A67523</color>
+    <color name="shimmer_grey_color">#979797</color>
+    <color name="nav_nav_textview">#CCCCCC</color>
+    <color name="grey_f2f2f2">#f2f2f2</color>
+
 
 </resources>

@@ -16,7 +16,7 @@
         android:requestLegacyExternalStorage="true"
         android:theme="@style/LaunchActivityTheme">
 
-        <activity android:name="com.moko.lifex.activity.GuideActivity">
+        <activity android:name="com.moko.lifex.activity.GuideActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,69 +27,85 @@
             android:name="com.moko.lifex.activity.MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.AddMokoPlugActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.SetDeviceMQTTActivity"
             android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.OperationPlugStepsActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.SetAppMQTTActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.ModifyNameActivity"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.moko.lifex.activity.PlugActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.ElectricityActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.MoreActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.DeviceInfoActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.AboutActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.CheckFirmwareUpdateActivity"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.PowerStatusActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.EnergyPlugActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.EnergyActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.moko.lifex.activity.EnergyPlugSettingActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
@@ -97,109 +113,127 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false"/>
         <activity
             android:name="com.moko.lifex.activity.OverloadValueActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan" android:exported="false"
+            />
         <activity
             android:name="com.moko.lifex.activity.PowerReportPeriodActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan" android:exported="false"/>
         <activity
             android:name="com.moko.lifex.activity.EnergyReportPeriodActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan" android:exported="false"/>
         <activity
             android:name="com.moko.lifex.activity.EnergyReportParamsActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan" android:exported="false"/>
         <activity
             android:name=".activity.EnergyTotalActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.LEDSettingActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
+            android:screenOrientation="portrait" android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.PowerIndicatorColorActivity"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.DeviceStatusReportPeriodActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.ConnectTimeoutSettingActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.LoadStatusNotifyActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.SettingForDeviceActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.SyncTimeFromNTPActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.SystemTimeActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.OverloadProtectionActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.OverVoltageProtectionActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.OverCurrentProtectionActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.EnergyPlugDetailActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.DeviceSettingActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.ProtectionSettingActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.ModifyMQTTSettingsActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
         <activity
+            android:exported="false"
             android:name=".activity.OTAProActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

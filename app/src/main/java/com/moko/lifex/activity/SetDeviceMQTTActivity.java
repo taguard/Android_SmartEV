@@ -122,6 +122,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     private boolean isSupportNTP;
     private boolean isSupportChannel;
     private String deviceName;
+    private int mCompartmentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +132,8 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         String MQTTConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         mqttAppConfig = new Gson().fromJson(MQTTConfigStr, MQTTConfig.class);
         mDeviceResult = (DeviceResult) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE_RESULT);
+        mCompartmentId=getIntent().getIntExtra(AppConstants.COMPARTMENT_ID, 0);
+
         if (TextUtils.isEmpty(MQTTConfigStr)) {
             mqttDeviceConfig = new MQTTConfig();
         } else {
@@ -283,6 +286,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                 MokoDevice mokoDevice = DBTools.getInstance(this).selectDevice(mDeviceResult.device_id);
                 if (mokoDevice == null) {
                     mokoDevice = new MokoDevice();
+                    mokoDevice.compartment=mCompartmentId;
                     mokoDevice.name = mDeviceResult.device_name;
                     mokoDevice.nickName = deviceName;
                     mokoDevice.deviceId = mDeviceResult.device_id;
@@ -291,7 +295,9 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
                     DBTools.getInstance(this).insertDevice(mokoDevice);
+
                 } else {
+                    mokoDevice.compartment=mCompartmentId;
                     mokoDevice.name = mDeviceResult.device_name;
                     mokoDevice.type = mDeviceResult.device_type;
                     mokoDevice.uniqueId = mqttDeviceConfig.deviceId;

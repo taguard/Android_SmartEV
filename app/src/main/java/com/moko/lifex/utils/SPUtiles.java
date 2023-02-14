@@ -3,7 +3,9 @@ package com.moko.lifex.utils;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 
+import com.google.gson.Gson;
 import com.moko.lifex.AppConstants;
+import com.moko.support.entity.MQTTConfig;
 
 public class SPUtiles {
     public static void clearAllData(Context context) {
@@ -19,6 +21,22 @@ public class SPUtiles {
     }
 
     public static String getStringValue(Context context, String key, String defValue) {
+
+        if(key.equals(AppConstants.SP_KEY_MQTT_CONFIG_APP)){
+            MQTTConfig mqttConfig=new MQTTConfig();
+            mqttConfig.host="careafox.com";
+            mqttConfig.port="1883";
+            mqttConfig.username="matrix";
+            mqttConfig.clientId="app";
+            mqttConfig.password="12345678";
+            mqttConfig.cleanSession=false;
+            mqttConfig.connectMode=0;
+            mqttConfig.ntpUrl="in.pool.ntp.org";
+            mqttConfig.timeZone=11;
+
+            new Gson().toJson(mqttConfig, MQTTConfig.class);
+
+        }
         return context.getSharedPreferences(AppConstants.SP_NAME, Context.MODE_PRIVATE).getString(key, defValue);
     }
 

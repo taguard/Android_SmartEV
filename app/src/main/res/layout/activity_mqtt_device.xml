@@ -11,7 +11,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:background="@color/blue_0188cc">
+        android:background="@color/light_black">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -57,14 +57,15 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:padding="12dp"
+                android:background="@color/light_black"
                 android:text="Broker Setting"
-                android:textColor="@color/black_333333"
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white_ffffff"
+                android:background="@color/light_black"
                 android:padding="12dp">
 
                 <TextView
@@ -72,7 +73,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Host"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_host"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -84,12 +85,13 @@
                     android:layout_height="50dp"
                     android:background="@drawable/shape_radius_edit_bg"
                     android:hint="1-64 Characters"
+                    android:enabled="false"
                     android:maxLength="64"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -102,7 +104,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Port"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_port"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -115,13 +117,14 @@
                     android:layout_marginTop="10dp"
                     android:background="@drawable/shape_radius_edit_bg"
                     android:hint="0-65535"
+                    android:enabled="false"
                     android:inputType="number"
                     android:maxLength="5"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="@id/et_mqtt_host"
@@ -133,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Client Id"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_client_id"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -146,12 +149,13 @@
                     android:layout_marginTop="10dp"
                     android:background="@drawable/shape_radius_edit_bg"
                     android:hint="1-64 Characters"
+                    android:enabled="false"
                     android:maxLength="64"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -166,13 +170,14 @@
                 android:gravity="center_vertical"
                 android:padding="12dp"
                 android:text="Topics"
-                android:textColor="@color/black_333333"
+                android:background="@color/light_black"
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white_ffffff"
+                android:background="@color/light_black"
                 android:padding="12dp">
 
                 <TextView
@@ -180,8 +185,9 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Subscribe"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
+
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_subscribe_topic"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toTopOf="@id/et_mqtt_subscribe_topic" />
@@ -197,7 +203,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text="{device_name}/{device_id}/app_to_device"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -210,7 +216,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Publish"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_mqtt_publish_topic"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -228,7 +234,7 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text="{device_name}/{device_id}/device_to_app"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -238,6 +244,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <RadioGroup
+                android:background="@color/light_black"
                 android:id="@+id/rg_mqtt"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
@@ -249,6 +256,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1.0"
                     android:button="@null"
+
                     android:checked="true"
                     android:gravity="center"
                     android:text="General"
@@ -289,14 +297,16 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:padding="12dp"
+                android:background="@color/light_black"
                 android:text="Device Id"
-                android:textColor="@color/black_333333"
+
+                android:textColor="@color/white"
                 android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white_ffffff"
+                android:background="@color/light_black"
                 android:padding="12dp">
 
                 <TextView
@@ -304,7 +314,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="Device Id"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintBottom_toBottomOf="@id/et_device_id"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -321,7 +331,8 @@
                     android:paddingRight="5dp"
                     android:singleLine="true"
                     android:text=""
-                    android:textColor="@color/black_333333"
+
+                    android:textColor="@color/white"
                     android:textSize="15sp"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -342,14 +353,16 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:padding="12dp"
+
+                    android:background="@color/light_black"
                     android:text="Time Setting"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/white_ffffff"
+                    android:background="@color/light_black"
                     android:padding="12dp">
 
                     <TextView
@@ -357,7 +370,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:text="NTP URL"
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         app:layout_constraintBottom_toBottomOf="@id/et_ntp_url"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -374,7 +387,7 @@
                         android:paddingRight="5dp"
                         android:singleLine="true"
                         android:text=""
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         app:layout_constraintHorizontal_bias="1.0"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -387,7 +400,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:text="TimeZone"
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         app:layout_constraintBottom_toBottomOf="@id/tv_time_zone"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -416,7 +429,7 @@
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
                         android:text="Note: the NTP URL can be set to empty, then it will use the default NTP server"
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
@@ -428,6 +441,7 @@
                 android:id="@+id/ll_channel_domain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/light_black"
                 android:orientation="vertical"
                 android:visibility="gone">
 
@@ -437,13 +451,13 @@
                     android:gravity="center_vertical"
                     android:padding="12dp"
                     android:text="@string/channel_domain"
-                    android:textColor="@color/black_333333"
+                    android:textColor="@color/white"
                     android:textSize="15sp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/white_ffffff"
+                    android:background="@color/light_black"
                     android:padding="12dp">
 
                     <TextView
@@ -451,7 +465,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:text="Domain"
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         app:layout_constraintBottom_toBottomOf="@id/tv_channel_domain"
                         app:layout_constraintLeft_toLeftOf="parent"
@@ -468,7 +482,7 @@
                         android:onClick="onSelectChannelDomainClick"
                         android:padding="12dp"
                         android:text="Korea, US"
-                        android:textColor="@color/white_ffffff"
+                        android:textColor="@color/white"
                         android:textSize="15sp"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -479,7 +493,7 @@
                         android:paddingTop="6dp"
                         android:paddingBottom="6dp"
                         android:text="@string/channel_domain_tips"
-                        android:textColor="@color/black_333333"
+                        android:textColor="@color/white"
                         android:textSize="12sp"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"

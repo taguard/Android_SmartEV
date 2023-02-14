@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_f2f2f2"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/black"
+    android:orientation="vertical"
+    tools:context=".activity.MainActivity">
 
     <RelativeLayout
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:background="@color/blue_0188cc">
+        android:id="@+id/relativeLayout"
+        android:background="@color/light_black">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:onClick="setAppMQTTConfig"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/settings" />
+<!--        <ImageView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:onClick="setAppMQTTConfig"-->
+<!--            android:paddingLeft="12dp"-->
+<!--            android:paddingRight="12dp"-->
+<!--            android:scaleType="fitCenter"-->
+<!--            android:src="@drawable/settings" />-->
 
         <TextView
             android:id="@+id/tv_title"
@@ -34,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:onClick="about"
+            android:onClick="setAppMQTTConfig"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:src="@drawable/about" />
@@ -45,57 +49,192 @@
             android:background="@color/grey_999999" />
     </RelativeLayout>
 
-    <RelativeLayout
+
+<!--    <com.google.android.material.tabs.TabLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        app:tabMode="fixed">-->
+
+<!--        <com.google.android.material.tabs.TabItem-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/AllDevices"-->
+<!--            android:icon="@drawable/about"-->
+<!--            />-->
+
+<!--        <com.google.android.material.tabs.TabItem-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/livingRoom"-->
+<!--            android:icon="@drawable/about"-->
+<!--            />-->
+
+<!--        <com.google.android.material.tabs.TabItem-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/kitchen"-->
+<!--            android:icon="@drawable/about"-->
+<!--            />-->
+
+<!--    </com.google.android.material.tabs.TabLayout>-->
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/light_black"
+        app:tabSelectedTextColor="@color/yellow_color"
+        app:tabTextColor="@color/white"
+        android:fillViewport="true"
+        app:tabIndicatorColor="@color/yellow_color"
+        app:tabGravity="fill"
+        app:tabMode="fixed" />
+
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        app:layout_constraintTop_toBottomOf="@+id/tabs"
+        android:layout_width="match_parent"
+        app:layout_constraintBottom_toTopOf="@id/nav_bar"
         android:layout_height="0dp"
-        android:layout_weight="1.0">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_device_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:overScrollMode="never"
-            tools:listitem="@layout/device_item" />
-
-        <RelativeLayout
-            android:id="@+id/rl_empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/grey_f2f2f2"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="50dp"
-                android:text="@string/main_welcome"
-                android:textColor="@color/blue_0188cc"
-                android:textSize="18sp" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="30dp"
-                android:src="@drawable/empty_device" />
+        />
 
 
-        </RelativeLayout>
-    </RelativeLayout>
 
-    <TextView
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="53dp"
-        android:layout_marginRight="53dp"
-        android:layout_marginBottom="70dp"
-        android:background="@drawable/shape_corner_btn_bg"
-        android:gravity="center"
-        android:onClick="mainAddDevices"
-        android:text="@string/main_add_device"
-        android:textColor="@color/white_ffffff"
-        android:textSize="18sp" />
+        android:id="@+id/nav_bar"
+        android:elevation="5sp"
+        android:layout_height="90sp"
+        android:backgroundTint="@color/light_black"
+        android:background="@drawable/bottom_home_back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/homeImageView"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            app:layout_constraintEnd_toStartOf="@+id/navsceneImageView"
+            android:src="@drawable/home_nav_button"
+            android:layout_marginBottom="10sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_marginTop="4sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/home"
+            android:textSize="13sp"
+            android:id="@+id/homeTextView"
+            android:textColor="@color/yellow_color"
+            app:layout_constraintTop_toBottomOf="@id/homeImageView"
+            app:layout_constraintStart_toStartOf="@id/homeImageView"
+            app:layout_constraintEnd_toEndOf="@id/homeImageView"
+            android:fontFamily="@font/montserrat_semibold"
+
+            />
+
+        <ImageView
+            android:id="@+id/navsceneImageView"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            app:layout_constraintEnd_toStartOf="@id/verticalGuidline1"
+            android:layout_marginBottom="10sp"
+            android:src="@drawable/nav_scene_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/homeImageView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_marginTop="4sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/scene"
+            android:textSize="13sp"
+            android:id="@+id/sceneTextView"
+            android:textColor="@color/nav_nav_textview"
+            app:layout_constraintTop_toBottomOf="@id/navsceneImageView"
+            app:layout_constraintStart_toStartOf="@id/navsceneImageView"
+            app:layout_constraintEnd_toEndOf="@id/navsceneImageView"
+            android:fontFamily="@font/montserrat_semibold"
+
+            />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".50"
+            android:id="@+id/verticalGuidline1"
+            />
+
+        <ImageView
+            android:id="@+id/notificationNavBottom"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            app:layout_constraintEnd_toStartOf="@+id/settingNavButton"
+            android:layout_marginBottom="10sp"
+            android:src="@drawable/notification_nav_bottom_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/verticalGuidline1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_marginTop="4sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notification"
+            android:textSize="13sp"
+            android:id="@+id/notificationTextViwe"
+            android:textColor="@color/nav_nav_textview"
+            app:layout_constraintTop_toBottomOf="@id/notificationNavBottom"
+            app:layout_constraintStart_toStartOf="@id/notificationNavBottom"
+            app:layout_constraintEnd_toEndOf="@id/notificationNavBottom"
+            android:fontFamily="@font/montserrat_semibold"
+
+            />
+
+        <ImageView
+            android:id="@+id/settingNavButton"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_marginBottom="10sp"
+            android:src="@drawable/setting_svg"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/notificationNavBottom"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_marginTop="4sp"
+            android:layout_width="wrap_content"
+            android:textSize="13sp"
+            android:layout_height="wrap_content"
+            android:text="@string/setting"
+            android:id="@+id/settingNavTextView"
+            android:textColor="@color/nav_nav_textview"
+            app:layout_constraintTop_toBottomOf="@id/settingNavButton"
+            app:layout_constraintStart_toStartOf="@id/settingNavButton"
+            app:layout_constraintEnd_toEndOf="@id/settingNavButton"
+            android:fontFamily="@font/montserrat_semibold"
+
+            />
+
+
+
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

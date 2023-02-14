@@ -29,6 +29,7 @@ public class DBTools {
 
     public long insertDevice(MokoDevice mokoDevice) {
         ContentValues cv = new ContentValues();
+        cv.put(DBConstants.DEVICE_FIELD_COMPARTMENT, mokoDevice.compartment);
         cv.put(DBConstants.DEVICE_FIELD_NAME, mokoDevice.name);
         cv.put(DBConstants.DEVICE_FIELD_NICK_NAME, mokoDevice.nickName);
         cv.put(DBConstants.DEVICE_FIELD_DEVICE_ID, mokoDevice.deviceId);
@@ -36,6 +37,7 @@ public class DBTools {
         cv.put(DBConstants.DEVICE_FIELD_TYPE, mokoDevice.type);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_PUBLISH, mokoDevice.topicPublish);
         cv.put(DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE, mokoDevice.topicSubscribe);
+
         long row = db.insert(DBConstants.TABLE_NAME_DEVICE, null, cv);
         return row;
     }
@@ -46,6 +48,8 @@ public class DBTools {
         ArrayList<MokoDevice> mokoDevices = new ArrayList<>();
         while (cursor.moveToNext()) {
             MokoDevice mokoDevice = new MokoDevice();
+            mokoDevice.compartment= cursor.getInt(cursor.
+                    getColumnIndex(DBConstants.DEVICE_FIELD_COMPARTMENT));
             mokoDevice.id = cursor.getInt(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_ID));
             mokoDevice.name = cursor.getString(cursor
@@ -72,6 +76,8 @@ public class DBTools {
         MokoDevice mokoDevice = null;
         while (cursor.moveToFirst()) {
             mokoDevice = new MokoDevice();
+            mokoDevice.compartment=cursor.getInt(cursor.
+                    getColumnIndex(DBConstants.DEVICE_FIELD_COMPARTMENT));
             mokoDevice.id = cursor.getInt(cursor
                     .getColumnIndex(DBConstants.DEVICE_FIELD_ID));
             mokoDevice.name = cursor.getString(cursor

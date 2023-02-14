@@ -8,15 +8,19 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.elvishew.xlog.XLog;
+import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
+import com.moko.lifex.Home.ActivityCallBacks;
+import com.moko.lifex.Home.ViewPagerAdapter;
 import com.moko.lifex.R;
 import com.moko.lifex.adapter.DeviceAdapter;
 import com.moko.lifex.base.BaseActivity;
@@ -63,21 +67,32 @@ import java.util.Iterator;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnItemChildClickListener,
-        BaseQuickAdapter.OnItemClickListener,
-        BaseQuickAdapter.OnItemLongClickListener {
+public class MainActivity extends BaseActivity  {
 
-    @BindView(R.id.rl_empty)
-    RelativeLayout rlEmpty;
-    @BindView(R.id.rv_device_list)
-    RecyclerView rvDeviceList;
+
     @BindView(R.id.tv_title)
     TextView tvTitle;
+
+    ActivityCallBacks callBacks;
+
+
     private ArrayList<MokoDevice> devices;
-    private DeviceAdapter adapter;
+    @BindView(R.id.viewPager)
+    ViewPager viewPager;
+    ViewPagerAdapter viewPagerAdapter;
+
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
+
+    @BindView(R.id.navsceneImageView)
+    ImageView sceneImageView;
+
     private Handler mHandler;
     private MQTTConfig appMqttConfig;
 
@@ -87,22 +102,16 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         devices = DBTools.getInstance(this).selectAllDevice();
-        adapter = new DeviceAdapter();
-        adapter.openLoadAnimation();
-        adapter.replaceData(devices);
-        adapter.setOnItemClickListener(this);
-        adapter.setOnItemLongClickListener(this);
-        adapter.setOnItemChildClickListener(this);
-        rvDeviceList.setLayoutManager(new LinearLayoutManager(this));
-        rvDeviceList.setAdapter(adapter);
-        if (devices.isEmpty()) {
-            rlEmpty.setVisibility(View.VISIBLE);
-            rvDeviceList.setVisibility(View.GONE);
-        } else {
-            rvDeviceList.setVisibility(View.VISIBLE);
-            rlEmpty.setVisibility(View.GONE);
-        }
+
+
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
+
         mHandler = new Handler(Looper.getMainLooper());
+
         String appMqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         if (!TextUtils.isEmpty(appMqttConfigStr)) {
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
@@ -137,6 +146,11 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             XLog.e(errorReport.toString());
         }
     }
+    public void setActivityCallBack(ActivityCallBacks activityCallBack){
+
+        this.callBacks=activityCallBack;
+
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // connect event
@@ -145,7 +159,9 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     public void onMQTTConnectionCompleteEvent(MQTTConnectionCompleteEvent event) {
         tvTitle.setText(getString(R.string.guide_center));
         // 订阅所有设备的Topic
+
         subscribeAllDevices();
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -156,6 +172,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionFailureEvent(MQTTConnectionFailureEvent event) {
         tvTitle.setText(getString(R.string.mqtt_connect_failed));
+
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -202,13 +219,17 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         // 修改了设备名称
         if (!devices.isEmpty()) {
             for (MokoDevice device : devices) {
+
                 if (device.deviceId.equals(event.getDeviceId())) {
                     device.nickName = event.getNickName();
                     break;
                 }
             }
         }
-        adapter.replaceData(devices);
+
+        callBacks.onDataReplaceCallBack(devices);
+
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -223,14 +244,13 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                 break;
             }
         }
-        adapter.replaceData(devices);
-        if (devices.isEmpty()) {
-            rlEmpty.setVisibility(View.VISIBLE);
-            rvDeviceList.setVisibility(View.GONE);
-        }
+        callBacks.onDataReplaceCallBack(devices);
+
         if (id > 0 && mHandler.hasMessages(id)) {
             mHandler.removeMessages(id);
         }
+
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -253,6 +273,28 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
             devices.add(mokoDevice);
         }
     }
+
+    private void subscribeAllDevices() {
+        if (!TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
+            try {
+                MQTTSupport.getInstance().subscribe(appMqttConfig.topicSubscribe, appMqttConfig.qos);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (devices.isEmpty()) {
+                return;
+            }
+            for (MokoDevice device : devices) {
+                try {
+                    MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -279,7 +321,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                             Message message = Message.obtain(mHandler, () -> {
                                 device.isOnline = false;
                                 XLog.i(device.deviceId + "离线");
-                                adapter.replaceData(devices);
+                                callBacks.onDataReplaceCallBack(devices);
                             });
                             message.what = device.id;
                             mHandler.sendMessageDelayed(message, 62 * 1000);
@@ -287,14 +329,8 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                         }
                     }
                 }
-                adapter.replaceData(devices);
-                if (!devices.isEmpty()) {
-                    rvDeviceList.setVisibility(View.VISIBLE);
-                    rlEmpty.setVisibility(View.GONE);
-                } else {
-                    rvDeviceList.setVisibility(View.GONE);
-                    rlEmpty.setVisibility(View.VISIBLE);
-                }
+                callBacks.onDataReplaceCallBack(devices);
+
             }
             if (ModifyMQTTSettingsActivity.TAG.equals(from)) {
                 if (!TextUtils.isEmpty(deviceId)) {
@@ -315,7 +351,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                         }
                     }
                 }
-                adapter.replaceData(devices);
+                callBacks.onDataReplaceCallBack(devices);
             }
         }
     }
@@ -339,25 +375,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
     }
 
-    public void mainAddDevices(View view) {
-        if (isWindowLocked())
-            return;
-        if (appMqttConfig == null) {
-            startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
-            return;
-        }
-        if (Utils.isNetworkAvailable(this)) {
-            if (TextUtils.isEmpty(appMqttConfig.host)) {
-                startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
-                return;
-            }
-            startActivity(new Intent(this, AddMokoPlugActivity.class));
-        } else {
-            String ssid = Utils.getWifiSSID(this);
-            ToastUtils.showToast(this, String.format("SSID:%s, the network cannot available,please check", ssid));
-            XLog.i(String.format("SSID:%s, the network cannot available,please check", ssid));
-        }
-    }
+
 
 
     public void about(View view) {
@@ -368,128 +386,28 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     }
 
 
-    @Override
-    public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-        MokoDevice device = (MokoDevice) adapter.getItem(position);
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        if (!device.isOnline) {
-            ToastUtils.showToast(this, R.string.device_offline);
-            return;
-        }
-        if (device.isOverload) {
-            ToastUtils.showToast(this, "Socket is overload, please check it!");
-            return;
-        }
-        if (device.isOvercurrent) {
-            ToastUtils.showToast(this, "Socket is overcurrent, please check it!");
-            return;
-        }
-        if (device.isOvervoltage) {
-            ToastUtils.showToast(this, "Socket is overvoltage, please check it!");
-            return;
-        }
-        showLoadingProgressDialog();
-        changeSwitch(device);
-    }
 
-    private void changeSwitch(MokoDevice device) {
-        String appTopic;
-        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
-            appTopic = device.topicSubscribe;
-        } else {
-            appTopic = appMqttConfig.topicPublish;
-        }
-        SwitchInfo switchInfo = new SwitchInfo();
-        switchInfo.switch_state = device.on_off ? "off" : "on";
-        String message = MQTTMessageAssembler.assembleWriteSwitchInfo(device.uniqueId, switchInfo);
-        try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SWITCH_STATE, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Override
-    public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
-        }
-        MokoDevice device = (MokoDevice) adapter.getItem(position);
-        if ("2".equals(device.type) || "3".equals(device.type)) {
-            // MK115、MK116
-            if (!device.isOnline) {
-                ToastUtils.showToast(this, R.string.device_offline);
-                return;
-            }
-            Intent intent = new Intent(this, EnergyPlugActivity.class);
-            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
-            startActivity(intent);
-        } else if ("4".equals(device.type) || "5".equals(device.type)) {
-            // MK117、MK117D
-            Intent intent = new Intent(this, EnergyPlugDetailActivity.class);
-            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
-            startActivity(intent);
-        } else {
-            // MK114
-            Intent intent = new Intent(this, PlugActivity.class);
-            intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
-            startActivity(intent);
-        }
-
-    }
-
-    @Override
-    public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
-        MokoDevice mokoDevice = (MokoDevice) adapter.getItem(position);
-        if (mokoDevice == null)
-            return true;
-        AlertMessageDialog dialog = new AlertMessageDialog();
-        dialog.setTitle("Remove Device");
-        dialog.setMessage("Please confirm again whether to \n remove the device");
-        dialog.setOnAlertConfirmListener(() -> {
-            if (!MQTTSupport.getInstance().isConnected()) {
-                ToastUtils.showToast(MainActivity.this, R.string.network_error);
-                return;
-            }
-            showLoadingProgressDialog();
-            // 取消订阅
-            try {
-                MQTTSupport.getInstance().unSubscribe(mokoDevice.topicPublish);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
-            XLog.i(String.format("删除设备:%s", mokoDevice.nickName));
-            DBTools.getInstance(MainActivity.this).deleteDevice(mokoDevice);
-            EventBus.getDefault().post(new DeviceDeletedEvent(mokoDevice.id));
-        });
-        dialog.show(getSupportFragmentManager());
-        return true;
-    }
-
-    private void subscribeAllDevices() {
-        if (!TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
-            try {
-                MQTTSupport.getInstance().subscribe(appMqttConfig.topicSubscribe, appMqttConfig.qos);
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
-        } else {
-            if (devices.isEmpty()) {
-                return;
-            }
-            for (MokoDevice device : devices) {
-                try {
-                    MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+//    private void subscribeAllDevices() {
+//        if (!TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
+//            try {
+//                MQTTSupport.getInstance().subscribe(appMqttConfig.topicSubscribe, appMqttConfig.qos);
+//            } catch (MqttException e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            if (devices.isEmpty()) {
+//                return;
+//            }
+//            for (MokoDevice device : devices) {
+//                try {
+//                    MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+//                } catch (MqttException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
     private void updateDeviceNetwokStatus(MQTTMessageArrivedEvent event) {
         if (devices.isEmpty()) {
@@ -517,7 +435,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                     device.isOnline = false;
                     device.on_off = false;
                     XLog.i(device.deviceId + "离线");
-                    adapter.replaceData(devices);
+                    callBacks.onDataReplaceCallBack(devices);
                     EventBus.getDefault().post(new DeviceOnlineEvent(device.deviceId, false));
                 });
                 offline.what = device.id;
@@ -560,7 +478,7 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                     OverloadOccur overloadOccur = new Gson().fromJson(msgCommon.data, infoType);
                     device.isOvercurrent = overloadOccur.state == 1;
                 }
-                adapter.replaceData(devices);
+                callBacks.onDataReplaceCallBack(devices);
                 break;
             }
         }

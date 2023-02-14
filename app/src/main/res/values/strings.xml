@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MokoLifeX</string>
+    <string name="app_name">Home Automation</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="save">Save</string>
@@ -8,8 +8,8 @@
     <string name="network_error">Network error,please check.</string>
     <string name="device_offline">Device offline,please check.</string>
     <string name="device_overload">Device is overload,please check.</string>
-    <string name="guide_center">Moko LifeX</string>
-    <string name="main_welcome">Start your moko lifeX</string>
+    <string name="guide_center">Home Automation</string>
+    <string name="main_welcome">Start your Smart Device</string>
     <string name="main_add_device">Add Devices</string>
     <string name="add_device_title">Add Device</string>
     <string name="add_plug_tips">Plug in the device and confirm \nthat indicator is blinking amber</string>
@@ -114,6 +114,13 @@
     <string name="setting_syncing">syncing</string>
     <string name="channel_domain"><![CDATA[Channel & Domain]]></string>
     <string name="channel_domain_tips"><![CDATA[Note: Configure 2.4G&5G channel by selecting your domain, channels will be matched according to the domain]]></string>
+    <string name="scene">Scene</string>
+    <string name="home">Home</string>
+    <string name="notification">Notification</string>
+    <string name="setting">Setting</string>
+    <string name="AllDevices">All Devices</string>
+    <string name="livingRoom">Living Room</string>
+    <string name="kitchen">Kitchen</string>
 
     <string-array name="update_type">
         <item>Firmware</item>
@@ -145,5 +152,7 @@
         <item>Cyan</item>
         <item>Purple</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
