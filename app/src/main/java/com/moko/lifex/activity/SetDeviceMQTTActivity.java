@@ -136,6 +136,8 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
 
         if (TextUtils.isEmpty(MQTTConfigStr)) {
             mqttDeviceConfig = new MQTTConfig();
+
+
         } else {
             Gson gson = new Gson();
             mqttDeviceConfig = gson.fromJson(MQTTConfigStr, MQTTConfig.class);
@@ -143,14 +145,17 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             mqttDeviceConfig.qos = 1;
             mqttDeviceConfig.keepAlive = 60;
             mqttDeviceConfig.clientId = "";
-            mqttDeviceConfig.username = "";
-            mqttDeviceConfig.password = "";
-            mqttDeviceConfig.caPath = "";
-            mqttDeviceConfig.clientKeyPath = "";
-            mqttDeviceConfig.clientCertPath = "";
+            mqttDeviceConfig.username = mqttAppConfig.username;
+            mqttDeviceConfig.password = mqttAppConfig.password;
+            mqttDeviceConfig.caPath = mqttAppConfig.caPath;
+            mqttDeviceConfig.clientKeyPath = mqttAppConfig.clientKeyPath;
+            mqttDeviceConfig.clientCertPath = mqttAppConfig.clientCertPath;
             mqttDeviceConfig.topicPublish = "";
             mqttDeviceConfig.topicSubscribe = "";
         }
+
+        etMqttHost.setText(mqttDeviceConfig.host);
+
         filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";

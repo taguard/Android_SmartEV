@@ -41,7 +41,9 @@ public class DeviceAdapter extends BaseQuickAdapter<MokoDevice, BaseViewHolder> 
                 holder.setTextColor(R.id.tv_device_switch, ContextCompat.getColor(mContext, R.color.red_ff0000));
             }
         }
+
         holder.setText(R.id.tv_device_name, device.nickName);
         holder.addOnClickListener(R.id.iv_switch);
+
     }
 }

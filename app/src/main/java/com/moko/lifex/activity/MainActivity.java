@@ -187,17 +187,20 @@ public class MainActivity extends BaseActivity  {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTUnSubscribeSuccessEvent(MQTTUnSubscribeSuccessEvent event) {
         dismissLoadingProgressDialog();
+        callBacks.dismissLoading();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTUnSubscribeFailureEvent(MQTTUnSubscribeFailureEvent event) {
         dismissLoadingProgressDialog();
+        callBacks.dismissLoading();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTPublishSuccessEvent(MQTTPublishSuccessEvent event) {
         int msgId = event.getMsgId();
         if (msgId == MQTTConstants.CONFIG_MSG_ID_SWITCH_STATE) {
+            callBacks.dismissLoading();
             dismissLoadingProgressDialog();
         }
     }
@@ -207,6 +210,7 @@ public class MainActivity extends BaseActivity  {
         int msgId = event.getMsgId();
         if (msgId == MQTTConstants.CONFIG_MSG_ID_SWITCH_STATE) {
             dismissLoadingProgressDialog();
+            callBacks.dismissLoading();
         }
     }
 

@@ -8,4 +8,7 @@ import java.util.List;
 public interface ActivityCallBacks {
     void onDataReplaceCallBack (ArrayList<MokoDevice> devices);
 
+    void dismissLoading();
+
+
 }

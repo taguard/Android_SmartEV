@@ -22,6 +22,7 @@ public class SPUtiles {
 
     public static String getStringValue(Context context, String key, String defValue) {
 
+
         if(key.equals(AppConstants.SP_KEY_MQTT_CONFIG_APP)){
             MQTTConfig mqttConfig=new MQTTConfig();
             mqttConfig.host="careafox.com";

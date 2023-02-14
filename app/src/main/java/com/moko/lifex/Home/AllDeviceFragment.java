@@ -53,9 +53,7 @@ import com.moko.support.handler.MQTTMessageAssembler;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.EventBus;
 
-
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnItemChildClickListener,
@@ -87,7 +85,6 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
     }
 
     @Override
@@ -95,7 +92,7 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
                              Bundle savedInstanceState) {
 
 
-        devices = DBTools.getInstance(getContext()).selectAllDevice();
+        devices = DBTools.getInstance(requireContext()).selectAllDevice();
 
         binding= DataBindingUtil.inflate(
                 inflater, R.layout.fragment_all_device, container, false);
@@ -117,7 +114,7 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
         });
         ((MainActivity)requireActivity()).setActivityCallBack(this);
 
-        appMqttConfigStr = SPUtiles.getStringValue(getContext(), AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+        appMqttConfigStr = SPUtiles.getStringValue(requireContext(), AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
 
         if (!TextUtils.isEmpty(appMqttConfigStr)) {
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
@@ -134,7 +131,7 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
 
 
 
-        binding.rvDeviceList.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvDeviceList.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvDeviceList.setAdapter(adapter);
         if (devices.isEmpty()) {
             binding.rlEmpty.setVisibility(View.VISIBLE);
@@ -151,28 +148,28 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
 
     @Override
     public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-        if (!MQTTSupport.getInstance().isConnected() && getContext()!=null ) {
-            ToastUtils.showToast(getContext(), R.string.network_error);
+        if (!MQTTSupport.getInstance().isConnected()  ) {
+            ToastUtils.showToast(requireContext(), R.string.network_error);
             return;
         }
         MokoDevice device = (MokoDevice) adapter.getItem(position);
         if ((device!=null && "2".equals(device.type)) || (device!=null && "3".equals(device.type))) {
             // MK115、MK116
-            if (!device.isOnline && getContext()!=null) {
-                ToastUtils.showToast(getContext(), R.string.device_offline);
+            if (!device.isOnline ) {
+                ToastUtils.showToast(requireContext(), R.string.device_offline);
                 return;
             }
-            Intent intent = new Intent(getContext(), EnergyPlugActivity.class);
+            Intent intent = new Intent(requireContext(), EnergyPlugActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
         } else if ("4".equals(device.type) || "5".equals(device.type)) {
             // MK117、MK117D
-            Intent intent = new Intent(getContext(), EnergyPlugDetailActivity.class);
+            Intent intent = new Intent(requireContext(), EnergyPlugDetailActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
         } else {
             // MK114
-            Intent intent = new Intent(getContext(), PlugActivity.class);
+            Intent intent = new Intent(requireContext(), PlugActivity.class);
             intent.putExtra(AppConstants.EXTRA_KEY_DEVICE, device);
             startActivity(intent);
         }
@@ -189,8 +186,8 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
         dialog.setMessage("Please confirm again whether to \n remove the device");
         dialog.setOnAlertConfirmListener(() -> {
             if (!MQTTSupport.getInstance().isConnected()) {
-                if(getContext()!=null)
-                ToastUtils.showToast(getContext(), R.string.network_error);
+                
+                ToastUtils.showToast(requireContext(), R.string.network_error);
                 return;
             }
             showLoadingProgressDialog();
@@ -201,7 +198,7 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
                 e.printStackTrace();
             }
             XLog.i(String.format("删除设备:%s", mokoDevice.nickName));
-            DBTools.getInstance(getContext()).deleteDevice(mokoDevice);
+            DBTools.getInstance(requireContext()).deleteDevice(mokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mokoDevice.id));
         });
         dialog.show(getFragmentManager());
@@ -211,24 +208,24 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
     @Override
     public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
         MokoDevice device = (MokoDevice) adapter.getItem(position);
-        if (!MQTTSupport.getInstance().isConnected() && getContext()!=null) {
-            ToastUtils.showToast(getContext(), R.string.network_error);
+        if (!MQTTSupport.getInstance().isConnected() ) {
+            ToastUtils.showToast(requireContext(), R.string.network_error);
             return;
         }
-        if (device!=null && !device.isOnline && getContext()!=null) {
-            ToastUtils.showToast(getContext(), R.string.device_offline);
+        if (device!=null && !device.isOnline ) {
+            ToastUtils.showToast(requireContext(), R.string.device_offline);
             return;
         }
-        if (device!=null && device.isOverload && getContext()!=null ) {
-            ToastUtils.showToast(getContext(), "Socket is overload, please check it!");
+        if (device!=null && device.isOverload  ) {
+            ToastUtils.showToast(requireContext(), "Socket is overload, please check it!");
             return;
         }
         if (device!=null && device.isOvercurrent) {
-            ToastUtils.showToast(getContext(), "Socket is overcurrent, please check it!");
+            ToastUtils.showToast(requireContext(), "Socket is overcurrent, please check it!");
             return;
         }
-        if (device!=null && device.isOvervoltage && getContext()!=null) {
-            ToastUtils.showToast(getContext(), "Socket is overvoltage, please check it!");
+        if (device!=null && device.isOvervoltage ) {
+            ToastUtils.showToast(requireContext(), "Socket is overvoltage, please check it!");
             return;
         }
         showLoadingProgressDialog();
@@ -318,4 +315,15 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
 
         }
     }
+
+    @Override
+    public void dismissLoading() {
+        dismissLoadingProgressDialog();
+
+    }
+    public void dismissLoadingProgressDialog() {
+        if (mLoadingDialog != null)
+            mLoadingDialog.dismissAllowingStateLoss();
+    }
+
 }

@@ -36,7 +36,7 @@ public class LoadingMessageDialog extends MokoBaseDialog {
     public void bindView(View v) {
         ButterKnife.bind(this, v);
         ProgressDrawable progressDrawable = new ProgressDrawable();
-        progressDrawable.setColor(ContextCompat.getColor(getContext(), R.color.black_333333));
+        progressDrawable.setColor(ContextCompat.getColor(requireContext(), R.color.black_333333));
         ivLoading.setImageDrawable(progressDrawable);
         progressDrawable.start();
         if (messageId > 0) {

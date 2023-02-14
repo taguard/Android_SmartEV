@@ -21,7 +21,7 @@
     <string name="operation_steps_1_content">Plug the device in power</string>
     <string name="operation_steps_2">Step 2</string>
     <string name="operation_steps_2_content">Hold the button for 10s until the LED blink amber</string>
-
+    <string name="server_url">http://65.1.114.224:3000/</string>
 
     <string name="mqtt_verify_client_id_empty">ClientId error</string>
     <string name="mqtt_verify_device_id_empty">DeivceId error</string>
