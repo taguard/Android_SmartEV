@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/wifi_alert_title"
-        android:textColor="@color/black_333333"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wifi_alert_1_1"
-            android:textColor="@color/black_333333"
+            android:textColor="@color/white"
             android:textSize="15sp" />
 
         <ImageView
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wifi_alert_1_2"
-            android:textColor="@color/black_333333"
+            android:textColor="@color/white"
             android:textSize="15sp" />
     </LinearLayout>
 
@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="@string/wifi_alert_2"
-        android:textColor="@color/black_333333"
+        android:textColor="@color/white"
         android:textSize="15sp" />
 
     <ImageView
@@ -63,6 +63,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="@string/wifi_alert_3"
-        android:textColor="@color/black_333333"
+        android:textColor="@color/white"
         android:textSize="15sp" />
 </LinearLayout>

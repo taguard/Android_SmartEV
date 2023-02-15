@@ -18,4 +18,5 @@ public class DBConstants {
     public static final String DEVICE_FIELD_TOPIC_SUBSCRIBE = "subscribe_topic";
     public static final String DEVICE_FIELD_COMPARTMENT="compartment_id";
 
+
 }

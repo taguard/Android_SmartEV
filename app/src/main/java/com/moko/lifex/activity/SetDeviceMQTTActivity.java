@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -15,6 +16,16 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.elvishew.xlog.XLog;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.gson.Gson;
@@ -50,11 +61,14 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
@@ -134,6 +148,9 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         mDeviceResult = (DeviceResult) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE_RESULT);
         mCompartmentId=getIntent().getIntExtra(AppConstants.COMPARTMENT_ID, 0);
 
+
+        makeApiCallForGettingDeviceId();
+
         if (TextUtils.isEmpty(MQTTConfigStr)) {
             mqttDeviceConfig = new MQTTConfig();
 
@@ -153,6 +170,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
             mqttDeviceConfig.topicPublish = "";
             mqttDeviceConfig.topicSubscribe = "";
         }
+
 
         etMqttHost.setText(mqttDeviceConfig.host);
 
@@ -244,6 +262,75 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
     }
 
+    private void makeApiCallForGettingDeviceId() {
+
+        try {
+            showLoadingProgressDialog();
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            String URL = getString(R.string.server_url)+"device/register_device";
+
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("mac_id", "Android Volley Demo");
+
+            final String requestBody = jsonBody.toString();
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    dismissLoadingProgressDialog();
+
+                    try{
+                        JSONObject jsonObject=new JSONObject(response);
+                        String id =jsonObject.optString("client_id");
+                        mqttDeviceConfig.deviceId=id;
+                        mqttDeviceConfig.clientId=id;
+
+
+
+                    }catch (Exception e){
+
+                    }
+                    Log.i("VOLLEY", response);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("VOLLEY", error.toString());
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return requestBody == null ? null : requestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    String responseString = "";
+                    if (response != null) {
+                        responseString = String.valueOf(response.statusCode);
+                        // can get more details such as response.headers
+                    }
+                    return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                }
+            };
+
+            requestQueue.add(stringRequest);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionCompleteEvent(MQTTConnectionCompleteEvent event) {
         if (isSettingSuccess) {
@@ -299,6 +386,9 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
+
+                    saveDeviceToDataBase();
+
                     DBTools.getInstance(this).insertDevice(mokoDevice);
 
                 } else {
@@ -308,6 +398,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
+
                     DBTools.getInstance(this).updateDevice(mokoDevice);
                 }
                 EventBus.getDefault().post(new DeviceUpdateEvent(mokoDevice.deviceId));
@@ -316,6 +407,14 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                 startActivity(modifyIntent);
             }, 500);
         }
+    }
+
+
+    private void saveDeviceToDataBase() {
+
+        String url =getString(R.string.server_url)+"";
+
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

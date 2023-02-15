@@ -35,7 +35,7 @@ public class SPUtiles {
             mqttConfig.ntpUrl="in.pool.ntp.org";
             mqttConfig.timeZone=11;
 
-            new Gson().toJson(mqttConfig, MQTTConfig.class);
+            return new Gson().toJson(mqttConfig, MQTTConfig.class);
 
         }
         return context.getSharedPreferences(AppConstants.SP_NAME, Context.MODE_PRIVATE).getString(key, defValue);

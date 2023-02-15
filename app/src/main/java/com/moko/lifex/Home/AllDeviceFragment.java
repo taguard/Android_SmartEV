@@ -119,6 +119,7 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
         if (!TextUtils.isEmpty(appMqttConfigStr)) {
             appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
 
+
         }
 
 
