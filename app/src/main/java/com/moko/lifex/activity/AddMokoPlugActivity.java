@@ -35,14 +35,14 @@ public class AddMokoPlugActivity extends BaseActivity {
     @BindView(R.id.not_blinking_tips)
     TextView notBlinkingTips;
     private CustomDialog wifiAlertDialog;
-    int selectedCompartment;
+    String selectedCompartment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_moko_plug);
         ButterKnife.bind(this);
-        selectedCompartment=getIntent().getIntExtra(AppConstants.COMPARTMENT_ID, 0);
+        selectedCompartment=getIntent().getStringExtra(AppConstants.COMPARTMENT_ID);
 
         notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
         notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
@@ -75,6 +75,7 @@ public class AddMokoPlugActivity extends BaseActivity {
                 Intent intent = new Intent(this, SetDeviceMQTTActivity.class);
                 intent.putExtra(AppConstants.EXTRA_KEY_DEVICE_RESULT, deviceResult);
                 intent.putExtra(AppConstants.COMPARTMENT_ID, selectedCompartment);
+
                 startActivity(intent);
             }
         } else {

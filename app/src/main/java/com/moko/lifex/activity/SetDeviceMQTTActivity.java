@@ -61,7 +61,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -136,7 +135,9 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     private boolean isSupportNTP;
     private boolean isSupportChannel;
     private String deviceName;
-    private int mCompartmentId;
+    private String mCompartmentId;
+    String userId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,12 +145,15 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         setContentView(R.layout.activity_mqtt_device);
         ButterKnife.bind(this);
         String MQTTConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+       userId=SPUtiles.getStringValue(this , AppConstants.SP_USER_ID, "");
+        String defaultCompartment= userId+"$ALL_COMPARTMENT";
+
         mqttAppConfig = new Gson().fromJson(MQTTConfigStr, MQTTConfig.class);
         mDeviceResult = (DeviceResult) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE_RESULT);
-        mCompartmentId=getIntent().getIntExtra(AppConstants.COMPARTMENT_ID, 0);
+        mCompartmentId=getIntent().getStringExtra(AppConstants.COMPARTMENT_ID);
 
 
-        makeApiCallForGettingDeviceId();
+        makeApiCallForGeneratingDeviceId();
 
         if (TextUtils.isEmpty(MQTTConfigStr)) {
             mqttDeviceConfig = new MQTTConfig();
@@ -262,72 +266,68 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
         tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
     }
 
-    private void makeApiCallForGettingDeviceId() {
+    private void makeApiCallForGeneratingDeviceId() {
 
-        try {
-            showLoadingProgressDialog();
-            RequestQueue requestQueue = Volley.newRequestQueue(this);
-            String URL = getString(R.string.server_url)+"device/register_device";
+        showLoadingProgressDialog();
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String URL = getString(R.string.server_url)+"device/generate_device_id";
 
-            JSONObject jsonBody = new JSONObject();
-            jsonBody.put("mac_id", "Android Volley Demo");
-
-            final String requestBody = jsonBody.toString();
-
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    dismissLoadingProgressDialog();
-
-                    try{
-                        JSONObject jsonObject=new JSONObject(response);
-                        String id =jsonObject.optString("client_id");
-                        mqttDeviceConfig.deviceId=id;
-                        mqttDeviceConfig.clientId=id;
+        JSONObject jsonBody = new JSONObject();
 
 
+        final String requestBody = jsonBody.toString();
 
-                    }catch (Exception e){
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                dismissLoadingProgressDialog();
 
-                    }
-                    Log.i("VOLLEY", response);
+                try{
+                    JSONObject jsonObject=new JSONObject(response);
+                    String id =jsonObject.optString("client_id");
+                    mqttDeviceConfig.deviceId=id;
+                    mqttDeviceConfig.clientId=id;
+
+
+
+                }catch (Exception e){
+
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e("VOLLEY", error.toString());
-                }
-            }) {
-                @Override
-                public String getBodyContentType() {
-                    return "application/json; charset=utf-8";
-                }
+                Log.i("VOLLEY", response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", error.toString());
+            }
+        }) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
 
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    try {
-                        return requestBody == null ? null : requestBody.getBytes("utf-8");
-                    } catch (UnsupportedEncodingException uee) {
-                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
-                        return null;
-                    }
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    return requestBody == null ? null : requestBody.getBytes("utf-8");
+                } catch (UnsupportedEncodingException uee) {
+                    VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                    return null;
                 }
+            }
 
-                @Override
-                protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    String responseString = "";
-                    if (response != null) {
-                        responseString = String.valueOf(response.statusCode);
-                        // can get more details such as response.headers
-                    }
-                    return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                String responseString = "";
+                if (response != null) {
+                    responseString = String.valueOf(response.statusCode);
+                    // can get more details such as response.headers
                 }
-            };
+                return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+            }
+        };
 
-            requestQueue.add(stringRequest);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        requestQueue.add(stringRequest);
     }
 
 
@@ -387,7 +387,8 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
 
-                    saveDeviceToDataBase();
+                    saveDeviceToDataBase(userId ,mDeviceResult.device_name ,mDeviceResult.device_id, mqttDeviceConfig.deviceId, mCompartmentId, mokoDevice.topicPublish, mokoDevice.topicSubscribe );
+
 
                     DBTools.getInstance(this).insertDevice(mokoDevice);
 
@@ -398,6 +399,7 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
                     mokoDevice.uniqueId = mqttDeviceConfig.deviceId;
                     mokoDevice.topicSubscribe = mqttDeviceConfig.topicSubscribe;
                     mokoDevice.topicPublish = mqttDeviceConfig.topicPublish;
+
 
                     DBTools.getInstance(this).updateDevice(mokoDevice);
                 }
@@ -410,9 +412,79 @@ public class SetDeviceMQTTActivity extends BaseActivity implements RadioGroup.On
     }
 
 
-    private void saveDeviceToDataBase() {
+    private void saveDeviceToDataBase(String userId ,String mac_name, String macId , String clientId , String compartmentId, String publishTopic , String subscribeTopic) {
 
-        String url =getString(R.string.server_url)+"";
+        String url =getString(R.string.server_url)+"user/add_device";
+
+        try {
+
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("user_id", userId);
+            jsonBody.put("mac_name", mac_name);
+            jsonBody.put("mac_id", macId);
+            jsonBody.put("client_id", clientId);
+            jsonBody.put("compartment_id", compartmentId);
+            jsonBody.put("publish_topic" ,publishTopic );
+            jsonBody.put("subscribe_topic", subscribeTopic);
+
+
+            final String requestBody = jsonBody.toString();
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    dismissLoadingProgressDialog();
+
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        boolean success= jsonObject.optBoolean("acknowledged");
+
+                        if(success){
+                            ToastUtils.showToast(SetDeviceMQTTActivity.this , "Device Registered in backend");
+                        }
+
+                    } catch (Exception e) {
+
+                    }
+                    Log.i("VOLLEY", response);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("VOLLEY", error.toString());
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return requestBody == null ? null : requestBody.getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", requestBody, "utf-8");
+                        return null;
+                    }
+                }
+
+                @Override
+                protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                    String responseString = "";
+                    if (response != null) {
+                        responseString = String.valueOf(response.statusCode);
+                        // can get more details such as response.headers
+                    }
+                    return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
+                }
+            };
+
+            Volley.newRequestQueue(this).add(stringRequest);
+        }catch (Exception e){
+
+        }
+
 
 
     }

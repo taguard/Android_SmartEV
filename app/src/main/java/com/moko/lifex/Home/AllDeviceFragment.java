@@ -65,6 +65,8 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
     String appMqttConfigStr;
     MQTTConfig appMqttConfig;
     LoadingDialog mLoadingDialog;
+    String userId;
+
 
     private ArrayList<MokoDevice> devices;
 
@@ -105,6 +107,8 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        userId=SPUtiles.getStringValue(requireContext(), AppConstants.SP_USER_ID, " ");
 
         binding.addDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -279,7 +283,8 @@ public class AllDeviceFragment extends Fragment implements BaseQuickAdapter.OnIt
                 return;
             }
             Intent intent=new Intent(requireContext(),AddMokoPlugActivity.class );
-            intent.putExtra(AppConstants.COMPARTMENT_ID, 0);
+            intent.putExtra(AppConstants.COMPARTMENT_ID, userId+"$ALL_COMPARTMENT");
+
 
             startActivity( intent);
 

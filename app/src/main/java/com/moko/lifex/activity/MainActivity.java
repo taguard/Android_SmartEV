@@ -12,6 +12,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.elvishew.xlog.XLog;
 import com.google.android.material.tabs.TabLayout;
@@ -55,6 +61,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -63,6 +72,7 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -102,7 +112,7 @@ public class MainActivity extends BaseActivity  {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         devices = DBTools.getInstance(this).selectAllDevice();
-
+        makeApiCallForFetchingData("63ecd8328832780d6b43379e");
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(viewPagerAdapter);
@@ -146,6 +156,75 @@ public class MainActivity extends BaseActivity  {
             XLog.e(errorReport.toString());
         }
     }
+
+    public void makeApiCallForFetchingData(String userId){
+
+        String url=getString(R.string.server_url)+"user/view_user?user_id="+userId;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+
+                        try {
+                            JSONObject responseObject=new JSONObject(response);
+                            String name=responseObject.optString("name");
+                            String phone_number =responseObject.optString("number");
+                            String email=responseObject.optString("email");
+
+                            JSONArray compartment_data=responseObject.optJSONArray("compartment_data");
+                            if(compartment_data==null)
+                                return ;
+
+                            for(int i=0;i<compartment_data.length();i++){
+
+                                JSONObject comartment=compartment_data.optJSONObject(i);
+                                String compartmentId=comartment.optString("compartment_id");
+                                String compartment_name=comartment.optString("compartment_name");
+                                JSONArray connected_device_data=comartment.optJSONArray("connected_device_data");
+
+                                if(connected_device_data==null)
+                                    return ;
+
+                                for(int j =0;j<connected_device_data.length();j++){
+                                    JSONObject connectedDevice=connected_device_data.optJSONObject(i);
+
+                                    String device_id=connectedDevice.optString("client_id");
+                                    String device_name=connectedDevice.optString("device_name");
+                                    String mac_id=connectedDevice.optString("mac_id");
+
+
+
+                                }
+                            }
+
+                        } catch (JSONException e) {
+
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                ToastUtils.showToast(MainActivity.this , "Error from backend");
+
+            }
+        });
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
+
+
+    }
+
     public void setActivityCallBack(ActivityCallBacks activityCallBack){
 
         this.callBacks=activityCallBack;

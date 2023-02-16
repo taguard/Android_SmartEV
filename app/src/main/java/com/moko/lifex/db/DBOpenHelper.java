@@ -74,6 +74,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
             // 设备唯一标识
             + DBConstants.DEVICE_FIELD_DEVICE_ID + " TEXT,"
 
-            +DBConstants.DEVICE_FIELD_COMPARTMENT +" INTEGER DEFAULT 0);";
+            +DBConstants.DEVICE_FIELD_COMPARTMENT +" TEXT DEFAULT ' ');";
 
 }

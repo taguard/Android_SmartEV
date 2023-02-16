@@ -12,6 +12,8 @@ public class AppConstants {
     // sp
     public static final String SP_NAME = "sp_name_life";
     public static final String SP_KEY_MQTT_CONFIG_APP = "SP_KEY_MQTT_CONFIG_APP";
+    public static final String SP_USER_ID="sp_user_id";
+
 
     // extra_key
     // 设备列表
