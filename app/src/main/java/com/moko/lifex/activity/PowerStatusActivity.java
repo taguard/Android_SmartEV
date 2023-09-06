@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.google.gson.Gson;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityPowerStatusBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -37,31 +36,21 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
+public class PowerStatusActivity extends BaseActivity<ActivityPowerStatusBinding> implements RadioGroup.OnCheckedChangeListener {
 
-public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
-
-
-    @BindView(R.id.rb_switch_off)
-    RadioButton rbSwitchOff;
-    @BindView(R.id.rb_switch_on)
-    RadioButton rbSwitchOn;
-    @BindView(R.id.rb_last_status)
-    RadioButton rbLastStatus;
-    @BindView(R.id.rg_power_status)
-    RadioGroup rgPowerStatus;
 
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_power_status);
-        ButterKnife.bind(this);
+    protected ActivityPowerStatusBinding getViewBinding() {
+        return ActivityPowerStatusBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -126,18 +115,14 @@ public class PowerStatusActivity extends BaseActivity implements RadioGroup.OnCh
                 PowerStatus powerStatus = new Gson().fromJson(msgCommon.data, statusType);
                 status = powerStatus.switch_state;
             }
-            switch (status) {
-                case 0:
-                    rbSwitchOff.setChecked(true);
-                    break;
-                case 1:
-                    rbSwitchOn.setChecked(true);
-                    break;
-                case 2:
-                    rbLastStatus.setChecked(true);
-                    break;
-            }
-            rgPowerStatus.setOnCheckedChangeListener(this);
+            if (status == 0)
+                mBind.rbSwitchOff.setChecked(true);
+            else if (status == 1)
+                mBind.rbSwitchOn.setChecked(true);
+            else if (status == 2)
+                mBind.rbLastStatus.setChecked(true);
+
+            mBind.rgPowerStatus.setOnCheckedChangeListener(this);
         }
     }
 

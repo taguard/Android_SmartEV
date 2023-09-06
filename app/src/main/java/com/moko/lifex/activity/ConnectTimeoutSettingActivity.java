@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityConnectionTimeoutBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -22,7 +21,6 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.ConnectionTimeout;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -36,24 +34,21 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
+public class ConnectTimeoutSettingActivity extends BaseActivity<ActivityConnectionTimeoutBinding> {
 
-public class ConnectTimeoutSettingActivity extends BaseActivity {
-
-
-    @BindView(R.id.et_connection_timeout)
-    EditText etConnectionTimeout;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connection_timeout);
-        ButterKnife.bind(this);
+    protected ActivityConnectionTimeoutBinding getViewBinding() {
+        return ActivityConnectionTimeoutBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -105,7 +100,7 @@ public class ConnectTimeoutSettingActivity extends BaseActivity {
             Type infoType = new TypeToken<ConnectionTimeout>() {
             }.getType();
             ConnectionTimeout timeout = new Gson().fromJson(msgCommon.data, infoType);
-            etConnectionTimeout.setText(String.valueOf(timeout.timeout));
+            mBind.etConnectionTimeout.setText(String.valueOf(timeout.timeout));
         }
     }
 
@@ -171,7 +166,7 @@ public class ConnectTimeoutSettingActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        String timeoutStr = etConnectionTimeout.getText().toString();
+        String timeoutStr = mBind.etConnectionTimeout.getText().toString();
         if (TextUtils.isEmpty(timeoutStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;

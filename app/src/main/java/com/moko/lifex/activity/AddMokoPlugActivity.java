@@ -3,17 +3,16 @@ package com.moko.lifex.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.gson.JsonObject;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityAddMokoPlugBinding;
 import com.moko.lifex.dialog.CustomDialog;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.lifex.utils.Utils;
@@ -27,22 +26,20 @@ import com.moko.support.event.SocketResponseEvent;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+public class AddMokoPlugActivity extends BaseActivity<ActivityAddMokoPlugBinding> {
 
-public class AddMokoPlugActivity extends BaseActivity {
 
-    @BindView(R.id.not_blinking_tips)
-    TextView notBlinkingTips;
     private CustomDialog wifiAlertDialog;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_moko_plug);
-        ButterKnife.bind(this);
-        notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
-        notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
+    protected ActivityAddMokoPlugBinding getViewBinding() {
+        return ActivityAddMokoPlugBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
+        mBind.notBlinkingTips.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG); //下划线
+        mBind.notBlinkingTips.getPaint().setAntiAlias(true);//抗锯齿
         SocketSupport.getInstance().init(getApplicationContext());
     }
 
@@ -141,7 +138,7 @@ public class AddMokoPlugActivity extends BaseActivity {
 
     private void showWifiInputDialog() {
         showLoadingProgressDialog();
-        notBlinkingTips.postDelayed(() -> {
+        mBind.notBlinkingTips.postDelayed(() -> {
             if (isWifiCorrect()) {
                 // 弹出加载弹框
                 // 连接设备

@@ -2,14 +2,11 @@ package com.moko.lifex.activity;
 
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.elvishew.xlog.XLog;
@@ -20,6 +17,7 @@ import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.adapter.DeviceAdapter;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityMainBinding;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.AlertMessageDialog;
 import com.moko.lifex.entity.MokoDevice;
@@ -62,30 +60,25 @@ import java.util.Iterator;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnItemChildClickListener,
+public class MainActivity extends BaseActivity<ActivityMainBinding> implements BaseQuickAdapter.OnItemChildClickListener,
         BaseQuickAdapter.OnItemClickListener,
         BaseQuickAdapter.OnItemLongClickListener {
 
-    @BindView(R.id.rl_empty)
-    RelativeLayout rlEmpty;
-    @BindView(R.id.rv_device_list)
-    RecyclerView rvDeviceList;
-    @BindView(R.id.tv_title)
-    TextView tvTitle;
     private ArrayList<MokoDevice> devices;
     private DeviceAdapter adapter;
     private Handler mHandler;
-    private MQTTConfig appMqttConfig;
+
+    public String mAppMqttConfigStr;
+    private MQTTConfig mAppMqttConfig;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+    protected ActivityMainBinding getViewBinding() {
+        return ActivityMainBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         devices = DBTools.getInstance(this).selectAllDevice();
         adapter = new DeviceAdapter();
         adapter.openLoadAnimation();
@@ -93,20 +86,20 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         adapter.setOnItemClickListener(this);
         adapter.setOnItemLongClickListener(this);
         adapter.setOnItemChildClickListener(this);
-        rvDeviceList.setLayoutManager(new LinearLayoutManager(this));
-        rvDeviceList.setAdapter(adapter);
+        mBind.rvDeviceList.setLayoutManager(new LinearLayoutManager(this));
+        mBind.rvDeviceList.setAdapter(adapter);
         if (devices.isEmpty()) {
-            rlEmpty.setVisibility(View.VISIBLE);
-            rvDeviceList.setVisibility(View.GONE);
+            mBind.rlEmpty.setVisibility(View.VISIBLE);
+            mBind.rvDeviceList.setVisibility(View.GONE);
         } else {
-            rvDeviceList.setVisibility(View.VISIBLE);
-            rlEmpty.setVisibility(View.GONE);
+            mBind.rvDeviceList.setVisibility(View.VISIBLE);
+            mBind.rlEmpty.setVisibility(View.GONE);
         }
         mHandler = new Handler(Looper.getMainLooper());
-        String appMqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
-        if (!TextUtils.isEmpty(appMqttConfigStr)) {
-            appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
-            tvTitle.setText(getString(R.string.mqtt_connecting));
+        mAppMqttConfigStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+        if (!TextUtils.isEmpty(mAppMqttConfigStr)) {
+            mAppMqttConfig = new Gson().fromJson(mAppMqttConfigStr, MQTTConfig.class);
+            mBind.tvTitle.setText(getString(R.string.mqtt_connecting));
         }
         StringBuffer buffer = new StringBuffer();
         // 记录机型
@@ -122,9 +115,9 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         buffer.append(Utils.getVersionInfo(this));
         XLog.d(buffer.toString());
         try {
-            MQTTSupport.getInstance().connectMqtt(appMqttConfig);
+            MQTTSupport.getInstance().connectMqtt(mAppMqttConfigStr);
         } catch (FileNotFoundException e) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ToastUtils.showToast(this, "Please select your SSL certificates again, otherwise the APP can't use normally.");
                 startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
             }
@@ -143,19 +136,19 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     ///////////////////////////////////////////////////////////////////////////
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionCompleteEvent(MQTTConnectionCompleteEvent event) {
-        tvTitle.setText(getString(R.string.guide_center));
+        mBind.tvTitle.setText(getString(R.string.guide_center));
         // 订阅所有设备的Topic
         subscribeAllDevices();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionLostEvent(MQTTConnectionLostEvent event) {
-        tvTitle.setText(getString(R.string.mqtt_connecting));
+        mBind.tvTitle.setText(getString(R.string.mqtt_connecting));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTConnectionFailureEvent(MQTTConnectionFailureEvent event) {
-        tvTitle.setText(getString(R.string.mqtt_connect_failed));
+        mBind.tvTitle.setText(getString(R.string.mqtt_connect_failed));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -225,8 +218,8 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
         }
         adapter.replaceData(devices);
         if (devices.isEmpty()) {
-            rlEmpty.setVisibility(View.VISIBLE);
-            rvDeviceList.setVisibility(View.GONE);
+            mBind.rlEmpty.setVisibility(View.VISIBLE);
+            mBind.rvDeviceList.setVisibility(View.GONE);
         }
         if (id > 0 && mHandler.hasMessages(id)) {
             mHandler.removeMessages(id);
@@ -289,11 +282,11 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
                 }
                 adapter.replaceData(devices);
                 if (!devices.isEmpty()) {
-                    rvDeviceList.setVisibility(View.VISIBLE);
-                    rlEmpty.setVisibility(View.GONE);
+                    mBind.rvDeviceList.setVisibility(View.VISIBLE);
+                    mBind.rlEmpty.setVisibility(View.GONE);
                 } else {
-                    rvDeviceList.setVisibility(View.GONE);
-                    rlEmpty.setVisibility(View.VISIBLE);
+                    mBind.rvDeviceList.setVisibility(View.GONE);
+                    mBind.rlEmpty.setVisibility(View.VISIBLE);
                 }
             }
             if (ModifyMQTTSettingsActivity.TAG.equals(from)) {
@@ -340,14 +333,14 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     }
 
     public void mainAddDevices(View view) {
-        if (isWindowLocked())
-            return;
-        if (appMqttConfig == null) {
+        if (isWindowLocked()) return;
+        if (TextUtils.isEmpty(mAppMqttConfigStr)) {
             startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
             return;
         }
         if (Utils.isNetworkAvailable(this)) {
-            if (TextUtils.isEmpty(appMqttConfig.host)) {
+            MQTTConfig MQTTAppConfig = new Gson().fromJson(mAppMqttConfigStr, MQTTConfig.class);
+            if (TextUtils.isEmpty(MQTTAppConfig.host)) {
                 startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
                 return;
             }
@@ -397,16 +390,16 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
 
     private void changeSwitch(MokoDevice device) {
         String appTopic;
-        if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
+        if (TextUtils.isEmpty(mAppMqttConfig.topicPublish)) {
             appTopic = device.topicSubscribe;
         } else {
-            appTopic = appMqttConfig.topicPublish;
+            appTopic = mAppMqttConfig.topicPublish;
         }
         SwitchInfo switchInfo = new SwitchInfo();
         switchInfo.switch_state = device.on_off ? "off" : "on";
         String message = MQTTMessageAssembler.assembleWriteSwitchInfo(device.uniqueId, switchInfo);
         try {
-            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SWITCH_STATE, appMqttConfig.qos);
+            MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SWITCH_STATE, mAppMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -471,19 +464,20 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     }
 
     private void subscribeAllDevices() {
-        if (!TextUtils.isEmpty(appMqttConfig.topicSubscribe)) {
+        if (!TextUtils.isEmpty(mAppMqttConfig.topicSubscribe)) {
             try {
-                MQTTSupport.getInstance().subscribe(appMqttConfig.topicSubscribe, appMqttConfig.qos);
+                MQTTSupport.getInstance().subscribe(mAppMqttConfig.topicSubscribe, mAppMqttConfig.qos);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
         } else {
-            if (devices.isEmpty()) {
+            if (devices.isEmpty())
                 return;
-            }
             for (MokoDevice device : devices) {
                 try {
-                    MQTTSupport.getInstance().subscribe(device.topicPublish, appMqttConfig.qos);
+                    // 订阅设备发布主题
+                    if (TextUtils.isEmpty(mAppMqttConfig.topicSubscribe))
+                        MQTTSupport.getInstance().subscribe(device.topicPublish, mAppMqttConfig.qos);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -570,9 +564,9 @@ public class MainActivity extends BaseActivity implements BaseQuickAdapter.OnIte
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AppConstants.REQUEST_CODE_MQTT_CONFIG_APP && resultCode == RESULT_OK) {
-            String appMqttConfigStr = data.getStringExtra(AppConstants.EXTRA_KEY_MQTT_CONFIG_APP);
-            appMqttConfig = new Gson().fromJson(appMqttConfigStr, MQTTConfig.class);
-            tvTitle.setText(getString(R.string.app_name));
+            String mAppMqttConfigStr = data.getStringExtra(AppConstants.EXTRA_KEY_MQTT_CONFIG_APP);
+            mAppMqttConfig = new Gson().fromJson(mAppMqttConfigStr, MQTTConfig.class);
+            mBind.tvTitle.setText(getString(R.string.app_name));
             // 订阅所有设备的Topic
             subscribeAllDevices();
         }

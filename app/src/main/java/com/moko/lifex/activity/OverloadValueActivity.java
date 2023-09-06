@@ -1,6 +1,5 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -14,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityOverloadValueBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -35,28 +35,25 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+public class OverloadValueActivity extends BaseActivity<ActivityOverloadValueBinding> {
 
-public class OverloadValueActivity extends BaseActivity {
-
-    @BindView(R.id.et_overload_value)
-    EditText etOverloadValue;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_overload_value);
-        ButterKnife.bind(this);
+    protected ActivityOverloadValueBinding getViewBinding() {
+        return ActivityOverloadValueBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
         String mqttConfigAppStr = SPUtiles.getStringValue(OverloadValueActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
-        etOverloadValue.setText(String.valueOf(mMokoDevice.overloadValue));
+        mBind.etOverloadValue.setText(String.valueOf(mMokoDevice.overloadValue));
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -141,7 +138,7 @@ public class OverloadValueActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        String overloadValue = etOverloadValue.getText().toString();
+        String overloadValue = mBind.etOverloadValue.getText().toString();
         if (TextUtils.isEmpty(overloadValue)) {
             ToastUtils.showToast(this, "Para Error");
             return;

@@ -1,12 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityOverVoltageProtectionBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -21,7 +19,6 @@ import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.OverloadProtection;
 import com.moko.support.event.DeviceOnlineEvent;
@@ -36,29 +33,23 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class OverVoltageProtectionActivity extends BaseActivity<ActivityOverVoltageProtectionBinding> {
 
 
-public class OverVoltageProtectionActivity extends BaseActivity {
 
-
-    @BindView(R.id.cb_over_voltage_protection)
-    CheckBox cbOverVoltageProtection;
-    @BindView(R.id.et_voltage_threshold)
-    EditText etVoltageThreshold;
-    @BindView(R.id.et_time_threshold)
-    EditText etTimeThreshold;
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
     private int productMode;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_over_voltage_protection);
-        ButterKnife.bind(this);
+    protected ActivityOverVoltageProtectionBinding getViewBinding() {
+        return ActivityOverVoltageProtectionBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -111,9 +102,9 @@ public class OverVoltageProtectionActivity extends BaseActivity {
             int enable = overloadProtection.protection_enable;
             int value = (int) overloadProtection.protection_value;
             int judge_time = overloadProtection.judge_time;
-            cbOverVoltageProtection.setChecked(enable == 1);
-            etVoltageThreshold.setText(String.valueOf(value));
-            etTimeThreshold.setText(String.valueOf(judge_time));
+            mBind.cbOverVoltageProtection.setChecked(enable == 1);
+            mBind.etVoltageThreshold.setText(String.valueOf(value));
+            mBind.etTimeThreshold.setText(String.valueOf(judge_time));
         }
     }
 
@@ -187,7 +178,7 @@ public class OverVoltageProtectionActivity extends BaseActivity {
             min = 100;
             max = 138;
         }
-        String voltageThresholdStr = etVoltageThreshold.getText().toString();
+        String voltageThresholdStr = mBind.etVoltageThreshold.getText().toString();
         if (TextUtils.isEmpty(voltageThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -197,7 +188,7 @@ public class OverVoltageProtectionActivity extends BaseActivity {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        String timeThresholdStr = etTimeThreshold.getText().toString();
+        String timeThresholdStr = mBind.etTimeThreshold.getText().toString();
         if (TextUtils.isEmpty(timeThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -223,7 +214,7 @@ public class OverVoltageProtectionActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         OverloadProtection protection = new OverloadProtection();
-        protection.protection_enable = cbOverVoltageProtection.isChecked() ? 1 : 0;
+        protection.protection_enable = mBind.cbOverVoltageProtection.isChecked() ? 1 : 0;
         protection.protection_value = voltageThreshold;
         protection.judge_time = timeThreshold;
         String message = MQTTMessageAssembler.assembleConfigOverVoltageProtection(mMokoDevice.uniqueId, protection);

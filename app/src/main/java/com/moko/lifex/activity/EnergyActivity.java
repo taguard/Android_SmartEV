@@ -1,13 +1,10 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -17,6 +14,7 @@ import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.adapter.EnergyListAdapter;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityEnergyBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.Utils;
@@ -43,27 +41,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
-public class EnergyActivity extends BaseActivity implements RadioGroup.OnCheckedChangeListener {
+public class EnergyActivity extends BaseActivity<ActivityEnergyBinding> implements RadioGroup.OnCheckedChangeListener {
 
-    @BindView(R.id.rg_energy)
-    RadioGroup rgEnergy;
-    @BindView(R.id.tv_energy_total)
-    TextView tvEnergyTotal;
-    @BindView(R.id.tv_duration)
-    TextView tvDuration;
-    @BindView(R.id.tv_unit)
-    TextView tvUnit;
-    @BindView(R.id.rv_energy)
-    RecyclerView rvEnergy;
-    @BindView(R.id.rb_daily)
-    RadioButton rbDaily;
-    @BindView(R.id.rb_monthly)
-    RadioButton rbMonthly;
+
     private EnergyListAdapter adapter;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -75,10 +57,12 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_energy);
-        ButterKnife.bind(this);
+    protected ActivityEnergyBinding getViewBinding() {
+        return ActivityEnergyBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -88,15 +72,15 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
         Calendar calendar = Calendar.getInstance();
         String time = Utils.calendar2StrDate(calendar, "HH");
         String date = Utils.calendar2StrDate(calendar, "MM-dd");
-        tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
+        mBind.tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
         energyInfosToday = new ArrayList<>();
         energyInfosMonth = new ArrayList<>();
         adapter = new EnergyListAdapter();
         adapter.openLoadAnimation();
         adapter.replaceData(energyInfosToday);
-        rvEnergy.setLayoutManager(new LinearLayoutManager(this));
-        rvEnergy.setAdapter(adapter);
-        rgEnergy.setOnCheckedChangeListener(this);
+        mBind.rvEnergy.setLayoutManager(new LinearLayoutManager(this));
+        mBind.rvEnergy.setAdapter(adapter);
+        mBind.rgEnergy.setOnCheckedChangeListener(this);
         showLoadingProgressDialog();
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
@@ -138,7 +122,7 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
             if (electricityConstant != 0) {
                 float totalToday = energyTotalToday * 1.0f / electricityConstant;
                 String energyTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
-                tvEnergyTotal.setText(energyTotalToday);
+                mBind.tvEnergyTotal.setText(energyTotalToday);
             }
 
             if (energyHistoryToday.result == null || energyHistoryToday.result.isEmpty())
@@ -239,15 +223,15 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                 energyInfosToday.add(energyInfoToday);
             }
             if (electricityConstant != 0) {
-                if (rbDaily.isChecked()) {
+                if (mBind.rbDaily.isChecked()) {
                     float totalToday = energyTotalToday * 1.0f / electricityConstant;
                     String energyTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
-                    tvEnergyTotal.setText(energyTotalToday);
+                    mBind.tvEnergyTotal.setText(energyTotalToday);
                     adapter.replaceData(energyInfosToday);
                 } else {
                     float totalMonthly = energyTotalMonth * 1.0f / electricityConstant;
                     String energyTotalMonthly = Utils.getDecimalFormat("0.##").format(totalMonthly);
-                    tvEnergyTotal.setText(energyTotalMonthly);
+                    mBind.tvEnergyTotal.setText(energyTotalMonthly);
                     adapter.replaceData(energyInfosMonth);
                 }
             }
@@ -322,13 +306,13 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                     // 切换日
                     float totalToday = energyTotalToday * 1.0f / electricityConstant;
                     String energyTotalToday = Utils.getDecimalFormat("0.##").format(totalToday);
-                    tvEnergyTotal.setText(energyTotalToday);
+                    mBind.tvEnergyTotal.setText(energyTotalToday);
                 }
                 Calendar calendarDaily = Calendar.getInstance();
                 String time = Utils.calendar2StrDate(calendarDaily, "HH");
                 String date = Utils.calendar2StrDate(calendarDaily, "MM-dd");
-                tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
-                tvUnit.setText("Hour");
+                mBind.tvDuration.setText(String.format("00:00 to %s:00,%s", time, date));
+                mBind.tvUnit.setText("Hour");
                 if (energyInfosToday != null) {
                     adapter.replaceData(energyInfosToday);
                 }
@@ -338,14 +322,14 @@ public class EnergyActivity extends BaseActivity implements RadioGroup.OnChecked
                     // 切换月
                     float totalMonthly = energyTotalMonth * 1.0f / electricityConstant;
                     String energyTotalMonthly = Utils.getDecimalFormat("0.##").format(totalMonthly);
-                    tvEnergyTotal.setText(energyTotalMonthly);
+                    mBind.tvEnergyTotal.setText(energyTotalMonthly);
                 }
                 Calendar calendarMonthly = Calendar.getInstance();
                 String end = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
                 calendarMonthly.add(Calendar.DAY_OF_MONTH, -29);
                 String start = Utils.calendar2StrDate(calendarMonthly, "MM-dd");
-                tvDuration.setText(String.format("%s to %s", start, end));
-                tvUnit.setText("Date");
+                mBind.tvDuration.setText(String.format("%s to %s", start, end));
+                mBind.tvUnit.setText("Date");
                 if (energyInfosMonth != null) {
                     adapter.replaceData(energyInfosMonth);
                 }

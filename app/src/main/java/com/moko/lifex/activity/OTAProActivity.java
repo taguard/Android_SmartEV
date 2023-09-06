@@ -1,14 +1,10 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -17,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityOtaProBinding;
 import com.moko.lifex.dialog.BottomDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
@@ -40,43 +37,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class OTAProActivity extends BaseActivity {
+public class OTAProActivity extends BaseActivity<ActivityOtaProBinding> {
     private final String FILTER_ASCII = "[ -~]*";
 
     public static String TAG = OTAProActivity.class.getSimpleName();
-    @BindView(R.id.tv_update_type)
-    TextView tvUpdateType;
-    @BindView(R.id.et_host)
-    EditText etHost;
-    @BindView(R.id.et_port)
-    EditText etPort;
-    @BindView(R.id.et_file_path)
-    EditText etFilePath;
-    @BindView(R.id.ll_firmware)
-    LinearLayout llMasterFirmware;
-    @BindView(R.id.et_one_way_host)
-    EditText etOneWayHost;
-    @BindView(R.id.et_one_way_port)
-    EditText etOneWayPort;
-    @BindView(R.id.et_one_way_ca_file_path)
-    EditText etOneWayCaFilePath;
-    @BindView(R.id.ll_one_way)
-    LinearLayout llOneWay;
-    @BindView(R.id.et_both_way_host)
-    EditText etBothWayHost;
-    @BindView(R.id.et_both_way_port)
-    EditText etBothWayPort;
-    @BindView(R.id.et_both_way_ca_file_path)
-    EditText etBothWayCaFilePath;
-    @BindView(R.id.et_both_way_client_key_file_path)
-    EditText etBothWayClientKeyFilePath;
-    @BindView(R.id.et_both_way_client_cert_file_path)
-    EditText etBothWayClientCertFilePath;
-    @BindView(R.id.ll_both_way)
-    LinearLayout llBothWay;
+
 
 
     private MokoDevice mMokoDevice;
@@ -86,10 +51,12 @@ public class OTAProActivity extends BaseActivity {
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ota_pro);
-        ButterKnife.bind(this);
+    protected ActivityOtaProBinding getViewBinding() {
+        return ActivityOtaProBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -100,14 +67,14 @@ public class OTAProActivity extends BaseActivity {
 
             return null;
         };
-        etHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
-        etOneWayHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
-        etBothWayHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
-        etFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
-        etOneWayCaFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
-        etBothWayCaFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
-        etBothWayClientKeyFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
-        etBothWayClientCertFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        mBind.etOneWayHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        mBind.etBothWayHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        mBind.etFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etOneWayCaFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etBothWayCaFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etBothWayClientKeyFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etBothWayClientCertFilePath.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
         mHandler = new Handler(Looper.getMainLooper());
         String mqttConfigAppStr = SPUtiles.getStringValue(OTAProActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -115,7 +82,7 @@ public class OTAProActivity extends BaseActivity {
         mValues.add("Firmware");
         mValues.add("CA certificate");
         mValues.add("Self signed server certificates ");
-        tvUpdateType.setText(mValues.get(mSelected));
+        mBind.tvUpdateType.setText(mValues.get(mSelected));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -185,9 +152,9 @@ public class OTAProActivity extends BaseActivity {
             return;
         }
         if (mSelected == 0) {
-            String hostStr = etHost.getText().toString();
-            String portStr = etPort.getText().toString();
-            String masterStr = etFilePath.getText().toString();
+            String hostStr = mBind.etHost.getText().toString();
+            String portStr = mBind.etPort.getText().toString();
+            String masterStr = mBind.etFilePath.getText().toString();
             if (TextUtils.isEmpty(hostStr)) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
@@ -202,9 +169,9 @@ public class OTAProActivity extends BaseActivity {
             }
         }
         if (mSelected == 1) {
-            String hostStr = etOneWayHost.getText().toString();
-            String portStr = etOneWayPort.getText().toString();
-            String oneWayStr = etOneWayCaFilePath.getText().toString();
+            String hostStr = mBind.etOneWayHost.getText().toString();
+            String portStr = mBind.etOneWayPort.getText().toString();
+            String oneWayStr = mBind.etOneWayCaFilePath.getText().toString();
             if (TextUtils.isEmpty(hostStr)) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
@@ -219,11 +186,11 @@ public class OTAProActivity extends BaseActivity {
             }
         }
         if (mSelected == 2) {
-            String hostStr = etBothWayHost.getText().toString();
-            String portStr = etBothWayPort.getText().toString();
-            String bothWayCaStr = etBothWayCaFilePath.getText().toString();
-            String bothWayClientKeyStr = etBothWayClientKeyFilePath.getText().toString();
-            String bothWayClientCertStr = etBothWayClientCertFilePath.getText().toString();
+            String hostStr = mBind.etBothWayHost.getText().toString();
+            String portStr = mBind.etBothWayPort.getText().toString();
+            String bothWayCaStr = mBind.etBothWayCaFilePath.getText().toString();
+            String bothWayClientKeyStr = mBind.etBothWayClientKeyFilePath.getText().toString();
+            String bothWayClientCertStr = mBind.etBothWayClientCertFilePath.getText().toString();
             if (TextUtils.isEmpty(hostStr)) {
                 ToastUtils.showToast(this, R.string.mqtt_verify_host);
                 return;
@@ -263,30 +230,30 @@ public class OTAProActivity extends BaseActivity {
             mSelected = value;
             switch (value) {
                 case 0:
-                    llMasterFirmware.setVisibility(View.VISIBLE);
-                    llOneWay.setVisibility(View.GONE);
-                    llBothWay.setVisibility(View.GONE);
+                    mBind.llFirmware.setVisibility(View.VISIBLE);
+                    mBind.llOneWay.setVisibility(View.GONE);
+                    mBind.llBothWay.setVisibility(View.GONE);
                     break;
                 case 1:
-                    llMasterFirmware.setVisibility(View.GONE);
-                    llOneWay.setVisibility(View.VISIBLE);
-                    llBothWay.setVisibility(View.GONE);
+                    mBind.llFirmware.setVisibility(View.GONE);
+                    mBind.llOneWay.setVisibility(View.VISIBLE);
+                    mBind.llBothWay.setVisibility(View.GONE);
                     break;
                 case 2:
-                    llMasterFirmware.setVisibility(View.GONE);
-                    llOneWay.setVisibility(View.GONE);
-                    llBothWay.setVisibility(View.VISIBLE);
+                    mBind.llFirmware.setVisibility(View.GONE);
+                    mBind.llOneWay.setVisibility(View.GONE);
+                    mBind.llBothWay.setVisibility(View.VISIBLE);
                     break;
             }
-            tvUpdateType.setText(mValues.get(value));
+            mBind.tvUpdateType.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }
 
     private void setOTAFirmware() {
-        String hostStr = etHost.getText().toString();
-        String portStr = etPort.getText().toString();
-        String masterStr = etFilePath.getText().toString();
+        String hostStr = mBind.etHost.getText().toString();
+        String portStr = mBind.etPort.getText().toString();
+        String masterStr = mBind.etFilePath.getText().toString();
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;
@@ -307,9 +274,9 @@ public class OTAProActivity extends BaseActivity {
 
 
     private void setOTAOneWay() {
-        String hostStr = etOneWayHost.getText().toString();
-        String portStr = etOneWayPort.getText().toString();
-        String oneWayStr = etOneWayCaFilePath.getText().toString();
+        String hostStr = mBind.etOneWayHost.getText().toString();
+        String portStr = mBind.etOneWayPort.getText().toString();
+        String oneWayStr = mBind.etOneWayCaFilePath.getText().toString();
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;
@@ -330,11 +297,11 @@ public class OTAProActivity extends BaseActivity {
 
 
     private void setOTABothWay() {
-        String hostStr = etBothWayHost.getText().toString();
-        String portStr = etBothWayPort.getText().toString();
-        String bothWayCaStr = etBothWayCaFilePath.getText().toString();
-        String bothWayClientKeyStr = etBothWayClientKeyFilePath.getText().toString();
-        String bothWayClientCertStr = etBothWayClientCertFilePath.getText().toString();
+        String hostStr = mBind.etBothWayHost.getText().toString();
+        String portStr = mBind.etBothWayPort.getText().toString();
+        String bothWayCaStr = mBind.etBothWayCaFilePath.getText().toString();
+        String bothWayClientKeyStr = mBind.etBothWayClientKeyFilePath.getText().toString();
+        String bothWayClientCertStr = mBind.etBothWayClientCertFilePath.getText().toString();
         String appTopic;
         if (TextUtils.isEmpty(appMqttConfig.topicPublish)) {
             appTopic = mMokoDevice.topicSubscribe;

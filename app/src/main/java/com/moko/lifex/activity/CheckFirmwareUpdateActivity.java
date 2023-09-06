@@ -1,13 +1,10 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -16,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityCheckFirmwareBinding;
 import com.moko.lifex.dialog.BottomDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
@@ -39,23 +37,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-
-public class CheckFirmwareUpdateActivity extends BaseActivity {
+public class CheckFirmwareUpdateActivity extends BaseActivity<ActivityCheckFirmwareBinding> {
     private final String FILTER_ASCII = "[ -~]*";
 
     public static String TAG = CheckFirmwareUpdateActivity.class.getSimpleName();
-    @BindView(R.id.et_host_content)
-    EditText etHostContent;
-    @BindView(R.id.et_host_port)
-    EditText etHostPort;
-    @BindView(R.id.et_host_catalogue)
-    EditText etHostCatalogue;
-    @BindView(R.id.tv_update_type)
-    TextView tvUpdateType;
-
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -64,10 +50,12 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_check_firmware);
-        ButterKnife.bind(this);
+    protected ActivityCheckFirmwareBinding getViewBinding() {
+        return ActivityCheckFirmwareBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -78,8 +66,8 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
 
             return null;
         };
-        etHostContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
-        etHostCatalogue.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
+        mBind.etHostContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        mBind.etHostCatalogue.setFilters(new InputFilter[]{new InputFilter.LengthFilter(100), inputFilter});
         mHandler = new Handler(Looper.getMainLooper());
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -88,7 +76,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         mValues.add("CA certificate");
         mValues.add("Client certificate");
         mValues.add("Private key");
-        tvUpdateType.setText(mValues.get(mSelected));
+        mBind.tvUpdateType.setText(mValues.get(mSelected));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -171,9 +159,9 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        String hostStr = etHostContent.getText().toString();
-        String portStr = etHostPort.getText().toString();
-        String catalogueStr = etHostCatalogue.getText().toString();
+        String hostStr = mBind.etHostContent.getText().toString();
+        String portStr = mBind.etHostPort.getText().toString();
+        String catalogueStr = mBind.etHostCatalogue.getText().toString();
         if (TextUtils.isEmpty(hostStr)) {
             ToastUtils.showToast(this, R.string.mqtt_verify_host);
             return;
@@ -223,7 +211,7 @@ public class CheckFirmwareUpdateActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvUpdateType.setText(mValues.get(value));
+            mBind.tvUpdateType.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }

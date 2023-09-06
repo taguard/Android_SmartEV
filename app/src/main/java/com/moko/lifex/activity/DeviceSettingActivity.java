@@ -3,7 +3,6 @@ package com.moko.lifex.activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
@@ -12,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -22,6 +19,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityDeviceSettingBinding;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.AlertMessageDialog;
 import com.moko.lifex.dialog.CustomDialog;
@@ -48,16 +46,10 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class DeviceSettingActivity extends BaseActivity {
+public class DeviceSettingActivity extends BaseActivity<ActivityDeviceSettingBinding> {
     private final String FILTER_ASCII = "[ -~]*";
     public static String TAG = DeviceSettingActivity.class.getSimpleName();
-    @BindView(R.id.tv_name)
-    TextView tvName;
-    @BindView(R.id.rl_modify_mqtt_settings)
-    RelativeLayout rlModifyMqttSettings;
+
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -66,10 +58,12 @@ public class DeviceSettingActivity extends BaseActivity {
     private InputFilter filter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_setting);
-        ButterKnife.bind(this);
+    protected ActivityDeviceSettingBinding getViewBinding() {
+        return ActivityDeviceSettingBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
@@ -81,7 +75,7 @@ public class DeviceSettingActivity extends BaseActivity {
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
         if ("5".equals(mMokoDevice.type)) {
-            rlModifyMqttSettings.setVisibility(View.VISIBLE);
+            mBind.rlModifyMqttSettings.setVisibility(View.VISIBLE);
         }
     }
 
@@ -134,7 +128,7 @@ public class DeviceSettingActivity extends BaseActivity {
             XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
-            tvName.postDelayed(() -> {
+            mBind.tvName.postDelayed(() -> {
                 dismissLoadingProgressDialog();
                 // 跳转首页，刷新数据
                 Intent intent = new Intent(this, MainActivity.class);
@@ -394,7 +388,7 @@ public class DeviceSettingActivity extends BaseActivity {
             XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
-            tvName.postDelayed(() -> {
+            mBind.tvName.postDelayed(() -> {
                 dismissLoadingProgressDialog();
                 // 跳转首页，刷新数据
                 Intent intent = new Intent(this, MainActivity.class);

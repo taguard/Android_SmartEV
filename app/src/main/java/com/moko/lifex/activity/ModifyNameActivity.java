@@ -2,40 +2,40 @@ package com.moko.lifex.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityModifyDeviceNameBinding;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.ToastUtils;
+import com.moko.support.event.MQTTUnSubscribeSuccessEvent;
 
-import androidx.fragment.app.FragmentActivity;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-public class ModifyNameActivity extends FragmentActivity {
+public class ModifyNameActivity extends BaseActivity<ActivityModifyDeviceNameBinding> {
 
     private final String FILTER_ASCII = "[ -~]*";
     public static String TAG = ModifyNameActivity.class.getSimpleName();
 
-    @BindView(R.id.et_nick_name)
-    EditText etNickName;
+
     private MokoDevice device;
     private InputFilter filter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modify_device_name);
-        ButterKnife.bind(this);
+    protected ActivityModifyDeviceNameBinding getViewBinding() {
+        return ActivityModifyDeviceNameBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         device = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
@@ -44,18 +44,18 @@ public class ModifyNameActivity extends FragmentActivity {
 
             return null;
         };
-        etNickName.setText(device.nickName);
-        etNickName.setSelection(etNickName.getText().toString().length());
-        etNickName.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(20)});
-        etNickName.postDelayed(() -> {
-            InputMethodManager inputManager = (InputMethodManager) etNickName.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.showSoftInput(etNickName, 0);
+        mBind.etNickName.setText(device.nickName);
+        mBind.etNickName.setSelection(mBind.etNickName.getText().toString().length());
+        mBind.etNickName.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(20)});
+        mBind.etNickName.postDelayed(() -> {
+            InputMethodManager inputManager = (InputMethodManager) mBind.etNickName.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.showSoftInput(mBind.etNickName, 0);
         }, 300);
     }
 
 
     public void modifyDone(View view) {
-        String nickName = etNickName.getText().toString();
+        String nickName = mBind.etNickName.getText().toString();
         if (TextUtils.isEmpty(nickName)) {
             ToastUtils.showToast(this, R.string.modify_device_name_empty);
             return;
@@ -75,5 +75,9 @@ public class ModifyNameActivity extends FragmentActivity {
             return false;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTUnSubscribeSuccessEvent(MQTTUnSubscribeSuccessEvent event) {
     }
 }

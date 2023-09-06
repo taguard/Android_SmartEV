@@ -1,7 +1,6 @@
 package com.moko.lifex.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -11,8 +10,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
-import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityProtectionSettingBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -32,9 +31,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.ButterKnife;
-
-public class ProtectionSettingActivity extends BaseActivity {
+public class ProtectionSettingActivity extends BaseActivity<ActivityProtectionSettingBinding> {
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -42,10 +39,12 @@ public class ProtectionSettingActivity extends BaseActivity {
     private int productType;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_protection_setting);
-        ButterKnife.bind(this);
+    protected ActivityProtectionSettingBinding getViewBinding() {
+        return ActivityProtectionSettingBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());

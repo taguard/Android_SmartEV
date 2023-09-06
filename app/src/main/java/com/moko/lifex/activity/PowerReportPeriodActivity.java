@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityPowerReportPeriodBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -21,7 +20,6 @@ import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.ReportPeriod;
 import com.moko.support.event.DeviceOnlineEvent;
@@ -36,23 +34,21 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class PowerReportPeriodActivity extends BaseActivity<ActivityPowerReportPeriodBinding> {
 
 
-public class PowerReportPeriodActivity extends BaseActivity {
-
-    @BindView(R.id.et_power_report_period)
-    EditText etPowerReportPeriod;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_power_report_period);
-        ButterKnife.bind(this);
+    protected ActivityPowerReportPeriodBinding getViewBinding() {
+        return ActivityPowerReportPeriodBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -104,7 +100,7 @@ public class PowerReportPeriodActivity extends BaseActivity {
             Type infoType = new TypeToken<ReportPeriod>() {
             }.getType();
             ReportPeriod powerReportPeriod = new Gson().fromJson(msgCommon.data, infoType);
-            etPowerReportPeriod.setText(String.valueOf(powerReportPeriod.report_interval));
+            mBind.etPowerReportPeriod.setText(String.valueOf(powerReportPeriod.report_interval));
         }
     }
 
@@ -169,7 +165,7 @@ public class PowerReportPeriodActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        String reportPeriodStr = etPowerReportPeriod.getText().toString();
+        String reportPeriodStr = mBind.etPowerReportPeriod.getText().toString();
         if (TextUtils.isEmpty(reportPeriodStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;

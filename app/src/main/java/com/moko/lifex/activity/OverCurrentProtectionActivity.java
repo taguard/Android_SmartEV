@@ -1,12 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityOverCurrentProtectionBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -21,7 +19,6 @@ import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.entity.OverloadProtection;
 import com.moko.support.event.DeviceOnlineEvent;
@@ -37,29 +34,21 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
+public class OverCurrentProtectionActivity extends BaseActivity<ActivityOverCurrentProtectionBinding> {
 
-public class OverCurrentProtectionActivity extends BaseActivity {
-
-
-    @BindView(R.id.cb_over_current_protection)
-    CheckBox cbOverCurrentProtection;
-    @BindView(R.id.et_current_threshold)
-    EditText etCurrentThreshold;
-    @BindView(R.id.et_time_threshold)
-    EditText etTimeThreshold;
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
     private int productMode;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_over_current_protection);
-        ButterKnife.bind(this);
+    protected ActivityOverCurrentProtectionBinding getViewBinding() {
+        return ActivityOverCurrentProtectionBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -112,9 +101,9 @@ public class OverCurrentProtectionActivity extends BaseActivity {
             int enable = overloadProtection.protection_enable;
             float value = overloadProtection.protection_value;
             int judge_time = overloadProtection.judge_time;
-            cbOverCurrentProtection.setChecked(enable == 1);
-            etCurrentThreshold.setText(String.valueOf(value));
-            etTimeThreshold.setText(String.valueOf(judge_time));
+            mBind.cbOverCurrentProtection.setChecked(enable == 1);
+            mBind.etCurrentThreshold.setText(String.valueOf(value));
+            mBind.etTimeThreshold.setText(String.valueOf(judge_time));
         }
     }
 
@@ -188,7 +177,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
         } else if (productMode == 3) {
             max = 15.6f;
         }
-        String currentThresholdStr = etCurrentThreshold.getText().toString();
+        String currentThresholdStr = mBind.etCurrentThreshold.getText().toString();
         if (TextUtils.isEmpty(currentThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -198,7 +187,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        String timeThresholdStr = etTimeThreshold.getText().toString();
+        String timeThresholdStr = mBind.etTimeThreshold.getText().toString();
         if (TextUtils.isEmpty(timeThresholdStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -224,7 +213,7 @@ public class OverCurrentProtectionActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         OverloadProtection protection = new OverloadProtection();
-        protection.protection_enable = cbOverCurrentProtection.isChecked() ? 1 : 0;
+        protection.protection_enable = mBind.cbOverCurrentProtection.isChecked() ? 1 : 0;
         protection.protection_value = currentThreshold;
         protection.judge_time = timeThreshold;
         String message = MQTTMessageAssembler.assembleConfigOverCurrentProtection(mMokoDevice.uniqueId, protection);

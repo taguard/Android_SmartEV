@@ -1,17 +1,12 @@
 package com.moko.lifex.dialog;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.TextView;
 
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseDialog;
-import com.moko.lifex.view.WheelView;
+import com.moko.lifex.databinding.DialogTimerBinding;
 
 import java.util.ArrayList;
-
-import butterknife.BindView;
-import butterknife.OnClick;
 
 /**
  * @Date 2018/6/21
@@ -19,27 +14,29 @@ import butterknife.OnClick;
  * @Description 倒计时弹框
  * @ClassPath com.moko.lifex.dialog.TimerDialog
  */
-public class TimerDialog extends BaseDialog<Boolean> {
-    @BindView(R.id.tv_switch_state)
-    TextView tvSwitchState;
-    @BindView(R.id.wv_hour)
-    WheelView wvHour;
-    @BindView(R.id.wv_minute)
-    WheelView wvMinute;
+public class TimerDialog extends BaseDialog<Boolean, DialogTimerBinding> {
+
 
     public TimerDialog(Context context) {
         super(context);
     }
 
     @Override
-    protected int getLayoutResId() {
-        return R.layout.dialog_timer;
+    protected DialogTimerBinding getViewBind() {
+        return DialogTimerBinding.inflate(getLayoutInflater());
     }
 
+
     @Override
-    protected void renderConvertView(View convertView, Boolean on_off) {
-        tvSwitchState.setText(on_off ? R.string.countdown_timer_off : R.string.countdown_timer_on);
+    protected void onCreate(Boolean on_off) {
+        mBind.tvSwitchState.setText(on_off ? R.string.countdown_timer_off : R.string.countdown_timer_on);
         initWheelView();
+        mBind.tvBack.setOnClickListener(v -> {
+            dismiss();
+        });
+        mBind.tvConfirm.setOnClickListener(v -> {
+            listener.onConfirmClick(this);
+        });
     }
 
     private void initWheelView() {
@@ -51,8 +48,8 @@ public class TimerDialog extends BaseDialog<Boolean> {
                 hour.add(i + " hour");
             }
         }
-        wvHour.setData(hour);
-        wvHour.setDefault(0);
+        mBind.wvHour.setData(hour);
+        mBind.wvHour.setDefault(0);
         ArrayList<String> minute = new ArrayList<>();
         for (int i = 0; i < 60; i++) {
             if (i > 1) {
@@ -62,29 +59,18 @@ public class TimerDialog extends BaseDialog<Boolean> {
 
             }
         }
-        wvMinute.setData(minute);
-        wvMinute.setDefault(0);
+        mBind.wvMinute.setData(minute);
+        mBind.wvMinute.setDefault(0);
     }
 
     public int getWvHour() {
-        return wvHour.getSelected();
+        return mBind.wvHour.getSelected();
     }
 
     public int getWvMinute() {
-        return wvMinute.getSelected();
+        return mBind.wvMinute.getSelected();
     }
 
-    @OnClick({R.id.tv_back, R.id.tv_confirm})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tv_back:
-                dismiss();
-                break;
-            case R.id.tv_confirm:
-                listener.onConfirmClick(this);
-                break;
-        }
-    }
 
     private TimerListener listener;
 

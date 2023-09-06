@@ -3,7 +3,6 @@ package com.moko.lifex.activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
@@ -12,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -21,6 +19,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityMoreBinding;
 import com.moko.lifex.db.DBTools;
 import com.moko.lifex.dialog.AlertMessageDialog;
 import com.moko.lifex.dialog.CustomDialog;
@@ -48,27 +47,23 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class MoreActivity extends BaseActivity {
+public class MoreActivity extends BaseActivity<ActivityMoreBinding> {
 
     private final String FILTER_ASCII = "[ -~]*";
     public static String TAG = MoreActivity.class.getSimpleName();
 
-    @BindView(R.id.tv_device_name)
-    TextView tvDeviceName;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
     private InputFilter filter;
 
+    @Override
+    protected ActivityMoreBinding getViewBinding() {
+        return ActivityMoreBinding.inflate(getLayoutInflater());
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_more);
-        ButterKnife.bind(this);
+    protected void onCreate() {
         filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
@@ -78,7 +73,7 @@ public class MoreActivity extends BaseActivity {
         };
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
-            tvDeviceName.setText(mMokoDevice.nickName);
+            mBind.tvDeviceName.setText(mMokoDevice.nickName);
         }
         mHandler = new Handler(Looper.getMainLooper());
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
@@ -143,7 +138,7 @@ public class MoreActivity extends BaseActivity {
             XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(MoreActivity.this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
-            tvDeviceName.postDelayed(() -> {
+            mBind.tvDeviceName.postDelayed(() -> {
                 dismissLoadingProgressDialog();
                 // 跳转首页，刷新数据
                 Intent intent = new Intent(MoreActivity.this, MainActivity.class);
@@ -173,7 +168,7 @@ public class MoreActivity extends BaseActivity {
     public void onModifyNameClick(View view) {
         View content = LayoutInflater.from(this).inflate(R.layout.modify_name, null);
         final EditText etDeviceName = content.findViewById(R.id.et_device_name);
-        String deviceName = tvDeviceName.getText().toString();
+        String deviceName = mBind.tvDeviceName.getText().toString();
         etDeviceName.setText(deviceName);
         etDeviceName.setSelection(deviceName.length());
         etDeviceName.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(20)});
@@ -193,7 +188,7 @@ public class MoreActivity extends BaseActivity {
                             ToastUtils.showToast(MoreActivity.this, R.string.more_modify_name_tips);
                             return;
                         }
-                        tvDeviceName.setText(nickName);
+                        mBind.tvDeviceName.setText(nickName);
                         mMokoDevice.nickName = nickName;
                         DBTools.getInstance(MoreActivity.this).updateDevice(mMokoDevice);
                         DeviceModifyNameEvent event = new DeviceModifyNameEvent(mMokoDevice.deviceId);
@@ -205,7 +200,7 @@ public class MoreActivity extends BaseActivity {
                 .create();
         dialog.show();
 
-        tvDeviceName.postDelayed(() -> {
+        mBind.tvDeviceName.postDelayed(() -> {
             showKeyboard(etDeviceName);
         }, 300);
     }
@@ -270,7 +265,7 @@ public class MoreActivity extends BaseActivity {
             XLog.i(String.format("删除设备:%s", mMokoDevice.nickName));
             DBTools.getInstance(this).deleteDevice(mMokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
-            tvDeviceName.postDelayed(() -> {
+            mBind.tvDeviceName.postDelayed(() -> {
                 dismissLoadingProgressDialog();
                 // 跳转首页，刷新数据
                 Intent intent = new Intent(MoreActivity.this, MainActivity.class);

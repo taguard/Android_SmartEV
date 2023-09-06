@@ -1,12 +1,9 @@
 package com.moko.lifex.dialog;
 
 import android.content.Context;
-import android.view.View;
 
-import com.moko.lifex.R;
 import com.moko.lifex.base.BaseDialog;
-
-import butterknife.OnClick;
+import com.moko.lifex.databinding.DialogResetDeviceBinding;
 
 /**
  * @Date 2018/6/21
@@ -14,38 +11,31 @@ import butterknife.OnClick;
  * @Description
  * @ClassPath com.moko.lifex.dialog.ResetDialog
  */
-public class ResetDialog extends BaseDialog<Boolean> {
+public class ResetDialog extends BaseDialog<Boolean, DialogResetDeviceBinding> {
 
     public ResetDialog(Context context) {
         super(context);
     }
 
     @Override
-    protected int getLayoutResId() {
-        return R.layout.dialog_reset_device;
+    protected DialogResetDeviceBinding getViewBind() {
+        return DialogResetDeviceBinding.inflate(getLayoutInflater());
     }
+
 
     @Override
-    protected void renderConvertView(View convertView, Boolean on_off) {
-
+    protected void onCreate(Boolean on_off) {
+        mBind.tvCancel.setOnClickListener(v -> {
+            dismiss();
+        });
+        mBind.tvConfirm.setOnClickListener(v -> {
+            listener.onConfirmClick(this);
+        });
     }
 
+    private ResetDialog.ResetListener listener;
 
-    @OnClick({R.id.tv_cancel, R.id.tv_confirm})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tv_cancel:
-                dismiss();
-                break;
-            case R.id.tv_confirm:
-                listener.onConfirmClick(this);
-                break;
-        }
-    }
-
-    private ResetListener listener;
-
-    public void setListener(ResetListener listener) {
+    public void setListener(ResetDialog.ResetListener listener) {
         this.listener = listener;
     }
 
@@ -53,3 +43,4 @@ public class ResetDialog extends BaseDialog<Boolean> {
         void onConfirmClick(ResetDialog dialog);
     }
 }
+

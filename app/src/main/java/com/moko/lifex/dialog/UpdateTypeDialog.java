@@ -1,35 +1,43 @@
 package com.moko.lifex.dialog;
 
 import android.text.TextUtils;
-import android.view.View;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 
 import com.moko.lifex.R;
-import com.moko.lifex.view.WheelView;
+import com.moko.lifex.databinding.DialogUpdateTypeBinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+public class UpdateTypeDialog extends MokoBaseDialog<DialogUpdateTypeBinding> {
 
-public class UpdateTypeDialog extends MokoBaseDialog {
-
-    @BindView(R.id.wv_update_type)
-    WheelView wvUpdateType;
     private int selected;
 
     @Override
-    public int getLayoutRes() {
-        return R.layout.dialog_update_type;
+    protected DialogUpdateTypeBinding getViewBind(LayoutInflater inflater, ViewGroup container) {
+        return DialogUpdateTypeBinding.inflate(inflater, container, false);
     }
 
     @Override
-    public void bindView(View v) {
-        ButterKnife.bind(this, v);
-
-        wvUpdateType.setData(createData());
-        wvUpdateType.setDefault(selected);
+    protected void onCreateView() {
+        mBind.wvUpdateType.setData(createData());
+        mBind.wvUpdateType.setDefault(selected);
+        mBind.tvCancel.setOnClickListener(v -> {
+            dismiss();
+        });
+        mBind.tvConfirm.setOnClickListener(v -> {
+            dismiss();
+            if (TextUtils.isEmpty(mBind.wvUpdateType.getSelectedText())) {
+                return;
+            }
+            if (mBind.wvUpdateType.getSelected() < 0) {
+                return;
+            }
+            if (listener != null) {
+                listener.onDataSelected(mBind.wvUpdateType.getSelected());
+            }
+        });
     }
 
     private ArrayList<String> createData() {
@@ -45,26 +53,6 @@ public class UpdateTypeDialog extends MokoBaseDialog {
         return 0.7f;
     }
 
-    @OnClick({R.id.tv_cancel, R.id.tv_confirm})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tv_cancel:
-                dismiss();
-                break;
-            case R.id.tv_confirm:
-                dismiss();
-                if (TextUtils.isEmpty(wvUpdateType.getSelectedText())) {
-                    return;
-                }
-                if (wvUpdateType.getSelected() < 0) {
-                    return;
-                }
-                if (listener != null) {
-                    listener.onDataSelected(wvUpdateType.getSelected());
-                }
-                break;
-        }
-    }
 
     private OnDataSelectedListener listener;
 

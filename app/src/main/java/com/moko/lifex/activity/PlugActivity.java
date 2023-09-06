@@ -2,15 +2,10 @@ package com.moko.lifex.activity;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -18,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityPlugBinding;
 import com.moko.lifex.dialog.TimerDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
@@ -41,35 +37,20 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.Type;
 
 import androidx.core.content.ContextCompat;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class PlugActivity extends BaseActivity {
-    @BindView(R.id.rl_title)
-    RelativeLayout rlTitle;
-    @BindView(R.id.iv_switch_state)
-    ImageView ivSwitchState;
-    @BindView(R.id.tv_device_schedule)
-    TextView tvDeviceSchedule;
-    @BindView(R.id.tv_device_timer)
-    TextView tvDeviceTimer;
-    @BindView(R.id.tv_device_statistics)
-    TextView tvDeviceStatistics;
-    @BindView(R.id.ll_bg)
-    LinearLayout llBg;
-    @BindView(R.id.tv_switch_state)
-    TextView tvSwitchState;
-    @BindView(R.id.tv_timer_state)
-    TextView tvTimerState;
+public class PlugActivity extends BaseActivity<ActivityPlugBinding> {
+
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_plug);
-        ButterKnife.bind(this);
+    protected ActivityPlugBinding getViewBinding() {
+        return ActivityPlugBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
@@ -111,7 +92,7 @@ public class PlugActivity extends BaseActivity {
             if (!switch_state.equals(mMokoDevice.on_off ? "on" : "off")) {
                 mMokoDevice.on_off = !mMokoDevice.on_off;
                 changeSwitchState();
-                tvSwitchState.setText(mMokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
+                mBind.tvSwitchState.setText(mMokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off);
             }
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_TIMER_INFO) {
@@ -127,11 +108,11 @@ public class PlugActivity extends BaseActivity {
             int delay_second = timerInfo.delay_second;
             String switch_state = timerInfo.switch_state;
             if (delay_hour == 0 && delay_minute == 0 && delay_second == 0) {
-                tvTimerState.setVisibility(View.GONE);
+                mBind.tvTimerState.setVisibility(View.GONE);
             } else {
-                tvTimerState.setVisibility(View.VISIBLE);
+                mBind.tvTimerState.setVisibility(View.VISIBLE);
                 String timer = String.format("%s after %d:%d:%d", switch_state, delay_hour, delay_minute, delay_second);
-                tvTimerState.setText(timer);
+                mBind.tvTimerState.setText(timer);
             }
         }
     }
@@ -155,30 +136,30 @@ public class PlugActivity extends BaseActivity {
         if (!online) {
             mMokoDevice.isOnline = false;
             mMokoDevice.on_off = false;
-            tvTimerState.setVisibility(View.GONE);
+            mBind.tvTimerState.setVisibility(View.GONE);
             changeSwitchState();
         }
     }
 
     private void changeSwitchState() {
-        rlTitle.setBackgroundColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.black_303a4b));
-        llBg.setBackgroundColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.grey_f2f2f2 : R.color.black_303a4b));
-        ivSwitchState.setImageDrawable(ContextCompat.getDrawable(this, mMokoDevice.on_off ? R.drawable.plug_switch_on : R.drawable.plug_switch_off));
-        tvSwitchState.setText(mMokoDevice.isOnline ? (mMokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off) : R.string.device_detail_switch_offline);
-        tvSwitchState.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
+        mBind.rlTitle.setBackgroundColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.black_303a4b));
+        mBind.llBg.setBackgroundColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.grey_f2f2f2 : R.color.black_303a4b));
+        mBind.ivSwitchState.setImageDrawable(ContextCompat.getDrawable(this, mMokoDevice.on_off ? R.drawable.plug_switch_on : R.drawable.plug_switch_off));
+        mBind.tvSwitchState.setText(mMokoDevice.isOnline ? (mMokoDevice.on_off ? R.string.device_detail_switch_on : R.string.device_detail_switch_off) : R.string.device_detail_switch_offline);
+        mBind.tvSwitchState.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
         Drawable drawableSchedult = ContextCompat.getDrawable(this, mMokoDevice.on_off ? R.drawable.schedule_on : R.drawable.schedule_off);
         drawableSchedult.setBounds(0, 0, drawableSchedult.getMinimumWidth(), drawableSchedult.getMinimumHeight());
-        tvDeviceSchedule.setCompoundDrawables(null, drawableSchedult, null, null);
-        tvDeviceSchedule.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
+        mBind.tvDeviceSchedule.setCompoundDrawables(null, drawableSchedult, null, null);
+        mBind.tvDeviceSchedule.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
         Drawable drawableTimer = ContextCompat.getDrawable(this, mMokoDevice.on_off ? R.drawable.timer_on : R.drawable.timer_off);
         drawableTimer.setBounds(0, 0, drawableTimer.getMinimumWidth(), drawableTimer.getMinimumHeight());
-        tvDeviceTimer.setCompoundDrawables(null, drawableTimer, null, null);
-        tvDeviceTimer.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
+        mBind.tvDeviceTimer.setCompoundDrawables(null, drawableTimer, null, null);
+        mBind.tvDeviceTimer.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
         Drawable drawableStatistics = ContextCompat.getDrawable(this, mMokoDevice.on_off ? R.drawable.statistics_on : R.drawable.statistics_off);
         drawableStatistics.setBounds(0, 0, drawableStatistics.getMinimumWidth(), drawableStatistics.getMinimumHeight());
-        tvDeviceStatistics.setCompoundDrawables(null, drawableStatistics, null, null);
-        tvDeviceStatistics.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
-        tvTimerState.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
+        mBind.tvDeviceStatistics.setCompoundDrawables(null, drawableStatistics, null, null);
+        mBind.tvDeviceStatistics.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
+        mBind.tvTimerState.setTextColor(ContextCompat.getColor(this, mMokoDevice.on_off ? R.color.blue_0188cc : R.color.grey_808080));
     }
 
     public void back(View view) {

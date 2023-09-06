@@ -1,12 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,12 +11,12 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivitySyncTimeFromNtpBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
 import com.moko.support.MQTTConstants;
 import com.moko.support.MQTTSupport;
-import com.moko.support.entity.LoadStatusNotify;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
 import com.moko.support.entity.OverloadInfo;
@@ -36,26 +33,21 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncTimeFromNtpBinding> {
 
 
-public class SyncTimeFromNTPActivity extends BaseActivity {
-
-
-    @BindView(R.id.cb_sync_switch)
-    CheckBox cbSyncSwitch;
-    @BindView(R.id.et_ntp_url)
-    EditText etNtpUrl;
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sync_time_from_ntp);
-        ButterKnife.bind(this);
+    protected ActivitySyncTimeFromNtpBinding getViewBinding() {
+        return ActivitySyncTimeFromNtpBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -104,8 +96,8 @@ public class SyncTimeFromNTPActivity extends BaseActivity {
             SyncFromNTP syncFromNTP = new Gson().fromJson(msgCommon.data, statusType);
             int ntp_enable = syncFromNTP.ntp_enable;
             String domain = syncFromNTP.domain;
-            cbSyncSwitch.setChecked(ntp_enable == 1);
-            etNtpUrl.setText(domain);
+            mBind.cbSyncSwitch.setChecked(ntp_enable == 1);
+            mBind.etNtpUrl.setText(domain);
         }
     }
 
@@ -197,8 +189,8 @@ public class SyncTimeFromNTPActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         SyncFromNTP syncFromNTP = new SyncFromNTP();
-        syncFromNTP.ntp_enable = cbSyncSwitch.isChecked() ? 1 : 0;
-        syncFromNTP.domain = etNtpUrl.getText().toString();
+        syncFromNTP.ntp_enable = mBind.cbSyncSwitch.isChecked() ? 1 : 0;
+        syncFromNTP.domain = mBind.etNtpUrl.getText().toString();
         String message = MQTTMessageAssembler.assembleConfigSyncTimeFromNTP(mMokoDevice.uniqueId, syncFromNTP);
         try {
             MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_SYNC_TIME_FROM_NTP, appMqttConfig.qos);

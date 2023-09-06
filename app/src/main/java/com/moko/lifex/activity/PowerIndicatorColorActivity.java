@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.elvishew.xlog.XLog;
@@ -15,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityPowerIndicatorColorBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -36,28 +35,11 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import cn.carbswang.android.numberpickerview.library.NumberPickerView;
 
-public class PowerIndicatorColorActivity extends BaseActivity implements NumberPickerView.OnValueChangeListener {
+public class PowerIndicatorColorActivity extends BaseActivity<ActivityPowerIndicatorColorBinding> implements NumberPickerView.OnValueChangeListener {
 
-    @BindView(R.id.npv_color_settings)
-    NumberPickerView npvColorSettings;
-    @BindView(R.id.et_blue)
-    EditText etBlue;
-    @BindView(R.id.et_green)
-    EditText etGreen;
-    @BindView(R.id.et_yellow)
-    EditText etYellow;
-    @BindView(R.id.et_orange)
-    EditText etOrange;
-    @BindView(R.id.et_red)
-    EditText etRed;
-    @BindView(R.id.et_purple)
-    EditText etPurple;
-    @BindView(R.id.ll_color_settings)
-    LinearLayout llColorSettings;
+
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
@@ -65,10 +47,12 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
     private int maxValue = 4416;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_power_indicator_color);
-        ButterKnife.bind(this);
+    protected ActivityPowerIndicatorColorBinding getViewBinding() {
+        return ActivityPowerIndicatorColorBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -79,10 +63,10 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
         if (productType == 3) {
             maxValue = 3588;
         }
-        npvColorSettings.setMinValue(0);
-        npvColorSettings.setMaxValue(8);
-        npvColorSettings.setValue(0);
-        npvColorSettings.setOnValueChangedListener(this);
+        mBind.npvColorSettings.setMinValue(0);
+        mBind.npvColorSettings.setMaxValue(8);
+        mBind.npvColorSettings.setValue(0);
+        mBind.npvColorSettings.setOnValueChangedListener(this);
         String mqttConfigAppStr = SPUtiles.getStringValue(PowerIndicatorColorActivity.this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mHandler = new Handler(Looper.getMainLooper());
@@ -135,18 +119,18 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
             Type infoType = new TypeToken<LEDColorInfo>() {
             }.getType();
             LEDColorInfo ledColorInfo = new Gson().fromJson(msgCommon.data, infoType);
-            npvColorSettings.setValue(ledColorInfo.led_state);
+            mBind.npvColorSettings.setValue(ledColorInfo.led_state);
             if (ledColorInfo.led_state > 1) {
-                llColorSettings.setVisibility(View.GONE);
+                mBind.llColorSettings.setVisibility(View.GONE);
             } else {
-                llColorSettings.setVisibility(View.VISIBLE);
+                mBind.llColorSettings.setVisibility(View.VISIBLE);
             }
-            etBlue.setText(String.valueOf(ledColorInfo.blue));
-            etGreen.setText(String.valueOf(ledColorInfo.green));
-            etYellow.setText(String.valueOf(ledColorInfo.yellow));
-            etOrange.setText(String.valueOf(ledColorInfo.orange));
-            etRed.setText(String.valueOf(ledColorInfo.red));
-            etPurple.setText(String.valueOf(ledColorInfo.purple));
+            mBind.etBlue.setText(String.valueOf(ledColorInfo.blue));
+            mBind.etGreen.setText(String.valueOf(ledColorInfo.green));
+            mBind.etYellow.setText(String.valueOf(ledColorInfo.yellow));
+            mBind.etOrange.setText(String.valueOf(ledColorInfo.orange));
+            mBind.etRed.setText(String.valueOf(ledColorInfo.red));
+            mBind.etPurple.setText(String.valueOf(ledColorInfo.purple));
         }
     }
 
@@ -209,9 +193,9 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
     @Override
     public void onValueChange(NumberPickerView picker, int oldVal, int newVal) {
         if (newVal > 1) {
-            llColorSettings.setVisibility(View.GONE);
+            mBind.llColorSettings.setVisibility(View.GONE);
         } else {
-            llColorSettings.setVisibility(View.VISIBLE);
+            mBind.llColorSettings.setVisibility(View.VISIBLE);
         }
     }
 
@@ -224,12 +208,12 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
     }
 
     private void setLEDColor() {
-        String blue = etBlue.getText().toString();
-        String green = etGreen.getText().toString();
-        String yellow = etYellow.getText().toString();
-        String orange = etOrange.getText().toString();
-        String red = etRed.getText().toString();
-        String purple = etPurple.getText().toString();
+        String blue = mBind.etBlue.getText().toString();
+        String green = mBind.etGreen.getText().toString();
+        String yellow = mBind.etYellow.getText().toString();
+        String orange = mBind.etOrange.getText().toString();
+        String red = mBind.etRed.getText().toString();
+        String purple = mBind.etPurple.getText().toString();
         if (TextUtils.isEmpty(blue)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -296,7 +280,7 @@ public class PowerIndicatorColorActivity extends BaseActivity implements NumberP
         showLoadingProgressDialog();
         XLog.i("设置颜色范围");
         LEDColorInfo ledColorInfo = new LEDColorInfo();
-        ledColorInfo.led_state = npvColorSettings.getValue();
+        ledColorInfo.led_state = mBind.npvColorSettings.getValue();
         if (ledColorInfo.led_state < 2) {
             ledColorInfo.blue = blueValue;
             ledColorInfo.green = greenValue;

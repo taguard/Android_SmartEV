@@ -1,12 +1,10 @@
 package com.moko.lifex.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityLedSettingsBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -36,27 +35,22 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class LEDSettingActivity extends BaseActivity<ActivityLedSettingsBinding> {
 
 
-public class LEDSettingActivity extends BaseActivity {
-
-
-    @BindView(R.id.cb_network_indicator_status)
-    CheckBox cbNetworkIndicatorStatus;
-    @BindView(R.id.cb_power_indicator_status)
-    CheckBox cbPowerIndicatorStatus;
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
     private int productType;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_led_settings);
-        ButterKnife.bind(this);
+    protected ActivityLedSettingsBinding getViewBinding() {
+        return ActivityLedSettingsBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -108,8 +102,8 @@ public class LEDSettingActivity extends BaseActivity {
             IndicatorStatus status = new Gson().fromJson(msgCommon.data, statusType);
             int network_led = status.network_led;
             int power_led = status.power_led;
-            cbNetworkIndicatorStatus.setChecked(network_led == 1);
-            cbPowerIndicatorStatus.setChecked(power_led == 1);
+            mBind.cbNetworkIndicatorStatus.setChecked(network_led == 1);
+            mBind.cbPowerIndicatorStatus.setChecked(power_led == 1);
         }
         if (msgCommon.msg_id == MQTTConstants.NOTIFY_MSG_ID_DEVICE_INFO) {
             if (mHandler.hasMessages(0)) {
@@ -213,8 +207,8 @@ public class LEDSettingActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         IndicatorStatus indicatorStatus = new IndicatorStatus();
-        indicatorStatus.network_led = cbNetworkIndicatorStatus.isChecked() ? 1 : 0;
-        indicatorStatus.power_led = cbPowerIndicatorStatus.isChecked() ? 1 : 0;
+        indicatorStatus.network_led = mBind.cbNetworkIndicatorStatus.isChecked() ? 1 : 0;
+        indicatorStatus.power_led = mBind.cbPowerIndicatorStatus.isChecked() ? 1 : 0;
         String message = MQTTMessageAssembler.assembleConfigIndicatorStatus(mMokoDevice.uniqueId, indicatorStatus);
         try {
             MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_INDICATOR_STATUS, appMqttConfig.qos);

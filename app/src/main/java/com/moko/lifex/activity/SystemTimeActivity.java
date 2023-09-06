@@ -1,12 +1,10 @@
 package com.moko.lifex.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivitySystemTimeBinding;
 import com.moko.lifex.dialog.BottomDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
@@ -39,15 +38,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+public class SystemTimeActivity extends BaseActivity<ActivitySystemTimeBinding> {
 
-public class SystemTimeActivity extends BaseActivity {
 
-    @BindView(R.id.tv_time_zone)
-    TextView tvTimeZone;
-    @BindView(R.id.tv_device_time)
-    TextView tvDeviceTime;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
 
@@ -57,11 +50,14 @@ public class SystemTimeActivity extends BaseActivity {
     private ArrayList<String> mTimeZones;
     private int mSelectedTimeZone;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_system_time);
-        ButterKnife.bind(this);
+    protected ActivitySystemTimeBinding getViewBinding() {
+        return ActivitySystemTimeBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -129,8 +125,8 @@ public class SystemTimeActivity extends BaseActivity {
             String date = timestamp.substring(0, 10);
             String time = timestamp.substring(11, 16);
             mSelectedTimeZone = systemTimeInfo.time_zone + 24;
-            tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
-            tvDeviceTime.setText(String.format("Device time:%s %s %s", date, time, mTimeZones.get(mSelectedTimeZone)));
+            mBind.tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
+            mBind.tvDeviceTime.setText(String.format("Device time:%s %s %s", date, time, mTimeZones.get(mSelectedTimeZone)));
             if (mSyncTimeHandler.hasMessages(0))
                 mSyncTimeHandler.removeMessages(0);
             mSyncTimeHandler.postDelayed(() -> {
@@ -244,7 +240,7 @@ public class SystemTimeActivity extends BaseActivity {
                 return;
             }
             mSelectedTimeZone = value;
-            tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
+            mBind.tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
             mHandler.postDelayed(() -> {
                 dismissLoadingProgressDialog();
                 ToastUtils.showToast(this, "Set up failed");

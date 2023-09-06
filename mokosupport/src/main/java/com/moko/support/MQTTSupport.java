@@ -2,9 +2,13 @@ package com.moko.support;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.elvishew.xlog.XLog;
+import com.google.gson.Gson;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.event.MQTTConnectionCompleteEvent;
 import com.moko.support.event.MQTTConnectionFailureEvent;
@@ -24,7 +28,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
@@ -61,6 +64,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import info.mqtt.android.service.Ack;
+import info.mqtt.android.service.MqttAndroidClient;
+
 public class MQTTSupport {
     private static final String TAG = "MQTTSupport";
 
@@ -70,7 +76,9 @@ public class MQTTSupport {
 
 
     private MqttAndroidClient mqttAndroidClient;
+    private String mqttConfigStr;
     private IMqttActionListener listener;
+    private Handler mHandler;
 
     private MQTTSupport() {
         //no instance
@@ -89,6 +97,7 @@ public class MQTTSupport {
 
     public void init(Context context) {
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         listener = new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken asyncActionToken) {
@@ -98,22 +107,39 @@ public class MQTTSupport {
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                 XLog.w(String.format("%s:%s", TAG, "connect failure"));
+                XLog.w("onFailure--->" + exception.getMessage());
+                if (asyncActionToken != null
+                        && asyncActionToken.getException() != null
+                        && MqttException.REASON_CODE_CLIENT_CONNECTED == asyncActionToken.getException().getReasonCode()) {
+                    if (isWindowLocked()) return;
+                    XLog.w("断开当前连接，2S后重连...");
+                    disconnectMqtt();
+                    mHandler.postDelayed(() -> {
+                        try {
+                            connectMqtt(mqttConfigStr);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }, 2000);
+                }
                 EventBus.getDefault().post(new MQTTConnectionFailureEvent());
             }
         };
     }
 
-    public void connectMqtt(MQTTConfig mqttConfig) throws FileNotFoundException {
-        if (mqttConfig == null)
+    public void connectMqtt(String mqttAppConfigStr) throws FileNotFoundException {
+        if (TextUtils.isEmpty(mqttAppConfigStr))
             return;
+        MQTTConfig mqttConfig = new Gson().fromJson(mqttAppConfigStr, MQTTConfig.class);
         if (!mqttConfig.isError()) {
+            this.mqttConfigStr = mqttAppConfigStr;
             String uri;
             if (mqttConfig.connectMode > 0) {
                 uri = "ssl://" + mqttConfig.host + ":" + mqttConfig.port;
             } else {
                 uri = "tcp://" + mqttConfig.host + ":" + mqttConfig.port;
             }
-            mqttAndroidClient = new MqttAndroidClient(mContext, uri, mqttConfig.clientId);
+            mqttAndroidClient = new MqttAndroidClient(mContext, uri, mqttConfig.clientId, Ack.AUTO_ACK);
             mqttAndroidClient.setCallback(new MqttCallbackExtended() {
                 @Override
                 public void connectComplete(boolean reconnect, String serverURI) {
@@ -127,6 +153,8 @@ public class MQTTSupport {
 
                 @Override
                 public void connectionLost(Throwable cause) {
+                    if (cause != null)
+                        XLog.w("connectionLost--->" + cause.getMessage());
                     EventBus.getDefault().post(new MQTTConnectionLostEvent());
                 }
 
@@ -424,13 +452,11 @@ public class MQTTSupport {
     }
 
     public void disconnectMqtt() {
+        if (!isConnected())
+            return;
         if (mqttAndroidClient != null) {
             mqttAndroidClient.close();
-            try {
-                mqttAndroidClient.disconnect();
-            } catch (MqttException e) {
-                e.printStackTrace();
-            }
+            mqttAndroidClient.disconnect();
             mqttAndroidClient = null;
         }
     }
@@ -455,7 +481,10 @@ public class MQTTSupport {
             @Override
             public void messageArrived(String topic, MqttMessage message) {
                 String messageInfo = new String(message.getPayload());
-                XLog.w(String.format("Message:%s:%s", topic, messageInfo));
+                if (message.isRetained())
+                    XLog.w(String.format("Retain,Message:%s:%s", topic, messageInfo));
+                else
+                    XLog.w(String.format("Message:%s:%s", topic, messageInfo));
                 EventBus.getDefault().post(new MQTTMessageArrivedEvent(topic, new String(message.getPayload())));
             }
         });
@@ -508,5 +537,18 @@ public class MQTTSupport {
             return mqttAndroidClient.isConnected();
         }
         return false;
+    }
+
+    // 记录上次页面控件点击时间,屏蔽无效点击事件
+    protected long mLastOnClickTime = 0;
+
+    public boolean isWindowLocked() {
+        long current = SystemClock.elapsedRealtime();
+        if (current - mLastOnClickTime > 1000) {
+            mLastOnClickTime = current;
+            return false;
+        } else {
+            return true;
+        }
     }
 }

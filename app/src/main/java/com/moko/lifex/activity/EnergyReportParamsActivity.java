@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -14,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityEnergyReportParamsBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -22,7 +21,6 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.EnergyReportParams;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -36,27 +34,23 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class EnergyReportParamsActivity extends BaseActivity<ActivityEnergyReportParamsBinding> {
 
 
-public class EnergyReportParamsActivity extends BaseActivity {
-
-
-    @BindView(R.id.et_storage_period)
-    EditText etStoragePeriod;
-    @BindView(R.id.et_storage_percent)
-    EditText etStoragePercent;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
 
     private Handler mHandler;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_energy_report_params);
-        ButterKnife.bind(this);
+    protected ActivityEnergyReportParamsBinding getViewBinding() {
+        return ActivityEnergyReportParamsBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -108,8 +102,8 @@ public class EnergyReportParamsActivity extends BaseActivity {
             Type infoType = new TypeToken<EnergyReportParams>() {
             }.getType();
             EnergyReportParams reportParams = new Gson().fromJson(msgCommon.data, infoType);
-            etStoragePeriod.setText(String.valueOf(reportParams.time_interval));
-            etStoragePercent.setText(String.valueOf(reportParams.power_change));
+            mBind.etStoragePeriod.setText(String.valueOf(reportParams.time_interval));
+            mBind.etStoragePercent.setText(String.valueOf(reportParams.power_change));
         }
     }
 
@@ -173,7 +167,7 @@ public class EnergyReportParamsActivity extends BaseActivity {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
-        String storagePeriodStr = etStoragePeriod.getText().toString();
+        String storagePeriodStr = mBind.etStoragePeriod.getText().toString();
         if (TextUtils.isEmpty(storagePeriodStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
@@ -183,7 +177,7 @@ public class EnergyReportParamsActivity extends BaseActivity {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        String storagePercentStr = etStoragePercent.getText().toString();
+        String storagePercentStr = mBind.etStoragePercent.getText().toString();
         if (TextUtils.isEmpty(storagePercentStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;

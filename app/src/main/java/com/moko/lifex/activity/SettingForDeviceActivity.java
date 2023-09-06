@@ -1,18 +1,16 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
-import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivitySettingForDeviceBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.support.MQTTConstants;
@@ -31,49 +29,22 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-
-public class SettingForDeviceActivity extends BaseActivity {
+public class SettingForDeviceActivity extends BaseActivity<ActivitySettingForDeviceBinding> {
 
     public static String TAG = SettingForDeviceActivity.class.getSimpleName();
-    @BindView(R.id.tv_type)
-    TextView tvType;
-    @BindView(R.id.tv_host)
-    TextView tvHost;
-    @BindView(R.id.tv_port)
-    TextView tvPort;
-    @BindView(R.id.tv_client_id)
-    TextView tvClientId;
-    @BindView(R.id.tv_user_name)
-    TextView tvUserName;
-    @BindView(R.id.tv_password)
-    TextView tvPassword;
-    @BindView(R.id.tv_clean_session)
-    TextView tvCleanSession;
-    @BindView(R.id.tv_qos)
-    TextView tvQos;
-    @BindView(R.id.tv_keep_alive)
-    TextView tvKeepAlive;
-    @BindView(R.id.tv_device_id)
-    TextView tvDeviceId;
-    @BindView(R.id.tv_subscribe_topic)
-    TextView tvSubscribeTopic;
-    @BindView(R.id.tv_publish_topic)
-    TextView tvPublishTopic;
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
 
     public Handler mHandler;
-
+    @Override
+    protected ActivitySettingForDeviceBinding getViewBinding() {
+        return ActivitySettingForDeviceBinding.inflate(getLayoutInflater());
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setting_for_device);
-        ButterKnife.bind(this);
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -122,23 +93,23 @@ public class SettingForDeviceActivity extends BaseActivity {
             Type infoType = new TypeToken<SettingsForDevice>() {
             }.getType();
             SettingsForDevice settingsForDevice = new Gson().fromJson(msgCommon.data, infoType);
-            tvHost.setText(settingsForDevice.host);
-            tvPort.setText(String.valueOf(settingsForDevice.port));
-            tvCleanSession.setText(settingsForDevice.clean_session == 0 ? "NO" : "YES");
-            tvUserName.setText(settingsForDevice.username);
-            tvPassword.setText(settingsForDevice.password);
-            tvQos.setText(String.valueOf(settingsForDevice.qos));
-            tvKeepAlive.setText(String.valueOf(settingsForDevice.keepalive));
-            tvClientId.setText(settingsForDevice.client_id);
-            tvDeviceId.setText(settingsForDevice.device_id);
+            mBind.tvHost.setText(settingsForDevice.host);
+            mBind.tvPort.setText(String.valueOf(settingsForDevice.port));
+            mBind.tvCleanSession.setText(settingsForDevice.clean_session == 0 ? "NO" : "YES");
+            mBind.tvUserName.setText(settingsForDevice.username);
+            mBind.tvPassword.setText(settingsForDevice.password);
+            mBind.tvQos.setText(String.valueOf(settingsForDevice.qos));
+            mBind.tvKeepAlive.setText(String.valueOf(settingsForDevice.keepalive));
+            mBind.tvClientId.setText(settingsForDevice.client_id);
+            mBind.tvDeviceId.setText(settingsForDevice.device_id);
 
             if (settingsForDevice.connect_mode == 0) {
-                tvType.setText("TCP");
+                mBind.tvType.setText("TCP");
             } else {
-                tvType.setText("SSL");
+                mBind.tvType.setText("SSL");
             }
-            tvSubscribeTopic.setText(settingsForDevice.subscribe_topic);
-            tvPublishTopic.setText(settingsForDevice.publish_topic);
+            mBind.tvSubscribeTopic.setText(settingsForDevice.subscribe_topic);
+            mBind.tvPublishTopic.setText(settingsForDevice.publish_topic);
         }
     }
 

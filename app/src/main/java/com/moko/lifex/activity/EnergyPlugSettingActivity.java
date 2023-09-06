@@ -1,12 +1,10 @@
 package com.moko.lifex.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
@@ -15,6 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityPlugSettingBinding;
 import com.moko.lifex.dialog.AlertMessageDialog;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
@@ -38,22 +37,19 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+public class EnergyPlugSettingActivity extends BaseActivity<ActivityPlugSettingBinding> {
 
-public class EnergyPlugSettingActivity extends BaseActivity {
-
-    @BindView(R.id.tv_energy_consumption)
-    TextView tvEnergyConsumption;
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_plug_setting);
-        ButterKnife.bind(this);
+    protected ActivityPlugSettingBinding getViewBinding() {
+        return ActivityPlugSettingBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         if (getIntent().getExtras() != null) {
             mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         }
@@ -114,7 +110,7 @@ public class EnergyPlugSettingActivity extends BaseActivity {
                 return;
             float consumption = energyTotal.all_energy * 1.0f / energyTotal.EC;
             String energyConsumption = Utils.getDecimalFormat("0.##").format(consumption);
-            tvEnergyConsumption.setText(energyConsumption + "KWh");
+            mBind.tvEnergyConsumption.setText(energyConsumption + "KWh");
         }
     }
 

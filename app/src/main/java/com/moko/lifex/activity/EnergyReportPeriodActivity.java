@@ -1,10 +1,15 @@
 package com.moko.lifex.activity;
 
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityEnergyReportPeriodBinding;
 
-public class EnergyReportPeriodActivity extends BaseActivity {
+public class EnergyReportPeriodActivity extends BaseActivity<ActivityEnergyReportPeriodBinding> {
+    @Override
+    protected ActivityEnergyReportPeriodBinding getViewBinding() {
+        return ActivityEnergyReportPeriodBinding.inflate(getLayoutInflater());
+    }
 
-//    @BindView(R.id.et_energy_report_period)
+    //    @BindView(R.id.et_energy_report_period)
 //    EditText etEnergyReportPeriod;
 //    private MokoDevice mMokoDevice;
 //    private MQTTConfig appMqttConfig;

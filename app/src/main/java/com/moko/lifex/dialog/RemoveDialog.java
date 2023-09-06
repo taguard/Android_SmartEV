@@ -1,12 +1,9 @@
 package com.moko.lifex.dialog;
 
 import android.content.Context;
-import android.view.View;
 
-import com.moko.lifex.R;
 import com.moko.lifex.base.BaseDialog;
-
-import butterknife.OnClick;
+import com.moko.lifex.databinding.DialogRemoveDeviceBinding;
 
 /**
  * @Date 2018/6/21
@@ -14,33 +11,26 @@ import butterknife.OnClick;
  * @Description
  * @ClassPath com.moko.lifex.dialog.RemoveDialog
  */
-public class RemoveDialog extends BaseDialog<Boolean> {
+public class RemoveDialog extends BaseDialog<Boolean, DialogRemoveDeviceBinding> {
 
     public RemoveDialog(Context context) {
         super(context);
     }
 
     @Override
-    protected int getLayoutResId() {
-        return R.layout.dialog_remove_device;
+    protected DialogRemoveDeviceBinding getViewBind() {
+        return DialogRemoveDeviceBinding.inflate(getLayoutInflater());
     }
+
 
     @Override
-    protected void renderConvertView(View convertView, Boolean on_off) {
-
-    }
-
-
-    @OnClick({R.id.tv_cancel, R.id.tv_confirm})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.tv_cancel:
-                dismiss();
-                break;
-            case R.id.tv_confirm:
-                listener.onConfirmClick(this);
-                break;
-        }
+    protected void onCreate(Boolean on_off) {
+        mBind.tvCancel.setOnClickListener(v -> {
+            dismiss();
+        });
+        mBind.tvConfirm.setOnClickListener(v -> {
+            listener.onConfirmClick(this);
+        });
     }
 
     private RemoveListener listener;

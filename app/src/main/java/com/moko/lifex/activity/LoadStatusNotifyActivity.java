@@ -1,11 +1,9 @@
 package com.moko.lifex.activity;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -13,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.lifex.AppConstants;
 import com.moko.lifex.R;
 import com.moko.lifex.base.BaseActivity;
+import com.moko.lifex.databinding.ActivityLoadStatusNotifyBinding;
 import com.moko.lifex.entity.MokoDevice;
 import com.moko.lifex.utils.SPUtiles;
 import com.moko.lifex.utils.ToastUtils;
@@ -21,7 +20,6 @@ import com.moko.support.MQTTSupport;
 import com.moko.support.entity.LoadStatusNotify;
 import com.moko.support.entity.MQTTConfig;
 import com.moko.support.entity.MsgCommon;
-import com.moko.support.entity.OverloadInfo;
 import com.moko.support.entity.OverloadOccur;
 import com.moko.support.event.DeviceOnlineEvent;
 import com.moko.support.event.MQTTMessageArrivedEvent;
@@ -35,26 +33,21 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
+public class LoadStatusNotifyActivity extends BaseActivity<ActivityLoadStatusNotifyBinding> {
 
 
-public class LoadStatusNotifyActivity extends BaseActivity {
-
-
-    @BindView(R.id.cb_load_start_notify)
-    CheckBox cbLoadStartNotify;
-    @BindView(R.id.cb_load_stop_notify)
-    CheckBox cbLoadStopNotify;
     private MQTTConfig appMqttConfig;
     private MokoDevice mMokoDevice;
     private Handler mHandler;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_load_status_notify);
-        ButterKnife.bind(this);
+    protected ActivityLoadStatusNotifyBinding getViewBinding() {
+        return ActivityLoadStatusNotifyBinding.inflate(getLayoutInflater());
+    }
+
+    @Override
+    protected void onCreate() {
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
@@ -105,8 +98,8 @@ public class LoadStatusNotifyActivity extends BaseActivity {
             LoadStatusNotify status = new Gson().fromJson(msgCommon.data, statusType);
             int remove_notice = status.remove_notice;
             int access_notice = status.access_notice;
-            cbLoadStartNotify.setChecked(access_notice == 1);
-            cbLoadStopNotify.setChecked(remove_notice == 1);
+            mBind.cbLoadStartNotify.setChecked(access_notice == 1);
+            mBind.cbLoadStopNotify.setChecked(remove_notice == 1);
         }
     }
 
@@ -190,8 +183,8 @@ public class LoadStatusNotifyActivity extends BaseActivity {
             appTopic = appMqttConfig.topicPublish;
         }
         LoadStatusNotify notify = new LoadStatusNotify();
-        notify.access_notice = cbLoadStartNotify.isChecked() ? 1 : 0;
-        notify.remove_notice = cbLoadStopNotify.isChecked() ? 1 : 0;
+        notify.access_notice = mBind.cbLoadStartNotify.isChecked() ? 1 : 0;
+        notify.remove_notice = mBind.cbLoadStopNotify.isChecked() ? 1 : 0;
         String message = MQTTMessageAssembler.assembleConfigLoadStatusNotify(mMokoDevice.uniqueId, notify);
         try {
             MQTTSupport.getInstance().publish(appTopic, message, MQTTConstants.CONFIG_MSG_ID_LOAD_STATUS_NOTIFY, appMqttConfig.qos);
